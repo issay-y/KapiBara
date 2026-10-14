@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/inventory/InventoryFormView.fxml
+     One form for both "Add inventory item" and "Edit inventory item".
+     Content only: the sidebar and top bar come from AdminView.fxml.
+     Scaled up with the "adm-lg" modifier (see AdminShell.css). -->
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.inventory.InventoryFormController">
+   <VBox spacing="24.0" styleClass="adm-page, adm-lg">
+      <padding>
+         <Insets top="32.0" right="40.0" bottom="32.0" left="40.0" />
+      </padding>
+
+      <!-- Header -->
+      <HBox alignment="CENTER_LEFT">
+         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <Label fx:id="titleLabel" styleClass="adm-page-title" text="Add inventory item" />
+            <Label fx:id="subtitleLabel" styleClass="adm-page-sub" text="Add an ingredient or supply to your café's inventory." />
+         </VBox>
+         <Button onAction="#handleBack" styleClass="adm-primary-btn" text="←   Back to inventory" />
+      </HBox>
+
+      <!-- fillHeight + vgrow: both cards stretch to the bottom of the window -->
+      <HBox alignment="TOP_LEFT" fillHeight="true" spacing="24.0" VBox.vgrow="ALWAYS">
+
+         <!-- ================= FORM CARD ================= -->
+         <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="20.0">
+            <Label styleClass="adm-card-title" text="Item details" />
+            <Label styleClass="adm-form-note" text="Fields marked * are required." />
+
+            <VBox spacing="8.0">
+               <Label styleClass="adm-form-label" text="Item name *" />
+               <TextField fx:id="nameField" promptText="e.g. Espresso beans" styleClass="adm-field" />
+            </VBox>
+
+            <VBox spacing="8.0">
+               <Label styleClass="adm-form-label" text="Category *" />
+               <ComboBox fx:id="categoryCombo" maxWidth="Infinity" promptText="Select a category" styleClass="adm-combo" />
+            </VBox>
+
+            <GridPane hgap="28.0" vgap="20.0">
+               <columnConstraints>
+                  <ColumnConstraints percentWidth="50.0" />
+                  <ColumnConstraints percentWidth="50.0" />
+               </columnConstraints>
+
+               <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                  <Label styleClass="adm-form-label" text="Quantity *" />
+                  <TextField fx:id="quantityField" styleClass="adm-field" />
+               </VBox>
+               <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                  <Label styleClass="adm-form-label" text="Unit *" />
+                  <ComboBox fx:id="unitCombo" maxWidth="Infinity" promptText="Select unit" styleClass="adm-combo" />
+               </VBox>
+
+               <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                  <Label styleClass="adm-form-label" text="Minimum stock *" />
+                  <TextField fx:id="minimumField" styleClass="adm-field" />
+               </VBox>
+               <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                  <Label styleClass="adm-form-label" text="Status *" />
+                  <TextField fx:id="statusField" styleClass="adm-field, adm-field-readonly" />
+               </VBox>
+            </GridPane>
+
+            <VBox spacing="8.0">
+               <Label styleClass="adm-form-label" text="Notes (optional)" />
+               <TextField fx:id="notesField" promptText="Add a short note for the team" styleClass="adm-field" />
+            </VBox>
+
+            <!-- Pushes the divider and buttons to the bottom of the card -->
+            <Region VBox.vgrow="ALWAYS" />
+
+            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
+
+            <Label fx:id="errorLabel" styleClass="adm-form-error" text="" wrapText="true" />
+
+            <HBox alignment="CENTER_LEFT" spacing="14.0">
+               <Label fx:id="footNoteLabel" styleClass="adm-form-note" text="Inventory details can be edited later." />
+               <Region HBox.hgrow="ALWAYS" />
+               <Button fx:id="cancelBtn" onAction="#handleCancel" styleClass="adm-page-btn" text="Cancel" />
+               <Button fx:id="saveBtn" onAction="#handleSave" styleClass="adm-primary-btn" text="✓   Save item" />
+            </HBox>
+         </VBox>
+
+         <!-- ================= STOCK GUIDANCE ================= -->
+         <VBox styleClass="adm-card" prefWidth="380.0" minWidth="340.0" maxWidth="380.0" spacing="20.0">
+            <Label styleClass="adm-card-title" text="Stock guidance" />
+            <Label styleClass="adm-guide-icon" text="📦" />
+            <Label styleClass="adm-role-desc" text="Use the same unit for quantity and minimum stock." wrapText="true" />
+
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="In stock" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label styleClass="adm-stock-value" text="Above minimum" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Low stock" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label styleClass="adm-stock-value" text="At / below minimum" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Out of stock" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label styleClass="adm-stock-value" text="Quantity is zero" />
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="adm-banner">
+               <Label styleClass="adm-alert-icon" text="⚠" />
+               <VBox spacing="3.0">
+                  <Label styleClass="adm-alert-title" text="Set a useful minimum" />
+                  <Label styleClass="adm-alert-sub" text="This helps the team spot low stock before service is affected." wrapText="true" />
+               </VBox>
+            </HBox>
+         </VBox>
+      </HBox>
+   </VBox>
+</ScrollPane>

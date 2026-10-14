@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane fx:id="shell" styleClass="alert-shell"
+           stylesheets="@/com/cafe/kapibara/kapibara/css/Alert.css"
+           xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.cafe.kapibara.kapibara.controller.util.AlertController">
+
+    <padding>
+        <Insets top="24.0" right="24.0" bottom="24.0" left="24.0" />
+    </padding>
+
+    <VBox fx:id="card" styleClass="alert-card" prefWidth="460.0" maxWidth="460.0" spacing="12.0">
+
+        <Label fx:id="titleLabel" styleClass="alert-title" text="Title" wrapText="true" />
+        <Label fx:id="messageLabel" styleClass="alert-message" text="Message" wrapText="true" />
+
+        <HBox fx:id="buttonBar" alignment="CENTER_RIGHT" spacing="12.0">
+            <VBox.margin>
+                <Insets top="12.0" />
+            </VBox.margin>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="cancelBtn" styleClass="alert-cancel" text="Cancel"
+                    cancelButton="true" onAction="#handleCancel" />
+            <Button fx:id="confirmBtn" styleClass="alert-confirm" text="Confirm"
+                    defaultButton="true" onAction="#handleConfirm" />
+        </HBox>
+    </VBox>
+</StackPane>

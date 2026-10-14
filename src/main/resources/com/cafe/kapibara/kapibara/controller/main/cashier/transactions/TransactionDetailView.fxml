@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- resources/com/cafe/kapibara/kapibara/controller/main/cashier/transactions/TransactionDetailView.fxml
+     Content only: the sidebar and top bar come from CashierView.fxml. -->
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cafe.kapibara.kapibara.controller.main.cashier.transactions.TransactionDetailController">
+   <VBox spacing="24.0" styleClass="adm-page, adm-lg">
+      <padding>
+         <Insets top="32.0" right="40.0" bottom="32.0" left="40.0" />
+      </padding>
+
+      <!-- Header -->
+      <VBox spacing="10.0">
+         <Label styleClass="adm-page-title" text="Transaction details" />
+         <Label fx:id="subLabel" styleClass="adm-page-sub" text="" />
+         <HBox fx:id="pillRow" spacing="10.0" />
+      </VBox>
+
+      <HBox alignment="TOP_LEFT" fillHeight="false" spacing="24.0">
+
+         <!-- ================= PURCHASED ITEMS + INFO ================= -->
+         <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="18.0">
+            <Label styleClass="adm-card-title" text="Purchased items" />
+
+            <GridPane fx:id="itemsGrid" styleClass="adm-table">
+               <columnConstraints>
+                  <ColumnConstraints percentWidth="46.0" />
+                  <ColumnConstraints percentWidth="14.0" />
+                  <ColumnConstraints percentWidth="20.0" />
+                  <ColumnConstraints percentWidth="20.0" />
+               </columnConstraints>
+            </GridPane>
+
+            <Label fx:id="itemsNote" styleClass="adm-card-foot" text="" />
+
+            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
+
+            <Label styleClass="adm-card-title" text="Transaction information" />
+
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Transaction number" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="infoNumber" styleClass="csh-receipt-val" text="" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Date &amp; time" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="infoTime" styleClass="csh-receipt-val" text="" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Cashier" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="infoCashier" styleClass="csh-receipt-val" text="" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Branch / counter" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="infoBranch" styleClass="csh-receipt-val" text="" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Payment method" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label styleClass="csh-receipt-val" text="Cash" />
+            </HBox>
+         </VBox>
+
+         <!-- ================= PAYMENT BREAKDOWN ================= -->
+         <VBox styleClass="adm-card" prefWidth="460.0" minWidth="400.0" maxWidth="460.0" spacing="16.0">
+            <Label styleClass="adm-card-title" text="Payment breakdown" />
+
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Subtotal (VAT-exclusive)" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="subtotalLabel" styleClass="adm-stock-value" text="" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label fx:id="vatCaption" styleClass="adm-stock-name" text="VAT (12%, included)" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="vatLabel" styleClass="adm-stock-value" text="" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label fx:id="discountCaption" styleClass="adm-stock-name" text="Discount" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="discountLabel" styleClass="adm-stock-value" text="" />
+            </HBox>
+
+            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
+
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="csh-total-label" text="Total" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="totalLabel" styleClass="csh-total-value" text="" />
+            </HBox>
+
+            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
+
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Cash received" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="cashLabel" styleClass="csh-receipt-val" text="" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Change returned" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="changeLabel" styleClass="csh-receipt-val" text="" />
+            </HBox>
+
+            <HBox>
+               <Label styleClass="adm-pill-green" text="Payment complete" />
+            </HBox>
+
+            <Button maxWidth="Infinity" onAction="#handleReceipt" styleClass="adm-outline-btn" text="▤   View virtual receipt" />
+            <Label styleClass="adm-form-note" text="The virtual receipt contains the same item and payment details. No print action is available." wrapText="true" />
+         </VBox>
+      </HBox>
+
+      <Region VBox.vgrow="ALWAYS" />
+
+      <HBox alignment="CENTER_RIGHT">
+         <Button onAction="#handleBack" styleClass="adm-primary-btn" text="←   Back to Transactions" />
+      </HBox>
+   </VBox>
+</ScrollPane>

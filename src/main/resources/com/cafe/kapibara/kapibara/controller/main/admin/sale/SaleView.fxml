@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/sale/SaleView.fxml
+     Content only: the sidebar and top bar come from AdminView.fxml. -->
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.sale.SaleController">
+
+   <fx:define>
+      <ToggleGroup fx:id="periodGroup" />
+   </fx:define>
+
+   <VBox spacing="16.0" styleClass="adm-page">
+      <padding>
+         <Insets top="24.0" right="28.0" bottom="24.0" left="28.0" />
+      </padding>
+
+      <!-- Header -->
+      <HBox alignment="CENTER_LEFT">
+         <VBox spacing="3.0" HBox.hgrow="ALWAYS">
+            <Label styleClass="adm-page-title" text="Sales overview" />
+            <Label styleClass="adm-page-sub" text="Know what's brewing. Track sales and your customers' favorites." />
+         </VBox>
+         <Button fx:id="dateRangeBtn" onAction="#handleDateRange" styleClass="adm-date-pill" text="30 Sep – 06 Oct 2026     📅" />
+      </HBox>
+
+      <!-- KPI row -->
+      <HBox spacing="14.0">
+         <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
+            <Label styleClass="adm-kpi-label" text="Today's Sales" />
+            <Label fx:id="todaySalesValue" styleClass="adm-kpi-value" text="₱18,480" />
+            <Label fx:id="todaySalesSub" styleClass="adm-kpi-sub" text="06 October · 48 transactions" />
+         </VBox>
+         <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
+            <Label styleClass="adm-kpi-label" text="Monthly Sales" />
+            <Label fx:id="monthSalesValue" styleClass="adm-kpi-value" text="₱221,760" />
+            <Label fx:id="monthSalesSub" styleClass="adm-kpi-sub" text="October to date · 576 transactions" />
+         </VBox>
+         <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
+            <Label styleClass="adm-kpi-label" text="Total Transactions" />
+            <Label fx:id="txValue" styleClass="adm-kpi-value" text="48" />
+            <Label fx:id="txSub" styleClass="adm-kpi-sub" text="Today · All complete" />
+         </VBox>
+         <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
+            <Label styleClass="adm-kpi-label" text="Average Transaction" />
+            <Label fx:id="avgValue" styleClass="adm-kpi-value" text="₱385" />
+            <Label fx:id="avgSub" styleClass="adm-kpi-sub" text="Today's sales ÷ 48 orders" />
+         </VBox>
+         <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
+            <Label styleClass="adm-kpi-label" text="Most Sold Product" />
+            <Label fx:id="topProductValue" styleClass="adm-kpi-value-text" text="Spanish Latte" />
+            <Label fx:id="topProductSub" styleClass="adm-kpi-sub" text="38 cups today · ₱4,750" />
+         </VBox>
+      </HBox>
+
+      <!-- Sales performance + best sellers -->
+      <HBox spacing="14.0" VBox.vgrow="ALWAYS" prefHeight="290.0" minHeight="250.0">
+         <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="2.0">
+            <HBox alignment="TOP_LEFT" spacing="6.0">
+               <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                  <Label styleClass="adm-card-title" text="Sales performance" />
+                  <Label fx:id="perfSubtitle" styleClass="adm-card-sub" text="₱252,560 total" />
+               </VBox>
+               <ToggleButton fx:id="dailyBtn" toggleGroup="$periodGroup" onAction="#handlePeriodChange" styleClass="adm-period-btn" text="Daily" />
+               <ToggleButton fx:id="weeklyBtn" toggleGroup="$periodGroup" onAction="#handlePeriodChange" styleClass="adm-period-btn" text="Weekly" selected="true" />
+               <ToggleButton fx:id="monthlyBtn" toggleGroup="$periodGroup" onAction="#handlePeriodChange" styleClass="adm-period-btn" text="Monthly" />
+            </HBox>
+            <Label fx:id="perfScaleLabel" styleClass="adm-chart-note" text="PHP · Scale 0 – 50,000" />
+            <BarChart fx:id="perfChart" legendVisible="false" animated="false" categoryGap="16.0" barGap="0.0"
+                      horizontalGridLinesVisible="false" verticalGridLinesVisible="false"
+                      horizontalZeroLineVisible="false" verticalZeroLineVisible="false"
+                      alternativeColumnFillVisible="false" alternativeRowFillVisible="false" VBox.vgrow="ALWAYS">
+               <xAxis>
+                  <CategoryAxis side="BOTTOM" tickMarkVisible="false" />
+               </xAxis>
+               <yAxis>
+                  <NumberAxis side="LEFT" tickLabelsVisible="false" tickMarkVisible="false" minorTickVisible="false" />
+               </yAxis>
+            </BarChart>
+         </VBox>
+
+         <VBox styleClass="adm-card" prefWidth="360.0" minWidth="300.0" maxWidth="360.0" spacing="12.0">
+            <Label styleClass="adm-card-title" text="Today's best sellers" />
+            <VBox fx:id="bestSellersBox" spacing="12.0" />
+            <Region VBox.vgrow="ALWAYS" />
+            <Label fx:id="bestSellersFooter" styleClass="adm-card-foot" text="122 of 168 items • Other products: 46 items" />
+         </VBox>
+      </HBox>
+
+      <!-- Bottom charts -->
+      <HBox spacing="14.0" VBox.vgrow="ALWAYS" prefHeight="230.0" minHeight="210.0">
+         <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="400.0" spacing="2.0">
+            <Label styleClass="adm-card-title" text="Daily • Hourly sales" />
+            <Label styleClass="adm-chart-note" text="PHP · Scale 0 – 7,000" />
+            <BarChart fx:id="hourlyChart" legendVisible="false" animated="false" categoryGap="16.0" barGap="0.0"
+                      horizontalGridLinesVisible="false" verticalGridLinesVisible="false"
+                      horizontalZeroLineVisible="false" verticalZeroLineVisible="false"
+                      alternativeColumnFillVisible="false" alternativeRowFillVisible="false" VBox.vgrow="ALWAYS">
+               <xAxis>
+                  <CategoryAxis side="BOTTOM" tickMarkVisible="false" />
+               </xAxis>
+               <yAxis>
+                  <NumberAxis side="LEFT" tickLabelsVisible="false" tickMarkVisible="false" minorTickVisible="false" />
+               </yAxis>
+            </BarChart>
+            <Label fx:id="hourlyFooter" styleClass="adm-card-foot" text="Today so far • ₱18,480 total" />
+         </VBox>
+
+         <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="400.0" spacing="2.0">
+            <Label fx:id="monthlyTitle" styleClass="adm-card-title" text="Monthly • October to date" />
+            <Label styleClass="adm-chart-note" text="PHP · Scale 0 – 50,000" />
+            <BarChart fx:id="monthlyChart" legendVisible="false" animated="false" categoryGap="16.0" barGap="0.0"
+                      horizontalGridLinesVisible="false" verticalGridLinesVisible="false"
+                      horizontalZeroLineVisible="false" verticalZeroLineVisible="false"
+                      alternativeColumnFillVisible="false" alternativeRowFillVisible="false" VBox.vgrow="ALWAYS">
+               <xAxis>
+                  <CategoryAxis side="BOTTOM" tickMarkVisible="false" />
+               </xAxis>
+               <yAxis>
+                  <NumberAxis side="LEFT" tickLabelsVisible="false" tickMarkVisible="false" minorTickVisible="false" />
+               </yAxis>
+            </BarChart>
+            <Label fx:id="monthlyFooter" styleClass="adm-card-foot" text="01–06 October • ₱221,760 total" />
+         </VBox>
+      </HBox>
+   </VBox>
+</ScrollPane>

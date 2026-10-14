@@ -1,0 +1,80 @@
+/* resources/com/cafe/kapibara/kapibara/css/Alert.css */
+
+.alert-shell {
+    -fx-background-color: transparent;
+}
+
+.alert-card {
+    -kb-brown: #4E2216;
+    -kb-red: #D42A0B;
+    -fx-background-color: #FFFCF8;
+    -fx-background-radius: 20;
+    -fx-border-color: #E8DACB;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+    -fx-padding: 28 30 26 30;
+    -fx-effect: dropshadow(gaussian, rgba(40,15,8,0.35), 28, 0.1, 0, 8);
+    -fx-font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+.alert-title {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4E2216;
+}
+
+.alert-message {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7A6A60;
+    -fx-line-spacing: 3px;
+}
+
+/* ---------- Buttons ---------- */
+.alert-cancel {
+    -fx-background-color: transparent;
+    -fx-background-radius: 12;
+    -fx-border-color: #D9C9B6;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-text-fill: #4E2216;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 11 26 11 26;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.alert-cancel:hover {
+    -fx-background-color: rgba(78,34,22,0.06);
+}
+
+.alert-confirm {
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 11 26 11 26;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* Brown: information, confirmation */
+.alert-brown .alert-confirm {
+    -fx-background-color: #4E2216;
+}
+
+.alert-brown .alert-confirm:hover {
+    -fx-background-color: #3A1910;
+}
+
+/* Red: warning, error */
+.alert-red .alert-confirm {
+    -fx-background-color: #D42A0B;
+}
+
+.alert-red .alert-confirm:hover {
+    -fx-background-color: #BC2408;
+}

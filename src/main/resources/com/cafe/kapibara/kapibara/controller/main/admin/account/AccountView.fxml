@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/account/AccountView.fxml
+     Content only: the sidebar and top bar come from AdminView.fxml.
+     Scaled up with the "adm-lg" modifier (see AdminShell.css). -->
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="adm-scroll"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.account.AccountController">
+    <VBox spacing="16.0" styleClass="adm-page, adm-lg">
+        <padding>
+            <Insets top="20.0" right="40.0" bottom="20.0" left="40.0" />
+        </padding>
+
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT">
+            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                <Label styleClass="adm-page-title" text="Team accounts" />
+                <Label styleClass="adm-page-sub" text="Manage your café team's roles and account status." />
+            </VBox>
+            <Button onAction="#handleAddAccount" styleClass="adm-primary-btn" text="＋   Add account" />
+        </HBox>
+
+        <!-- KPI row -->
+        <HBox spacing="22.0">
+            <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
+                <Label styleClass="adm-kpi-label" text="Total accounts" />
+                <Label fx:id="totalValue" styleClass="adm-kpi-value" text="–" />
+                <Label fx:id="totalSub" styleClass="adm-kpi-sub" text="Caloocan branch team" />
+            </VBox>
+            <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
+                <Label styleClass="adm-kpi-label" text="Active accounts" />
+                <Label fx:id="activeValue" styleClass="adm-kpi-value" text="–" />
+                <Label fx:id="activeSub" styleClass="adm-kpi-sub, adm-sub-good" text="" />
+            </VBox>
+            <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
+                <Label styleClass="adm-kpi-label" text="Cashiers" />
+                <Label fx:id="cashierValue" styleClass="adm-kpi-value" text="–" />
+                <Label fx:id="cashierSub" styleClass="adm-kpi-sub" text="" />
+            </VBox>
+        </HBox>
+
+        <!-- Filters -->
+        <HBox alignment="CENTER_LEFT" spacing="16.0">
+            <StackPane HBox.hgrow="ALWAYS">
+                <TextField fx:id="searchField" promptText="Search name or username..." styleClass="adm-search" />
+                <Label mouseTransparent="true" styleClass="adm-search-icon" text="🔍" StackPane.alignment="CENTER_LEFT">
+                    <StackPane.margin><Insets left="18.0" /></StackPane.margin>
+                </Label>
+            </StackPane>
+            <ComboBox fx:id="roleCombo" minHeight="52.0" prefHeight="52.0" prefWidth="240.0" styleClass="adm-combo" />
+            <ComboBox fx:id="statusCombo" minHeight="52.0" prefHeight="52.0" prefWidth="280.0" styleClass="adm-combo" />
+        </HBox>
+
+        <!-- Table -->
+        <GridPane fx:id="accountsGrid" styleClass="adm-table">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="20.0" />
+                <ColumnConstraints percentWidth="18.0" />
+                <ColumnConstraints percentWidth="12.0" />
+                <ColumnConstraints percentWidth="12.0" />
+                <ColumnConstraints percentWidth="20.0" />
+                <ColumnConstraints percentWidth="18.0" />
+            </columnConstraints>
+        </GridPane>
+
+        <!-- Takes the leftover height so the footer sits at the bottom of the window -->
+        <Region VBox.vgrow="ALWAYS" />
+
+        <!-- Footer: count + pagination -->
+        <HBox alignment="CENTER_LEFT">
+            <Label fx:id="showingLabel" styleClass="adm-card-foot" text="" />
+            <Region HBox.hgrow="ALWAYS" />
+            <HBox fx:id="paginationBox" alignment="CENTER_RIGHT" spacing="8.0" />
+        </HBox>
+
+        <Label styleClass="adm-card-foot" text="Cashiers handle orders. Managers monitor sales and inventory. Admins manage the team and café records." />
+    </VBox>
+</ScrollPane>

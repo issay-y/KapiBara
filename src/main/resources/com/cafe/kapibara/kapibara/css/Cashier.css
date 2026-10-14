@@ -1,0 +1,560 @@
+/* resources/com/cafe/kapibara/kapibara/css/Cashier.css
+   Loaded by CashierView.fxml AFTER AdminShell.css. It adds the "csh-" classes used by the
+   cashier screens; everything else (cards, buttons, table, sidebar) comes from AdminShell.css.
+   Sizes are the large ("adm-lg") scale. */
+
+/* ---------- Sidebar badge: orange text, like the design ---------- */
+.adm-badge.csh-badge {
+    -fx-text-fill: -adm-orange;
+}
+
+/* ---------- Home: shift banner ---------- */
+.csh-hero {
+    -fx-background-color: -adm-brown;
+    -fx-background-radius: 20;
+    -fx-padding: 32 40 32 40;
+}
+
+.csh-hero-date {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-orange;
+}
+
+.csh-hero-title {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFF3E6;
+}
+
+.csh-hero-sub {
+    -fx-font-size: 15px;
+    -fx-text-fill: #E9D6C4;
+}
+
+.csh-shift-pill {
+    -fx-background-color: #E3F3E3;
+    -fx-background-radius: 14;
+    -fx-padding: 6 16 6 16;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2F7D4A;
+}
+
+.csh-clickable {
+    -fx-cursor: hand;
+}
+
+/* ---------- Category chips ---------- */
+.csh-chip {
+    -fx-background-color: white;
+    -fx-background-radius: 999;
+    -fx-border-color: #E3D2BF;
+    -fx-border-radius: 999;
+    -fx-padding: 10 26 10 26;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+    -fx-cursor: hand;
+}
+
+.csh-chip:hover {
+    -fx-background-color: #F8EFE3;
+}
+
+.csh-chip-active,
+.csh-chip-active:hover {
+    -fx-background-color: -adm-orange;
+    -fx-border-color: -adm-orange;
+    -fx-text-fill: white;
+}
+
+.csh-section-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-count {
+    -fx-font-size: 13px;
+    -fx-text-fill: -adm-muted;
+}
+
+/* ---------- Product cards ---------- */
+.csh-product-card {
+    -fx-background-color: -adm-card;
+    -fx-background-radius: 16;
+    -fx-border-color: -adm-line;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(gaussian, rgba(78,34,22,0.06), 8, 0, 0, 2);
+}
+
+.csh-product-card-selected {
+    -fx-border-color: -adm-orange;
+    -fx-border-width: 2;
+    -fx-padding: 17;
+}
+
+.csh-product-img {
+    -fx-background-color: #F0E4D4;
+    -fx-background-radius: 14;
+}
+
+.csh-product-emoji {
+    -fx-font-size: 40px;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-product-cat-icon {
+    -fx-font-size: 15px;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-product-cat {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-muted;
+}
+
+.csh-product-name {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-product-desc {
+    -fx-font-size: 13px;
+    -fx-text-fill: -adm-muted;
+}
+
+.csh-product-price {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-avail {
+    -fx-font-size: 12px;
+    -fx-text-fill: #2F8F4E;
+}
+
+.csh-avail-out {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-red;
+}
+
+.csh-add-btn,
+.csh-added-btn,
+.csh-unavail-btn {
+    -fx-background-radius: 10;
+    -fx-padding: 13 16 13 16;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.csh-add-btn {
+    -fx-background-color: #F3E9DB;
+    -fx-text-fill: -adm-red;
+}
+
+.csh-add-btn:hover {
+    -fx-background-color: #EBDDCB;
+}
+
+.csh-added-btn {
+    -fx-background-color: #DDF0DE;
+    -fx-text-fill: #2F7D4A;
+}
+
+.csh-added-btn:hover {
+    -fx-background-color: #CFE8D1;
+}
+
+.csh-unavail-btn,
+.csh-unavail-btn:disabled {
+    -fx-background-color: #EBDDCB;
+    -fx-text-fill: -adm-muted;
+    -fx-opacity: 1;
+    -fx-cursor: default;
+}
+
+/* ---------- Current order panel ---------- */
+.csh-order-title {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-count-pill {
+    -fx-background-color: #EBDDCB;
+    -fx-background-radius: 14;
+    -fx-padding: 5 14 5 14;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-order-no {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-line-name {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-line-price {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-line-each {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-muted;
+}
+
+.csh-stepper-btn {
+    -fx-background-color: #F3E9DB;
+    -fx-background-radius: 8;
+    -fx-padding: 6 14 6 14;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+    -fx-cursor: hand;
+}
+
+.csh-stepper-btn:hover {
+    -fx-background-color: #EBDDCB;
+}
+
+.csh-stepper-btn:disabled {
+    -fx-opacity: 0.45;
+}
+
+.csh-qty {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-total-label {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-total-value {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+/* =====================================================================
+   Cash payment (checkout)
+   ===================================================================== */
+
+.csh-due-banner {
+    -fx-background-color: -adm-brown;
+    -fx-background-radius: 16;
+    -fx-padding: 24 30 24 30;
+}
+
+.csh-due-caption {
+    -fx-font-size: 16px;
+    -fx-text-fill: #F1DFCF;
+}
+
+.csh-due-value {
+    -fx-font-size: 44px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFF3E6;
+}
+
+/* PWD / Senior Citizen discount row */
+.csh-check-row {
+    -fx-background-color: -adm-card;
+    -fx-background-radius: 12;
+    -fx-border-color: -adm-line;
+    -fx-border-radius: 12;
+    -fx-padding: 14 18 14 18;
+}
+
+.csh-check-row-on {
+    -fx-background-color: #FFF0C9;
+    -fx-border-color: #F0C86A;
+}
+
+.csh-check-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-muted;
+    -fx-padding: 0 0 0 28;
+}
+
+.csh-check-amount {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-red;
+}
+
+.csh-check {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+    -fx-cursor: hand;
+}
+
+.csh-check > .box {
+    -fx-background-color: white;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6;
+    -fx-border-color: #CDB8A3;
+    -fx-border-radius: 6;
+    -fx-padding: 5;
+}
+
+.csh-check:selected > .box {
+    -fx-background-color: -adm-red;
+    -fx-border-color: -adm-red;
+}
+
+.csh-check > .box > .mark {
+    -fx-background-color: transparent;
+}
+
+.csh-check:selected > .box > .mark {
+    -fx-background-color: white;
+}
+
+/* Cash field */
+.csh-cash-field {
+    -fx-background-color: #F3E9DB;
+    -fx-background-radius: 14;
+    -fx-border-color: #E3D2BF;
+    -fx-border-radius: 14;
+    -fx-border-width: 2;
+    -fx-pref-height: 76px;
+    -fx-padding: 0 60 0 54;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+    -fx-prompt-text-fill: #B8A898;
+}
+
+.csh-cash-field:focused {
+    -fx-border-color: #CDB8A3;
+}
+
+.csh-cash-field.csh-cash-ok,
+.csh-cash-field.csh-cash-ok:focused {
+    -fx-border-color: #2F8F4E;
+}
+
+.csh-cash-field.csh-cash-short,
+.csh-cash-field.csh-cash-short:focused {
+    -fx-border-color: #E0A030;
+}
+
+.csh-cash-prefix {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-cash-icon {
+    -fx-font-size: 22px;
+    -fx-text-fill: -adm-text;
+}
+
+/* Quick amounts */
+.csh-quick {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #E3D2BF;
+    -fx-border-radius: 12;
+    -fx-padding: 16 0 16 0;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+    -fx-cursor: hand;
+}
+
+.csh-quick:hover {
+    -fx-background-color: #F8EFE3;
+}
+
+.csh-quick-on,
+.csh-quick-on:hover {
+    -fx-background-color: -adm-brown;
+    -fx-border-color: -adm-brown;
+    -fx-text-fill: white;
+}
+
+/* Change */
+.csh-change-caption {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-change-value {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2F8F4E;
+}
+
+.csh-change-value.csh-change-short {
+    -fx-text-fill: #C77D00;
+}
+
+.csh-change-value.csh-change-idle {
+    -fx-text-fill: -adm-muted;
+}
+
+/* Status banner (checkout + receipt) */
+.csh-status {
+    -fx-background-radius: 10;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-radius: 10;
+    -fx-padding: 16 20 16 20;
+}
+
+.csh-status-ok {
+    -fx-background-color: #E3F3E3;
+    -fx-border-color: transparent transparent transparent #2F8F4E;
+}
+
+.csh-status-warn {
+    -fx-background-color: #FFF0C9;
+    -fx-border-color: transparent transparent transparent #F2A33C;
+}
+
+.csh-status-idle {
+    -fx-background-color: #F3E9DB;
+    -fx-border-color: transparent transparent transparent #CDB8A3;
+}
+
+.csh-status-icon {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-status-ok .csh-status-icon {
+    -fx-text-fill: #2F8F4E;
+}
+
+.csh-status-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-status-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: -adm-muted;
+}
+
+/* =====================================================================
+   Virtual receipt
+   ===================================================================== */
+
+.csh-receipt {
+    -fx-background-color: -adm-card;
+    -fx-background-radius: 20;
+    -fx-border-color: -adm-line;
+    -fx-border-radius: 20;
+    -fx-padding: 40 40 32 40;
+    -fx-effect: dropshadow(gaussian, rgba(78,34,22,0.08), 12, 0, 0, 3);
+}
+
+.csh-receipt-brand {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 38px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-receipt-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: -adm-muted;
+}
+
+.csh-receipt-val {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-receipt-head {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-receipt-name {
+    -fx-font-size: 15px;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-receipt-amt {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-receipt-thanks {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+    -fx-padding: 6 0 0 0;
+}
+
+.csh-check-circle {
+    -fx-background-color: transparent;
+    -fx-border-color: #2F8F4E;
+    -fx-border-width: 2;
+    -fx-border-radius: 999;
+    -fx-background-radius: 999;
+    -fx-min-width: 52px;
+    -fx-min-height: 52px;
+    -fx-pref-width: 52px;
+    -fx-pref-height: 52px;
+    -fx-max-width: 52px;
+    -fx-max-height: 52px;
+}
+
+.csh-check-mark {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2F8F4E;
+}
+
+.csh-done-title {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-close-btn {
+    -fx-background-color: transparent;
+    -fx-padding: 12 0 4 0;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+    -fx-cursor: hand;
+}
+
+.csh-close-btn:hover {
+    -fx-underline: true;
+}

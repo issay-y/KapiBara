@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- resources/com/cafe/kapibara/kapibara/controller/main/profile/ProfileView.fxml
+     "My profile" for every role. Content only: the navigation (admin/manager sidebar + top
+     bar, or the cashier top bar) comes from whichever shell loads this page.
+     The page loads AdminShell.css itself and carries "adm-root", so the adm- colours resolve
+     even inside a shell that doesn't use the admin stylesheet. -->
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cafe.kapibara.kapibara.controller.main.profile.ProfileController">
+   <stylesheets>
+      <URL value="@/com/cafe/kapibara/kapibara/css/AdminShell.css" />
+   </stylesheets>
+
+   <VBox spacing="24.0" styleClass="adm-root, adm-page, adm-lg">
+      <padding>
+         <Insets top="32.0" right="40.0" bottom="32.0" left="40.0" />
+      </padding>
+
+      <!-- Header -->
+      <VBox spacing="5.0">
+         <Label styleClass="adm-page-title" text="My profile" />
+         <Label styleClass="adm-page-sub" text="Your account details and workspace preferences in one place." />
+      </VBox>
+
+      <HBox alignment="TOP_LEFT" fillHeight="true" spacing="24.0" VBox.vgrow="ALWAYS">
+
+         <!-- ================= IDENTITY CARD ================= -->
+         <VBox styleClass="adm-card" prefWidth="400.0" minWidth="340.0" maxWidth="400.0" spacing="18.0">
+            <StackPane styleClass="adm-avatar">
+               <Label fx:id="initialsLabel" styleClass="adm-avatar-text" text="–" />
+            </StackPane>
+
+            <Label fx:id="nameLabel" styleClass="adm-profile-name" text="–" wrapText="true" />
+
+            <HBox><Label fx:id="roleLabel" styleClass="adm-pill-tan" text="" /></HBox>
+            <HBox><Label fx:id="statusLabel" styleClass="adm-pill-green" text="Active account" /></HBox>
+
+            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
+
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Username" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="usernameValue" styleClass="adm-stock-value" text="–" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Branch" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="branchValue" styleClass="adm-stock-value" text="–" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Joined" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="joinedValue" styleClass="adm-stock-value" text="–" />
+            </HBox>
+
+            <Label fx:id="roleNoteLabel" styleClass="adm-form-note" text="" wrapText="true" />
+
+            <!-- Pushes Log out to the bottom of the card -->
+            <Region VBox.vgrow="ALWAYS" />
+
+            <Button maxWidth="Infinity" onAction="#handleLogout" styleClass="adm-outline-btn" text="⇥   Log out" />
+         </VBox>
+
+         <!-- ================= PERSONAL DETAILS ================= -->
+         <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="20.0">
+            <Label styleClass="adm-card-title" text="Personal details" />
+            <Label styleClass="adm-form-note" text="Fields marked * are required." />
+
+            <VBox spacing="8.0">
+               <Label styleClass="adm-form-label" text="Full name *" />
+               <TextField fx:id="fullNameField" promptText="Enter your full name" styleClass="adm-field" />
+            </VBox>
+
+            <VBox spacing="8.0">
+               <Label styleClass="adm-form-label" text="Email *" />
+               <TextField fx:id="emailField" promptText="name@kapibara.ph" styleClass="adm-field" />
+            </VBox>
+
+            <VBox spacing="8.0">
+               <Label styleClass="adm-form-label" text="Username *" />
+               <TextField fx:id="usernameField" promptText="e.g. mika.santos" styleClass="adm-field" />
+            </VBox>
+
+            <Label styleClass="adm-form-note" text="Your username identifies you in transaction records." />
+
+            <!-- Pushes the divider and buttons to the bottom of the card -->
+            <Region VBox.vgrow="ALWAYS" />
+
+            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
+
+            <Label fx:id="errorLabel" styleClass="adm-form-error" text="" wrapText="true" />
+
+            <HBox alignment="CENTER_LEFT" spacing="14.0">
+               <Button fx:id="cancelBtn" onAction="#handleCancel" styleClass="adm-page-btn" text="Cancel" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Button fx:id="saveBtn" onAction="#handleSave" styleClass="adm-primary-btn" text="✓   Save profile" />
+            </HBox>
+         </VBox>
+      </HBox>
+   </VBox>
+</ScrollPane>

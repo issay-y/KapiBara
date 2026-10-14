@@ -1,0 +1,209 @@
+/* resources/com/cafe/kapibara/kapibara/css/Login.css */
+
+.root-pane {
+    -kb-brown: #4E2216;
+    -kb-cream: #F4EADC;
+    -kb-orange: #F0883A;
+    -kb-red: #D42A0B;
+    -kb-text: #4E2216;
+    -kb-muted: #8A7A70;
+    -fx-background-color: -kb-cream;
+    -fx-font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---------- Left panel ---------- */
+.left-panel {
+    -fx-background-color: -kb-brown;
+}
+
+.logo-icon {
+    -fx-font-size: 24px;
+    -fx-text-fill: -kb-orange;
+}
+
+.brand-name {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFF3E6;
+}
+
+.eyebrow {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -kb-orange;
+}
+
+.hero-title {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 46px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFF3E6;
+}
+
+.hero-sub {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 16px;
+    -fx-text-fill: #F1DFCF;
+    -fx-line-spacing: 2px;
+}
+
+/* Hero photo: drop your image at css/../images/hero.png.
+   If the file is missing, the gradient shows instead. */
+.hero-placeholder {
+    -fx-background-color: linear-gradient(to bottom right, #7A4A33, #A8683F);
+    -fx-background-image: url("/com/cafe/kapibara/kapibara/images/bg.png");
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-radius: 16;
+}
+
+.hero-placeholder-text {
+    -fx-font-size: 64px;
+    -fx-opacity: 0.85;
+}
+
+.branch-label {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 11px;
+    -fx-text-fill: #D9C3B2;
+}
+
+/* ---------- Right panel ---------- */
+.right-panel {
+    -fx-background-color: -kb-cream;
+}
+
+.badge {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-background-color: #EBD9C8;
+    -fx-background-radius: 20;
+    -fx-padding: 4 14 4 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -kb-text;
+}
+
+.form-title {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 46px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -kb-text;
+}
+
+.form-sub {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: -kb-muted;
+}
+
+/* ---------- Form ---------- */
+.field-label {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -kb-text;
+}
+
+.input-field {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-background-color: #FFFCF8;
+    -fx-background-radius: 10;
+    -fx-border-color: #E8DACB;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-pref-height: 42px;
+    -fx-padding: 0 40 0 14;
+    -fx-font-size: 14px;
+    -fx-text-fill: -kb-text;
+    -fx-prompt-text-fill: #A89A90;
+}
+
+.input-field:focused {
+    -fx-border-color: -kb-red;
+    -fx-effect: dropshadow(gaussian, rgba(212,42,11,0.18), 6, 0, 0, 0);
+}
+
+.input-icon {
+    -fx-font-size: 15px;
+    -fx-text-fill: -kb-text;
+}
+
+.icon-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: -kb-text;
+    -fx-font-size: 15px;
+    -fx-padding: 4 6 4 6;
+    -fx-cursor: hand;
+}
+
+.icon-btn:hover {
+    -fx-background-color: rgba(78,34,22,0.08);
+    -fx-background-radius: 6;
+}
+
+/* ---------- Checkbox ---------- */
+.remember {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 12px;
+    -fx-text-fill: -kb-text;
+}
+
+.remember .box {
+    -fx-background-color: #FFFCF8;
+    -fx-border-color: #CDBBAA;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-padding: 3;
+}
+
+.remember:selected .box {
+    -fx-background-color: -kb-red;
+    -fx-border-color: -kb-red;
+}
+
+.remember:selected .mark {
+    -fx-background-color: white;
+}
+
+.error-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #B3200A;
+}
+
+/* ---------- Login button ---------- */
+.login-btn {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-background-color: -kb-red;
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.login-btn:hover {
+    -fx-background-color: #BC2408;
+}
+
+.login-btn:pressed {
+    -fx-background-color: #A31F07;
+}
+
+.login-btn:disabled {
+    -fx-opacity: 0.6;
+}
+
+.help-text {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 11px;
+    -fx-text-fill: -kb-muted;
+}
+
+.footer-text {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 11px;
+    -fx-text-fill: #9C8D83;
+}

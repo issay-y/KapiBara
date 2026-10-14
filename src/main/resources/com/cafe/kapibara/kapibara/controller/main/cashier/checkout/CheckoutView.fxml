@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- resources/com/cafe/kapibara/kapibara/controller/main/cashier/checkout/CheckoutView.fxml
+     Content only: the sidebar and top bar come from CashierView.fxml. -->
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cafe.kapibara.kapibara.controller.main.cashier.checkout.CheckoutController">
+   <VBox spacing="24.0" styleClass="adm-page, adm-lg">
+      <padding>
+         <Insets top="32.0" right="40.0" bottom="32.0" left="40.0" />
+      </padding>
+
+      <!-- Header -->
+      <VBox spacing="5.0">
+         <Label styleClass="adm-page-title" text="Cash payment" />
+         <Label styleClass="adm-page-sub" text="Review the order, receive cash, and confirm the customer's change." />
+      </VBox>
+
+      <HBox alignment="TOP_LEFT" fillHeight="true" spacing="24.0" VBox.vgrow="ALWAYS">
+
+         <!-- ================= ORDER SUMMARY ================= -->
+         <VBox styleClass="adm-card" prefWidth="580.0" minWidth="480.0" maxWidth="640.0" spacing="16.0">
+            <Label styleClass="adm-card-title" text="Order summary" />
+
+            <HBox alignment="CENTER_LEFT">
+               <Label fx:id="orderNoLabel" styleClass="csh-order-no" text="" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="orderTimeLabel" styleClass="adm-form-note" text="" />
+            </HBox>
+
+            <GridPane fx:id="summaryGrid" styleClass="adm-table">
+               <columnConstraints>
+                  <ColumnConstraints percentWidth="56.0" />
+                  <ColumnConstraints percentWidth="14.0" />
+                  <ColumnConstraints percentWidth="30.0" />
+               </columnConstraints>
+            </GridPane>
+
+            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
+
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Subtotal (VAT-exclusive)" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="subtotalLabel" styleClass="adm-stock-value" text="₱0.00" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label fx:id="vatCaption" styleClass="adm-stock-name" text="VAT (12%, included)" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="vatLabel" styleClass="adm-stock-value" text="₱0.00" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label fx:id="discountCaption" styleClass="adm-stock-name" text="Discount" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="discountLabel" styleClass="adm-stock-value" text="₱0.00" />
+            </HBox>
+
+            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
+
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="csh-total-label" text="Total" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="totalLabel" styleClass="csh-total-value" text="₱0.00" />
+            </HBox>
+
+            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
+
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Cashier" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="cashierLabel" styleClass="adm-stock-value" text="" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-stock-name" text="Date" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="dateLabel" styleClass="adm-stock-value" text="" />
+            </HBox>
+
+            <Label fx:id="noteLabel" styleClass="adm-form-note" text="" wrapText="true" />
+
+            <Region VBox.vgrow="ALWAYS" />
+
+            <Button maxWidth="Infinity" onAction="#handleBack" styleClass="adm-outline-btn" text="←   Back to order" />
+         </VBox>
+
+         <!-- ================= RECEIVE CASH ================= -->
+         <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="18.0">
+            <Label styleClass="adm-card-title" text="Receive cash" />
+
+            <HBox alignment="CENTER_LEFT" styleClass="csh-due-banner">
+               <Label styleClass="csh-due-caption" text="Total due" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="dueLabel" styleClass="csh-due-value" text="₱0.00" />
+            </HBox>
+
+            <!-- PWD / Senior Citizen discount: tick to apply 20% off -->
+            <HBox fx:id="discountRow" alignment="CENTER_LEFT" spacing="12.0" styleClass="csh-check-row">
+               <VBox spacing="4.0">
+                  <CheckBox fx:id="discountCheck" onAction="#handleDiscount" styleClass="csh-check" text="PWD / Senior Citizen discount" />
+                  <Label styleClass="csh-check-sub" text="20% off the VAT-exclusive price • VAT-exempt • valid ID required" />
+               </VBox>
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="discountAmountLabel" styleClass="csh-check-amount" text="" />
+            </HBox>
+
+            <Label styleClass="adm-form-label" text="Cash received" />
+            <StackPane>
+               <TextField fx:id="cashField" promptText="0.00" styleClass="csh-cash-field" />
+               <Label mouseTransparent="true" styleClass="csh-cash-prefix" text="₱" StackPane.alignment="CENTER_LEFT">
+                  <StackPane.margin><Insets left="22.0" /></StackPane.margin>
+               </Label>
+               <Label mouseTransparent="true" styleClass="csh-cash-icon" text="💵" StackPane.alignment="CENTER_RIGHT">
+                  <StackPane.margin><Insets right="22.0" /></StackPane.margin>
+               </Label>
+            </StackPane>
+
+            <HBox fx:id="quickRow" spacing="12.0" />
+
+            <HBox alignment="CENTER_LEFT">
+               <Label fx:id="changeCaption" styleClass="csh-change-caption" text="Change to give" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="changeLabel" styleClass="csh-change-value" text="₱0.00" />
+            </HBox>
+
+            <HBox fx:id="statusBox" alignment="CENTER_LEFT" spacing="16.0" styleClass="csh-status, csh-status-idle">
+               <Label fx:id="statusIcon" styleClass="csh-status-icon" text="…" />
+               <VBox spacing="3.0" HBox.hgrow="ALWAYS">
+                  <Label fx:id="statusTitle" styleClass="csh-status-title" text="" wrapText="true" />
+                  <Label fx:id="statusSub" styleClass="csh-status-sub" text="" wrapText="true" />
+               </VBox>
+            </HBox>
+
+            <Region VBox.vgrow="ALWAYS" />
+
+            <HBox alignment="CENTER_LEFT" spacing="14.0">
+               <Button onAction="#handleCancel" styleClass="adm-page-btn" text="Cancel" />
+               <Button fx:id="confirmBtn" maxWidth="Infinity" onAction="#handleConfirm" styleClass="adm-primary-btn" text="✓   Confirm Payment" HBox.hgrow="ALWAYS" />
+            </HBox>
+         </VBox>
+      </HBox>
+   </VBox>
+</ScrollPane>

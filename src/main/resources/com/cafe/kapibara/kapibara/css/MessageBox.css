@@ -1,0 +1,63 @@
+/* resources/com/cafe/kapibara/kapibara/css/MessageBox.css
+   Loaded by MessageBox.java. The box is its own transparent window, so it uses plain hex
+   colours (no looked-up -adm- colours). */
+
+.msg-root {
+    -fx-background-color: transparent;
+    -fx-padding: 32;
+}
+
+.msg-card {
+    -fx-background-color: #FFFCF8;
+    -fx-background-radius: 22;
+    -fx-border-color: #F0E4D6;
+    -fx-border-radius: 22;
+    -fx-border-width: 1;
+    -fx-padding: 30 32 26 32;
+    -fx-effect: dropshadow(gaussian, rgba(78,34,22,0.30), 30, 0.08, 0, 10);
+    -fx-font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+.msg-title {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4E2216;
+}
+
+.msg-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7A6A60;
+    -fx-line-spacing: 3;
+}
+
+.msg-btn-cancel,
+.msg-btn-confirm {
+    -fx-background-radius: 12;
+    -fx-padding: 12 28 12 28;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.msg-btn-cancel {
+    -fx-background-color: white;
+    -fx-border-color: #E3D2BF;
+    -fx-border-radius: 12;
+    -fx-text-fill: #4E2216;
+}
+
+.msg-btn-cancel:hover {
+    -fx-background-color: #F8EFE3;
+}
+
+.msg-btn-confirm {
+    -fx-background-color: #D42A0B;
+    -fx-text-fill: white;
+}
+
+.msg-btn-confirm:hover {
+    -fx-background-color: #BC2408;
+}

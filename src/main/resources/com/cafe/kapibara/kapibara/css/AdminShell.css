@@ -1,0 +1,917 @@
+/* resources/com/cafe/kapibara/kapibara/css/AdminShell.css
+   Styles for the admin shell (sidebar + top bar) and the Home / Sales pages.
+   All classes are prefixed "adm-" so they can't clash with your other stylesheets. */
+
+.adm-root {
+    -adm-brown: #4E2216;
+    -adm-cream: #F3E9DB;
+    -adm-card: #FFFCF8;
+    -adm-line: #EADCCB;
+    -adm-orange: #FF8732;
+    -adm-red: #D42A0B;
+    -adm-text: #4E2216;
+    -adm-muted: #8A7A70;
+    -fx-background-color: -adm-cream;
+    -fx-font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 13px;
+}
+
+/* ---------- Sidebar ---------- */
+.adm-sidebar {
+    -fx-background-color: -adm-brown;
+}
+
+.adm-side-brand {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFF3E6;
+}
+
+.adm-side-tagline {
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #D9C3B2;
+}
+
+.adm-badge {
+    -fx-background-color: rgba(255,255,255,0.10);
+    -fx-background-radius: 8;
+    -fx-padding: 6 12 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #F4D9BF;
+}
+
+.adm-nav {
+    -fx-background-color: transparent;
+    -fx-background-radius: 12;
+    -fx-text-fill: #F1DFCF;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 11 14 11 14;
+    -fx-cursor: hand;
+}
+
+.adm-nav:hover {
+    -fx-background-color: rgba(255,255,255,0.08);
+}
+
+.adm-nav-active,
+.adm-nav-active:hover {
+    -fx-background-color: -adm-orange;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.adm-side-version {
+    -fx-font-size: 10px;
+    -fx-text-fill: #D9C3B2;
+}
+
+/* ---------- Top bar ---------- */
+.adm-topbar {
+    -fx-background-color: -adm-card;
+    -fx-border-color: transparent transparent -adm-line transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.adm-breadcrumb,
+.adm-topbar-date {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-muted;
+}
+
+.adm-bell {
+    -fx-font-size: 15px;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-topbar-user {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+/* ---------- Page container ---------- */
+.adm-content-holder {
+    -fx-background-color: -adm-cream;
+}
+
+.adm-scroll,
+.adm-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.adm-page {
+    -fx-background-color: transparent;
+}
+
+.adm-page-title {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-page-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: -adm-muted;
+}
+
+.adm-status-pill {
+    -fx-background-color: #DDF0DE;
+    -fx-background-radius: 10;
+    -fx-padding: 4 10 4 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2F7D4A;
+}
+
+.adm-date-pill {
+    -fx-background-color: -adm-card;
+    -fx-background-radius: 18;
+    -fx-border-color: -adm-line;
+    -fx-border-radius: 18;
+    -fx-padding: 8 16 8 16;
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-text;
+    -fx-cursor: hand;
+}
+
+/* ---------- Cards ---------- */
+.adm-card {
+    -fx-background-color: -adm-card;
+    -fx-background-radius: 14;
+    -fx-border-color: -adm-line;
+    -fx-border-radius: 14;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(gaussian, rgba(78,34,22,0.06), 8, 0, 0, 2);
+}
+
+.adm-kpi-card {
+    -fx-spacing: 4;
+    -fx-padding: 16 18 16 18;
+}
+
+.adm-kpi-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-muted;
+}
+
+.adm-kpi-value {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-kpi-value-text {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+    -fx-padding: 6 0 6 0;
+}
+
+.adm-kpi-sub {
+    -fx-font-size: 11px;
+    -fx-text-fill: -adm-muted;
+}
+
+.adm-card-title {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-card-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-muted;
+}
+
+.adm-chart-note {
+    -fx-font-size: 10px;
+    -fx-text-fill: -adm-muted;
+}
+
+.adm-card-foot {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-muted;
+}
+
+.adm-foot-total {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+/* ---------- Links and buttons ---------- */
+.adm-link {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-red;
+    -fx-cursor: hand;
+}
+
+.adm-link:hover {
+    -fx-underline: true;
+}
+
+.adm-outline-btn {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #E3D2BF;
+    -fx-border-radius: 10;
+    -fx-padding: 10 14 10 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+    -fx-cursor: hand;
+}
+
+.adm-outline-btn:hover {
+    -fx-background-color: #F8EFE3;
+}
+
+.adm-period-btn {
+    -fx-background-color: -adm-cream;
+    -fx-background-radius: 8;
+    -fx-padding: 5 12 5 12;
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-text;
+    -fx-cursor: hand;
+}
+
+.adm-period-btn:selected {
+    -fx-background-color: -adm-brown;
+    -fx-text-fill: white;
+}
+
+/* ---------- Best sellers ---------- */
+.adm-seller-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-seller-bar {
+    -fx-padding: 0;
+}
+
+.adm-seller-bar > .track {
+    -fx-background-color: #F0E1D1;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4;
+}
+
+.adm-seller-bar > .bar {
+    -fx-background-color: -adm-orange;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4;
+    -fx-padding: 4;
+}
+
+.adm-seller-bar.adm-top-seller > .bar {
+    -fx-background-color: -adm-red;
+}
+
+/* ---------- Table (recent transactions) ---------- */
+.adm-table {
+    -fx-background-color: -adm-card;
+    -fx-border-color: -adm-line;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.adm-th {
+    -fx-background-color: #EBDCCA;
+    -fx-padding: 10 14 10 14;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-td {
+    -fx-padding: 12 14 12 14;
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-text;
+    -fx-border-color: transparent transparent #F0E4D6 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.adm-pill-green {
+    -fx-background-color: #DDF0DE;
+    -fx-background-radius: 10;
+    -fx-padding: 3 10 3 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2F7D4A;
+}
+
+/* ---------- Attention card ---------- */
+.adm-alert {
+    -fx-background-color: #FFF0C9;
+    -fx-background-radius: 10;
+    -fx-border-color: #F0C86A;
+    -fx-border-radius: 10;
+    -fx-padding: 12 14 12 14;
+}
+
+.adm-alert-icon {
+    -fx-font-size: 18px;
+    -fx-text-fill: #C77D00;
+}
+
+.adm-alert-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-alert-sub {
+    -fx-font-size: 11px;
+    -fx-text-fill: #8A6D2F;
+}
+
+.adm-stock-name {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-muted;
+}
+
+.adm-stock-value {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+/* ---------- Charts ---------- */
+.adm-root .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.adm-root .axis {
+    -fx-tick-label-fill: -adm-muted;
+    -fx-font-size: 11px;
+}
+
+.adm-root .axis:bottom {
+    -fx-border-color: transparent;
+}
+
+.adm-root .default-color0.chart-bar {
+    -fx-bar-fill: -adm-orange;
+    -fx-background-radius: 6 6 0 0;
+}
+
+.adm-root .default-color0.chart-bar.bar-highlight {
+    -fx-bar-fill: -adm-red;
+}
+
+/* =====================================================================
+   Inventory + Low stock pages
+   ===================================================================== */
+
+.adm-primary-btn {
+    -fx-background-color: -adm-red;
+    -fx-background-radius: 10;
+    -fx-padding: 11 22 11 22;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+.adm-primary-btn:hover {
+    -fx-background-color: #BC2408;
+}
+
+.adm-sub-good {
+    -fx-text-fill: #2F8F4E;
+}
+
+.adm-sub-bad {
+    -fx-text-fill: -adm-red;
+}
+
+.adm-banner {
+    -fx-background-color: #FFF0C9;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent transparent transparent #F2A33C;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-radius: 8;
+    -fx-padding: 12 16 12 16;
+}
+
+.adm-filter-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-search {
+    -fx-background-color: -adm-card;
+    -fx-background-radius: 10;
+    -fx-border-color: #E8DACB;
+    -fx-border-radius: 10;
+    -fx-pref-height: 40px;
+    -fx-padding: 0 14 0 40;
+    -fx-font-size: 13px;
+    -fx-text-fill: -adm-text;
+    -fx-prompt-text-fill: #A89A90;
+}
+
+.adm-search:focused {
+    -fx-border-color: -adm-red;
+}
+
+.adm-search-icon {
+    -fx-font-size: 14px;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-combo {
+    -fx-background-color: -adm-card;
+    -fx-background-radius: 10;
+    -fx-border-color: #E8DACB;
+    -fx-border-radius: 10;
+    -fx-pref-height: 40px;
+    -fx-font-size: 13px;
+}
+
+.adm-combo:focused {
+    -fx-border-color: -adm-red;
+}
+
+.adm-combo > .list-cell {
+    -fx-text-fill: -adm-text;
+    -fx-padding: 0 0 0 8;
+    -fx-background-color: transparent;
+}
+
+.adm-combo > .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.adm-combo > .arrow-button > .arrow {
+    -fx-background-color: -adm-text;
+}
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover,
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected {
+    -fx-background-color: #F3E9DB;
+    -fx-text-fill: #4E2216;
+}
+
+.adm-pill-gold {
+    -fx-background-color: #FFF3CF;
+    -fx-background-radius: 10;
+    -fx-border-color: #F0C86A;
+    -fx-border-radius: 10;
+    -fx-padding: 2 9 2 9;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7A5300;
+}
+
+.adm-pill-red {
+    -fx-background-color: #FCE1DA;
+    -fx-background-radius: 10;
+    -fx-padding: 3 10 3 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #C0290C;
+}
+
+.adm-icon-btn {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-font-size: 13px;
+    -fx-text-fill: -adm-red;
+    -fx-cursor: hand;
+}
+
+.adm-page-btn {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #E3D2BF;
+    -fx-border-radius: 10;
+    -fx-padding: 9 18 9 18;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+    -fx-cursor: hand;
+}
+
+.adm-page-btn:disabled {
+    -fx-opacity: 0.5;
+}
+
+.adm-page-num {
+    -fx-background-color: transparent;
+    -fx-padding: 7 10 7 10;
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-text;
+    -fx-cursor: hand;
+}
+
+.adm-page-num-active {
+    -fx-background-color: -adm-brown;
+    -fx-background-radius: 8;
+    -fx-padding: 7 12 7 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.adm-ellipsis {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-muted;
+}
+
+/* Accounts page: inactive status pill */
+.adm-pill-tan {
+    -fx-background-color: #EBDDCB;
+    -fx-background-radius: 10;
+    -fx-padding: 3 10 3 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+/* =====================================================================
+   Add / Edit account form
+   ===================================================================== */
+
+.adm-field {
+    -fx-background-color: -adm-card;
+    -fx-background-radius: 10;
+    -fx-border-color: #E8DACB;
+    -fx-border-radius: 10;
+    -fx-pref-height: 40px;
+    -fx-padding: 0 14 0 14;
+    -fx-font-size: 13px;
+    -fx-text-fill: -adm-text;
+    -fx-prompt-text-fill: #A89A90;
+}
+
+.adm-field:focused {
+    -fx-border-color: -adm-red;
+}
+
+.adm-field-pw {
+    -fx-padding: 0 46 0 14;
+}
+
+.adm-eye-btn {
+    -fx-background-color: transparent;
+    -fx-padding: 4 6 4 6;
+    -fx-font-size: 14px;
+    -fx-text-fill: -adm-text;
+    -fx-cursor: hand;
+}
+
+.adm-form-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-form-note {
+    -fx-font-size: 11px;
+    -fx-text-fill: -adm-muted;
+}
+
+.adm-form-error {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-red;
+}
+
+.adm-divider {
+    -fx-background-color: -adm-line;
+}
+
+.adm-role-name {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-role-desc {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-muted;
+}
+
+/* =====================================================================
+   Message boxes (DialogUtil). Dialogs live outside .adm-root, so no
+   looked-up colours here: plain hex values only.
+   ===================================================================== */
+
+.adm-dialog {
+    -fx-background-color: #FFFCF8;
+    -fx-font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 13px;
+}
+
+.adm-dialog > .header-panel {
+    -fx-background-color: #F3E9DB;
+    -fx-padding: 16 22 14 22;
+}
+
+.adm-dialog > .header-panel > .label {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4E2216;
+}
+
+.adm-dialog > .content.label {
+    -fx-text-fill: #4E2216;
+    -fx-padding: 16 22 10 22;
+}
+
+.adm-dialog .button-bar .button {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #E3D2BF;
+    -fx-border-radius: 10;
+    -fx-padding: 8 18 8 18;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4E2216;
+    -fx-cursor: hand;
+}
+
+.adm-dialog .button-bar .button:focused {
+    -fx-border-color: #4E2216;
+}
+
+.adm-dialog .button-bar .button.adm-dialog-danger {
+    -fx-background-color: #D42A0B;
+    -fx-border-color: #D42A0B;
+    -fx-text-fill: white;
+}
+
+.adm-dialog .button-bar .button.adm-dialog-danger:hover {
+    -fx-background-color: #BC2408;
+}
+
+/* =====================================================================
+   Large-screen scale ("adm-lg")
+   Paste at the END of AdminShell.css. Only pages whose root VBox has
+   the "adm-lg" style class are affected, so other admin pages keep
+   their current size. Remove the class from a page to revert it.
+   ===================================================================== */
+
+/* ---------- Headings ---------- */
+.adm-lg .adm-page-title { -fx-font-size: 40px; }
+.adm-lg .adm-page-sub   { -fx-font-size: 16px; }
+.adm-lg .adm-card-title { -fx-font-size: 22px; }
+
+/* ---------- Cards ---------- */
+.adm-lg .adm-card {
+    -fx-padding: 28;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+}
+
+.adm-lg .adm-kpi-card {
+    -fx-spacing: 8;
+    -fx-padding: 24 28 24 28;
+}
+
+.adm-lg .adm-kpi-label { -fx-font-size: 15px; }
+.adm-lg .adm-kpi-value { -fx-font-size: 46px; }
+.adm-lg .adm-kpi-sub   { -fx-font-size: 13px; }
+
+/* ---------- Filters and form controls ---------- */
+.adm-lg .adm-search {
+    -fx-pref-height: 52px;
+    -fx-padding: 0 18 0 52;
+    -fx-font-size: 16px;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+.adm-lg .adm-search-icon { -fx-font-size: 17px; }
+
+.adm-lg .adm-combo {
+    -fx-pref-height: 52px;
+    -fx-font-size: 16px;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+.adm-lg .adm-combo > .list-cell { -fx-padding: 0 0 0 12; }
+
+.adm-lg .adm-field {
+    -fx-pref-height: 52px;
+    -fx-padding: 0 18 0 18;
+    -fx-font-size: 16px;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+.adm-lg .adm-field-pw { -fx-padding: 0 56 0 18; }
+.adm-lg .adm-eye-btn  { -fx-font-size: 18px; }
+
+.adm-lg .adm-form-label { -fx-font-size: 14px; }
+.adm-lg .adm-form-note  { -fx-font-size: 13px; }
+.adm-lg .adm-form-error { -fx-font-size: 14px; }
+
+.adm-lg .adm-role-name { -fx-font-size: 15px; }
+.adm-lg .adm-role-desc { -fx-font-size: 14px; }
+
+/* ---------- Buttons ---------- */
+.adm-lg .adm-primary-btn {
+    -fx-padding: 15 30 15 30;
+    -fx-font-size: 15px;
+    -fx-background-radius: 12;
+}
+
+.adm-lg .adm-page-btn {
+    -fx-padding: 14 26 14 26;
+    -fx-font-size: 14px;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+
+.adm-lg .adm-page-num        { -fx-padding: 9 13 9 13; -fx-font-size: 14px; }
+.adm-lg .adm-page-num-active { -fx-padding: 9 15 9 15; -fx-font-size: 14px; }
+.adm-lg .adm-ellipsis        { -fx-font-size: 14px; }
+
+/* ---------- Table ---------- */
+.adm-lg .adm-table {
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+}
+
+.adm-lg .adm-th {
+    -fx-padding: 16 24 16 24;
+    -fx-font-size: 13px;
+}
+
+.adm-lg .adm-td {
+    -fx-padding: 24 24 24 24;
+    -fx-font-size: 15px;
+}
+
+.adm-lg .adm-pill-green,
+.adm-lg .adm-pill-red,
+.adm-lg .adm-pill-tan {
+    -fx-padding: 5 14 5 14;
+    -fx-font-size: 13px;
+    -fx-background-radius: 14;
+}
+
+.adm-lg .adm-link     { -fx-font-size: 14px; }
+.adm-lg .adm-icon-btn { -fx-font-size: 16px; }
+
+/* ---------- Footer text ---------- */
+.adm-lg .adm-card-foot { -fx-font-size: 14px; }
+
+/* =====================================================================
+   Inventory form
+   ===================================================================== */
+
+.adm-field-readonly {
+    -fx-background-color: #F6EEE3;
+}
+
+.adm-guide-icon {
+    -fx-font-size: 28px;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-lg .adm-guide-icon { -fx-font-size: 36px; }
+.adm-lg .adm-pill-gold {
+    -fx-padding: 4 13 4 13;
+    -fx-font-size: 13px;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+}
+
+/* =====================================================================
+   Paste at the END of AdminShell.css (after the "adm-lg" block).
+   1) Extra adm-lg sizes needed by the Inventory pages
+   2) Styles for the shared My profile page
+   ===================================================================== */
+
+/* ---------- Inventory pages (adm-lg) ---------- */
+.adm-lg .adm-filter-label { -fx-font-size: 14px; }
+
+.adm-lg .adm-outline-btn {
+    -fx-padding: 14 24 14 24;
+    -fx-font-size: 14px;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+
+.adm-lg .adm-banner {
+    -fx-padding: 16 22 16 22;
+}
+
+.adm-lg .adm-alert-icon  { -fx-font-size: 24px; }
+.adm-lg .adm-alert-title { -fx-font-size: 16px; }
+.adm-lg .adm-alert-sub   { -fx-font-size: 13px; }
+
+.adm-lg .adm-stock-name,
+.adm-lg .adm-stock-value { -fx-font-size: 14px; }
+
+/* ---------- My profile ---------- */
+.adm-avatar {
+    -fx-background-color: #EFE1D0;
+    -fx-background-radius: 999;
+    -fx-min-width: 96px;
+    -fx-min-height: 96px;
+    -fx-pref-width: 96px;
+    -fx-pref-height: 96px;
+    -fx-max-width: 96px;
+    -fx-max-height: 96px;
+}
+
+.adm-avatar-text {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-profile-name {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-lg .adm-avatar {
+    -fx-min-width: 120px;
+    -fx-min-height: 120px;
+    -fx-pref-width: 120px;
+    -fx-pref-height: 120px;
+    -fx-max-width: 120px;
+    -fx-max-height: 120px;
+}
+
+.adm-lg .adm-avatar-text  { -fx-font-size: 40px; }
+.adm-lg .adm-profile-name { -fx-font-size: 32px; }
+
+/* =====================================================================
+   REPLACE the last block you pasted at the end of AdminShell.css with
+   this whole block (the old one lost its comment opener, which breaks
+   the CSS parser).
+   Accounts + Inventory: brown card outline, compact fit, combo fix,
+   straight table row lines.
+   ===================================================================== */
+
+/* ---------- KPI cards: outline same brown as the sidebar ---------- */
+.adm-lg .adm-kpi-card {
+    -fx-border-color: -adm-brown;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 16;
+    -fx-padding: 18 28 18 28;
+}
+
+/* ---------- Compact sizes so everything fits on screen ---------- */
+.adm-lg .adm-page-title { -fx-font-size: 36px; }
+.adm-lg .adm-kpi-value  { -fx-font-size: 40px; }
+.adm-lg .adm-banner     { -fx-padding: 12 22 12 22; }
+
+.adm-lg .adm-th { -fx-padding: 14 24 14 24; }
+.adm-lg .adm-td { -fx-padding: 18 24 18 24; }
+
+/* ---------- Combo boxes (Category / Stock status / Roles) ---------- */
+.adm-lg .adm-combo {
+    -fx-min-height: 52px;
+    -fx-pref-height: 52px;
+    -fx-max-height: 52px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.adm-lg .adm-combo > .list-cell {
+    -fx-font-size: 16px;
+    -fx-padding: 0 0 0 14;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.adm-lg .adm-combo > .arrow-button {
+    -fx-padding: 0 16 0 8;
+}
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
+    -fx-font-size: 15px;
+    -fx-padding: 10 14 10 14;
+    -fx-text-fill: #4E2216;
+}
+
+/* ---------- Table row lines ----------
+   The per-cell borders are turned off (they were what looked crooked).
+   TableRowUtil.polish(...) draws one straight line per row instead. */
+.adm-lg .adm-td {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.adm-row-line {
+    -fx-background-color: #F0E4D6;
+}

@@ -1,0 +1,279 @@
+/* resources/com/cafe/kapibara/kapibara/css/Admin.css */
+
+.admin-root {
+    -kb-brown: #4E2216;
+    -kb-cream: #F4EADC;
+    -kb-orange: #FF8A33;
+    -kb-red: #D42A0B;
+    -kb-text: #4E2216;
+    -kb-muted: #8A7A70;
+    -fx-background-color: -kb-cream;
+    -fx-font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+    -fx-background-color: -kb-brown;
+}
+
+/* Logo placeholder (replace with an ImageView later) */
+.logo-placeholder {
+    -fx-background-color: rgba(255,138,51,0.12);
+    -fx-background-radius: 18;
+    -fx-border-color: -kb-orange;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 18;
+}
+
+.logo-placeholder-text {
+    -fx-font-size: 28px;
+    -fx-text-fill: -kb-orange;
+}
+
+.side-brand {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFF3E6;
+}
+
+.side-tagline {
+    -fx-font-size: 8px;
+    -fx-text-fill: #D9C3B2;
+}
+
+.side-version {
+    -fx-font-size: 9px;
+    -fx-text-fill: #C9B2A1;
+}
+
+.nav-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-text-fill: #F1DFCF;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 12 10 14;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.nav-btn:hover {
+    -fx-background-color: rgba(255,255,255,0.08);
+}
+
+.nav-btn.nav-active,
+.nav-btn.nav-active:hover {
+    -fx-background-color: -kb-orange;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* ---------- Top bar ---------- */
+.topbar {
+    -fx-background-color: white;
+    -fx-border-color: #EFE4D6;
+    -fx-border-width: 0 0 1 0;
+}
+
+.topbar-date {
+    -fx-font-size: 12px;
+    -fx-text-fill: -kb-text;
+}
+
+.topbar-user {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -kb-text;
+}
+
+/* Avatar placeholder (initials) */
+.avatar {
+    -fx-background-color: -kb-orange;
+    -fx-background-radius: 20;
+}
+
+.avatar-text {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+/* ---------- Content ---------- */
+.content-scroll,
+.content-scroll > .viewport,
+.content {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.content-scroll {
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.page-title {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -kb-text;
+}
+
+.page-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: -kb-muted;
+}
+
+.date-pill {
+    -fx-background-color: #FFFCF8;
+    -fx-background-radius: 10;
+    -fx-border-color: #E8DACB;
+    -fx-border-radius: 10;
+    -fx-text-fill: -kb-text;
+    -fx-font-size: 13px;
+    -fx-padding: 10 16 10 16;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* ---------- Cards ---------- */
+.card {
+    -fx-background-color: #FFFCF8;
+    -fx-background-radius: 14;
+    -fx-border-color: #EADCCB;
+    -fx-border-radius: 14;
+    -fx-padding: 16 20 16 20;
+    -fx-effect: dropshadow(gaussian, rgba(78,34,22,0.07), 10, 0, 0, 2);
+}
+
+.kpi-card {
+    -fx-spacing: 4;
+}
+
+.kpi-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: -kb-muted;
+}
+
+.kpi-value {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -kb-text;
+}
+
+.kpi-value-text {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 21px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -kb-text;
+    -fx-padding: 8 0 8 0;
+}
+
+.kpi-sub {
+    -fx-font-size: 10px;
+    -fx-text-fill: -kb-muted;
+}
+
+.card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -kb-text;
+}
+
+.card-sub {
+    -fx-font-size: 11px;
+    -fx-text-fill: -kb-muted;
+}
+
+.chart-note {
+    -fx-font-size: 9px;
+    -fx-text-fill: #9C8D83;
+    -fx-padding: 6 0 0 0;
+}
+
+.card-foot {
+    -fx-font-size: 10px;
+    -fx-text-fill: -kb-muted;
+}
+
+/* ---------- Period toggle ---------- */
+.period-btn {
+    -fx-background-color: #FFFCF8;
+    -fx-background-radius: 8;
+    -fx-border-color: #E8DACB;
+    -fx-border-radius: 8;
+    -fx-text-fill: -kb-text;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 7 16 7 16;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.period-btn:selected {
+    -fx-background-color: -kb-brown;
+    -fx-border-color: -kb-brown;
+    -fx-text-fill: white;
+}
+
+/* ---------- Charts ---------- */
+.chart {
+    -fx-padding: 0;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+/* flat bars (removes JavaFX's default gradient) */
+.chart-bar,
+.chart-bar.default-color0 {
+    -fx-bar-fill: -kb-orange;
+    -fx-background-color: -fx-bar-fill;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6 6 0 0;
+}
+
+.axis {
+    -fx-tick-label-fill: -kb-muted;
+    -fx-tick-label-font-size: 10px;
+}
+
+.axis-line,
+.axis-tick-mark,
+.axis-minor-tick-mark {
+    -fx-stroke: transparent;
+}
+
+/* ---------- Best sellers ---------- */
+.seller-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -kb-text;
+}
+
+.seller-bar {
+    -fx-accent: -kb-orange;
+    -fx-pref-height: 8;
+}
+
+.seller-bar > .track {
+    -fx-background-color: #EFE4D6;
+    -fx-background-radius: 4;
+    -fx-background-insets: 0;
+}
+
+.seller-bar > .bar {
+    -fx-background-color: -kb-orange;
+    -fx-background-radius: 4;
+    -fx-background-insets: 0;
+    -fx-padding: 4;
+}
+
+.seller-bar.top-seller > .bar {
+    -fx-background-color: -kb-red;
+}

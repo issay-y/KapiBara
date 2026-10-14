@@ -1,13 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.cafe.kapibara.kapibara.controller.id.LoginController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
-</VBox>
+<HBox fx:id="root" prefHeight="720.0" prefWidth="1280.0" styleClass="root-pane" stylesheets="@/com/cafe/kapibara/kapibara/css/Login.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cafe.kapibara.kapibara.controller.id.LoginController">
+
+   <!-- ============ LEFT: BRAND PANEL ============ -->
+   <VBox minWidth="480.0" prefWidth="640.0" spacing="0" styleClass="left-panel" HBox.hgrow="ALWAYS">
+      <padding>
+         <Insets bottom="30.0" left="50.0" right="50.0" top="40.0" />
+      </padding>
+
+      <HBox alignment="CENTER_LEFT" spacing="10.0">
+         <ImageView fitHeight="36.0" preserveRatio="true" smooth="true">
+            <image>
+               <Image url="@/com/cafe/kapibara/kapibara/images/logo.png" />
+            </image>
+         </ImageView>
+         <Label styleClass="brand-name" text="KapiBara" />
+      </HBox>
+
+      <Region minHeight="10.0" prefHeight="50.0" />
+
+      <Label styleClass="eyebrow" text="YOUR DAILY DOSE OF GOOD" />
+      <Region prefHeight="10.0" />
+
+      <Label styleClass="hero-title" text="A warm welcome." />
+      <Label styleClass="hero-title" text="A fresh start." />
+      <Region prefHeight="14.0" />
+
+      <Label maxWidth="520.0" styleClass="hero-sub" text="Great coffee starts with a great team. Let's make every order a little brighter." wrapText="true" />
+      <Region prefHeight="20.0" />
+
+      <!-- Hero photo comes from CSS (.hero-placeholder -> images/hero.png) -->
+      <StackPane fx:id="heroImageHolder" styleClass="hero-placeholder"
+                 prefHeight="280.0" minHeight="220.0" maxHeight="320.0" />
+
+      <Region minHeight="14.0" prefHeight="14.0" />
+      <Label styleClass="branch-label" text="CALOOCAN BRANCH" />
+   </VBox>
+
+   <!-- ============ RIGHT: FORM PANEL ============ -->
+   <StackPane prefWidth="640.0" styleClass="right-panel" HBox.hgrow="ALWAYS">
+
+      <VBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="520.0" spacing="0" StackPane.alignment="CENTER">
+         <Label styleClass="badge" text="Team workspace" />
+         <Region prefHeight="10.0" />
+         <Label styleClass="form-title" text="Ready for your shift?" />
+         <Region prefHeight="4.0" />
+         <Label styleClass="form-sub" text="Sign in to your KapiBara account." />
+         <Region prefHeight="36.0" />
+
+         <!-- Form block, centered -->
+         <HBox alignment="CENTER">
+            <VBox maxWidth="440.0" prefWidth="440.0" spacing="0">
+               <Label styleClass="field-label" text="Username" />
+               <Region prefHeight="6.0" />
+               <StackPane styleClass="input-wrap">
+                  <TextField fx:id="usernameField" promptText="Enter your username" styleClass="input-field" />
+                  <Label mouseTransparent="true" styleClass="input-icon" text="👤" StackPane.alignment="CENTER_RIGHT">
+                     <StackPane.margin><Insets right="12.0" /></StackPane.margin>
+                  </Label>
+               </StackPane>
+               <Region prefHeight="16.0" />
+
+               <Label styleClass="field-label" text="Password" />
+               <Region prefHeight="6.0" />
+               <StackPane styleClass="input-wrap">
+                  <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="input-field" />
+                  <TextField fx:id="passwordVisibleField" managed="false" promptText="Enter your password" styleClass="input-field" visible="false" />
+                  <Button fx:id="togglePasswordBtn" focusTraversable="false" onAction="#handleTogglePassword" styleClass="icon-btn" text="👁" StackPane.alignment="CENTER_RIGHT">
+                     <StackPane.margin><Insets right="6.0" /></StackPane.margin>
+                  </Button>
+               </StackPane>
+               <Region prefHeight="12.0" />
+
+               <CheckBox fx:id="rememberCheck" styleClass="remember" text="Remember me" />
+               <Label fx:id="errorLabel" managed="false" styleClass="error-label" visible="false" wrapText="true" />
+               <Region prefHeight="30.0" />
+
+               <Button fx:id="loginBtn" defaultButton="true" maxWidth="Infinity" onAction="#handleLogin" prefHeight="42.0" styleClass="login-btn" text="→  Log in" />
+               <Region prefHeight="12.0" />
+               <Label alignment="CENTER" maxWidth="Infinity" styleClass="help-text" text="Need help? Contact your branch administrator." />
+            </VBox>
+         </HBox>
+      </VBox>
+
+      <Label styleClass="footer-text" text="KapiBara • Made for your café's everyday rhythm" StackPane.alignment="BOTTOM_CENTER">
+         <StackPane.margin><Insets bottom="22.0" /></StackPane.margin>
+      </Label>
+   </StackPane>
+
+</HBox>

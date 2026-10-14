@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/account/AccountFormView.fxml
+     One form for both "Add team account" and "Edit account".
+     Content only: the sidebar and top bar come from AdminView.fxml.
+     Scaled up with the "adm-lg" modifier (see adm-lg-additions.css). -->
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.account.AccountFormController">
+   <VBox spacing="24.0" styleClass="adm-page, adm-lg">
+      <padding>
+         <Insets top="32.0" right="40.0" bottom="32.0" left="40.0" />
+      </padding>
+
+      <!-- Header -->
+      <HBox alignment="CENTER_LEFT">
+         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <Label fx:id="titleLabel" styleClass="adm-page-title" text="Add team account" />
+            <Label fx:id="subtitleLabel" styleClass="adm-page-sub" text="Set up a clear identity and role for your team member." />
+         </VBox>
+         <Button onAction="#handleBack" styleClass="adm-primary-btn" text="←   Back to accounts" />
+      </HBox>
+
+      <!-- fillHeight + vgrow: both cards stretch to the bottom of the window -->
+      <HBox alignment="TOP_LEFT" fillHeight="true" spacing="24.0" VBox.vgrow="ALWAYS">
+
+         <!-- ================= FORM CARD ================= -->
+         <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="20.0">
+            <Label styleClass="adm-card-title" text="Account details" />
+            <Label styleClass="adm-form-note" text="Fields marked * are required." />
+
+            <GridPane hgap="28.0" vgap="20.0">
+               <columnConstraints>
+                  <ColumnConstraints percentWidth="50.0" />
+                  <ColumnConstraints percentWidth="50.0" />
+               </columnConstraints>
+
+               <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                  <Label styleClass="adm-form-label" text="Full name *" />
+                  <TextField fx:id="fullNameField" promptText="Enter full name" styleClass="adm-field" />
+               </VBox>
+               <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                  <Label styleClass="adm-form-label" text="Username *" />
+                  <TextField fx:id="usernameField" promptText="e.g. mika.santos" styleClass="adm-field" />
+               </VBox>
+
+               <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                  <Label styleClass="adm-form-label" text="Role *" />
+                  <ComboBox fx:id="roleCombo" maxWidth="Infinity" styleClass="adm-combo" />
+               </VBox>
+               <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                  <Label styleClass="adm-form-label" text="Account status *" />
+                  <ComboBox fx:id="statusCombo" maxWidth="Infinity" styleClass="adm-combo" />
+               </VBox>
+            </GridPane>
+
+            <Label fx:id="lockNoteLabel" styleClass="adm-form-note" text="" />
+
+            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
+
+            <Label fx:id="passwordSectionLabel" styleClass="adm-form-label" text="Account password" />
+
+            <GridPane hgap="28.0" vgap="20.0">
+               <columnConstraints>
+                  <ColumnConstraints percentWidth="50.0" />
+                  <ColumnConstraints percentWidth="50.0" />
+               </columnConstraints>
+
+               <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                  <Label fx:id="passwordLabel" styleClass="adm-form-label" text="Password *" />
+                  <StackPane>
+                     <PasswordField fx:id="passwordField" promptText="Enter a password" styleClass="adm-field, adm-field-pw" />
+                     <TextField fx:id="passwordVisibleField" managed="false" promptText="Enter a password" styleClass="adm-field, adm-field-pw" visible="false" />
+                     <Button fx:id="togglePasswordBtn" focusTraversable="false" styleClass="adm-eye-btn" text="👁" StackPane.alignment="CENTER_RIGHT">
+                        <StackPane.margin><Insets right="10.0" /></StackPane.margin>
+                     </Button>
+                  </StackPane>
+               </VBox>
+
+               <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                  <Label fx:id="confirmLabel" styleClass="adm-form-label" text="Confirm password *" />
+                  <StackPane>
+                     <PasswordField fx:id="confirmField" promptText="Re-enter password" styleClass="adm-field, adm-field-pw" />
+                     <TextField fx:id="confirmVisibleField" managed="false" promptText="Re-enter password" styleClass="adm-field, adm-field-pw" visible="false" />
+                     <Button fx:id="toggleConfirmBtn" focusTraversable="false" styleClass="adm-eye-btn" text="👁" StackPane.alignment="CENTER_RIGHT">
+                        <StackPane.margin><Insets right="10.0" /></StackPane.margin>
+                     </Button>
+                  </StackPane>
+               </VBox>
+            </GridPane>
+
+            <Label fx:id="hintLabel" styleClass="adm-form-note" text="Use at least 8 characters. Confirm the details with your team member." />
+            <Label fx:id="errorLabel" styleClass="adm-form-error" text="" wrapText="true" />
+
+            <!-- Pushes the buttons to the bottom of the card -->
+            <Region VBox.vgrow="ALWAYS" />
+
+            <HBox alignment="CENTER_RIGHT" spacing="14.0">
+               <Button fx:id="cancelBtn" onAction="#handleCancel" styleClass="adm-page-btn" text="Cancel" />
+               <Button fx:id="saveBtn" onAction="#handleSave" styleClass="adm-primary-btn" text="✓   Save account" />
+            </HBox>
+         </VBox>
+
+         <!-- ================= WORKSPACE ROLES ================= -->
+         <VBox styleClass="adm-card" prefWidth="380.0" minWidth="340.0" maxWidth="380.0" spacing="22.0">
+            <Label styleClass="adm-card-title" text="Workspace roles" />
+            <VBox spacing="4.0">
+               <Label styleClass="adm-role-name" text="Cashier" />
+               <Label styleClass="adm-role-desc" text="Orders, cash payments and shift history." wrapText="true" />
+            </VBox>
+            <VBox spacing="4.0">
+               <Label styleClass="adm-role-name" text="Manager" />
+               <Label styleClass="adm-role-desc" text="Sales monitoring and inventory oversight." wrapText="true" />
+            </VBox>
+            <VBox spacing="4.0">
+               <Label styleClass="adm-role-name" text="Admin" />
+               <Label styleClass="adm-role-desc" text="Café records and team account management." wrapText="true" />
+            </VBox>
+         </VBox>
+      </HBox>
+   </VBox>
+</ScrollPane>

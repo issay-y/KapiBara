@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/home/HomeView.fxml
+     Content only: the sidebar and top bar come from AdminView.fxml. -->
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.home.HomeController">
+   <VBox spacing="16.0" styleClass="adm-page">
+      <padding>
+         <Insets top="24.0" right="28.0" bottom="24.0" left="28.0" />
+      </padding>
+
+      <!-- Header -->
+      <HBox alignment="CENTER_LEFT">
+         <VBox spacing="3.0" HBox.hgrow="ALWAYS">
+            <Label styleClass="adm-page-title" text="Café administration" />
+            <Label fx:id="greetingLabel" styleClass="adm-page-sub" text="Your team, records and stock in one view." />
+         </VBox>
+         <Label styleClass="adm-status-pill" text="Caloocan • Open" />
+      </HBox>
+
+      <!-- KPI row -->
+      <HBox spacing="14.0">
+         <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
+            <Label styleClass="adm-kpi-label" text="Today's Sales" />
+            <Label fx:id="todaySalesValue" styleClass="adm-kpi-value" text="₱18,480" />
+            <Label fx:id="todaySalesSub" styleClass="adm-kpi-sub" text="48 completed cash transactions" />
+         </VBox>
+         <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
+            <Label styleClass="adm-kpi-label" text="Monthly Sales" />
+            <Label fx:id="monthSalesValue" styleClass="adm-kpi-value" text="₱221,760" />
+            <Label fx:id="monthSalesSub" styleClass="adm-kpi-sub" text="October to date · 576 orders" />
+         </VBox>
+         <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
+            <Label styleClass="adm-kpi-label" text="Transactions today" />
+            <Label fx:id="txValue" styleClass="adm-kpi-value" text="48" />
+            <Label fx:id="txSub" styleClass="adm-kpi-sub" text="₱385 average transaction" />
+         </VBox>
+         <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
+            <Label styleClass="adm-kpi-label" text="Inventory health" />
+            <Label fx:id="inventoryValue" styleClass="adm-kpi-value" text="18 / 24" />
+            <Label fx:id="inventorySub" styleClass="adm-kpi-sub" text="4 low stock · 2 out of stock" />
+         </VBox>
+      </HBox>
+
+      <!-- Sales rhythm + best sellers -->
+      <HBox spacing="14.0" VBox.vgrow="ALWAYS" prefHeight="290.0" minHeight="250.0">
+         <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="2.0">
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-card-title" text="Today's sales rhythm" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Button onAction="#handleOpenSales" styleClass="adm-link" text="Sales overview →" />
+            </HBox>
+            <Label styleClass="adm-chart-note" text="PHP · Scale 0 – 7,000" />
+            <BarChart fx:id="rhythmChart" legendVisible="false" animated="false" categoryGap="16.0" barGap="0.0"
+                      horizontalGridLinesVisible="false" verticalGridLinesVisible="false"
+                      horizontalZeroLineVisible="false" verticalZeroLineVisible="false"
+                      alternativeColumnFillVisible="false" alternativeRowFillVisible="false" VBox.vgrow="ALWAYS">
+               <xAxis>
+                  <CategoryAxis side="BOTTOM" tickMarkVisible="false" />
+               </xAxis>
+               <yAxis>
+                  <NumberAxis side="LEFT" tickLabelsVisible="false" tickMarkVisible="false" minorTickVisible="false" />
+               </yAxis>
+            </BarChart>
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="adm-card-foot" text="Completed today" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="rhythmTotal" styleClass="adm-foot-total" text="₱18,480.00" />
+            </HBox>
+         </VBox>
+
+         <VBox styleClass="adm-card" prefWidth="360.0" minWidth="300.0" maxWidth="360.0" spacing="12.0">
+            <Label styleClass="adm-card-title" text="Best sellers today" />
+            <VBox fx:id="bestSellersBox" spacing="12.0" />
+         </VBox>
+      </HBox>
+
+      <!-- Recent transactions + team & stock attention -->
+      <HBox spacing="14.0" VBox.vgrow="ALWAYS" prefHeight="250.0" minHeight="240.0">
+         <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="12.0">
+            <Label styleClass="adm-card-title" text="Recent transactions" />
+            <GridPane fx:id="recentGrid" styleClass="adm-table">
+               <columnConstraints>
+                  <ColumnConstraints percentWidth="34.0" />
+                  <ColumnConstraints percentWidth="26.0" />
+                  <ColumnConstraints percentWidth="20.0" />
+                  <ColumnConstraints percentWidth="20.0" />
+               </columnConstraints>
+            </GridPane>
+            <Region VBox.vgrow="ALWAYS" />
+            <Button onAction="#handleOpenTransactions" styleClass="adm-link" text="View transactions →" />
+         </VBox>
+
+         <VBox styleClass="adm-card" prefWidth="360.0" minWidth="300.0" maxWidth="360.0" spacing="12.0">
+            <Label styleClass="adm-card-title" text="Team &amp; stock attention" />
+            <HBox styleClass="adm-alert" spacing="10.0" alignment="CENTER_LEFT">
+               <Label styleClass="adm-alert-icon" text="⚠" />
+               <VBox spacing="2.0">
+                  <Label fx:id="attentionTitle" styleClass="adm-alert-title" text="6 items need attention" />
+                  <Label fx:id="attentionSub" styleClass="adm-alert-sub" text="2 unavailable • 1 critical • 3 low stock" />
+               </VBox>
+            </HBox>
+            <VBox fx:id="stockRowsBox" spacing="8.0" />
+            <Button onAction="#handleOpenAccounts" maxWidth="Infinity" styleClass="adm-outline-btn" text="👥   Manage team accounts" />
+            <Region VBox.vgrow="ALWAYS" />
+            <Label fx:id="teamFooter" styleClass="adm-card-foot" text="5 active accounts • 1 inactive account" />
+         </VBox>
+      </HBox>
+   </VBox>
+</ScrollPane>

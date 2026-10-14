@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/AdminView.fxml
+     The shell: sidebar + top bar. Pages are loaded into contentHolder by AdminController. -->
+<BorderPane fx:id="root" prefHeight="800.0" prefWidth="1280.0" styleClass="adm-root"
+            stylesheets="@/com/cafe/kapibara/kapibara/css/AdminShell.css"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.AdminController">
+
+   <!-- ================= SIDEBAR ================= -->
+   <left>
+      <VBox styleClass="adm-sidebar" prefWidth="230.0" minWidth="230.0" maxWidth="230.0">
+         <padding>
+            <Insets top="24.0" right="16.0" bottom="16.0" left="16.0" />
+         </padding>
+
+         <VBox alignment="CENTER_LEFT" spacing="2.0">
+            <padding>
+               <Insets left="6.0" />
+            </padding>
+            <ImageView fx:id="sidebarLogo" fitHeight="64.0" preserveRatio="true" smooth="true" />
+            <Label styleClass="adm-side-brand" text="KapiBara" />
+            <Label styleClass="adm-side-tagline" text="COFFEE SHOP • EST. 2024" />
+         </VBox>
+
+         <Region prefHeight="14.0" />
+         <Label styleClass="adm-badge" text="Admin workspace" />
+         <Region prefHeight="20.0" />
+
+         <!-- Main nav -->
+         <VBox spacing="6.0">
+            <Button fx:id="navHome" onAction="#handleNav" styleClass="adm-nav, adm-nav-active" text="▦   Dashboard" maxWidth="Infinity" />
+            <Button fx:id="navTransactions" onAction="#handleNav" styleClass="adm-nav" text="🧾   Transactions" maxWidth="Infinity" />
+            <Button fx:id="navSales" onAction="#handleNav" styleClass="adm-nav" text="📊   Sales" maxWidth="Infinity" />
+            <Button fx:id="navInventory" onAction="#handleNav" styleClass="adm-nav" text="📦   Inventory" maxWidth="Infinity" />
+            <Button fx:id="navAccounts" onAction="#handleNav" styleClass="adm-nav" text="👥   Accounts" maxWidth="Infinity" />
+         </VBox>
+
+         <Region VBox.vgrow="ALWAYS" />
+
+         <!-- Bottom nav -->
+         <VBox spacing="6.0">
+            <Button fx:id="navProfile" onAction="#handleProfile" styleClass="adm-nav" text="👤   Profile" maxWidth="Infinity" />
+            <Button fx:id="navSettings" onAction="#handleSettings" styleClass="adm-nav" text="⚙   Settings" maxWidth="Infinity" />
+            <Button fx:id="navLogout" onAction="#handleLogout" styleClass="adm-nav" text="⇦   Logout" maxWidth="Infinity" />
+         </VBox>
+         <Region prefHeight="14.0" />
+         <Label styleClass="adm-side-version" text="KapiBara v1.0 • Caloocan" />
+      </VBox>
+   </left>
+
+   <!-- ================= TOP BAR ================= -->
+   <top>
+      <HBox alignment="CENTER_LEFT" styleClass="adm-topbar" prefHeight="54.0" minHeight="54.0" spacing="22.0">
+         <padding>
+            <Insets right="28.0" left="28.0" />
+         </padding>
+         <Label fx:id="breadcrumbLabel" styleClass="adm-breadcrumb" text="Caloocan branch / Café administration" />
+         <Region HBox.hgrow="ALWAYS" />
+         <Label fx:id="dateLabel" styleClass="adm-topbar-date" text="Tue, 06 Oct 2026" />
+         <Label styleClass="adm-bell" text="🔔" />
+         <Label fx:id="userLabel" styleClass="adm-topbar-user" text="User  ▾" />
+      </HBox>
+   </top>
+
+   <!-- ================= PAGE CONTENT ================= -->
+   <center>
+      <StackPane fx:id="contentHolder" styleClass="adm-content-holder" />
+   </center>
+</BorderPane>
