@@ -23,7 +23,7 @@ import javafx.stage.Window;
  */
 public final class MessageBox {
 
-    private static final String CSS = "/com/cafe/kapibara/kapibara/css/MessageBox.css";
+    private static final String CSS = "/com/cafe/kapibara/kapibara/css/util/MessageBox.css";
 
     private MessageBox() { }
 

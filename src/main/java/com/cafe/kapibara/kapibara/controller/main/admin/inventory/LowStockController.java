@@ -5,6 +5,7 @@ import com.cafe.kapibara.kapibara.controller.main.admin.AdminPage;
 import com.cafe.kapibara.kapibara.controller.main.admin.AdminShell;
 import com.cafe.kapibara.kapibara.model.inventory.InventoryItem;
 import com.cafe.kapibara.kapibara.model.inventory.StockStatus;
+import com.cafe.kapibara.kapibara.util.TableRowUtil;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,7 +29,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.TreeSet;
 
-/** Everything at or below its minimum, most urgent first. */
 public class LowStockController implements Initializable, AdminShell.Aware {
 
     private static final String ALL_CATEGORIES = "All categories";
@@ -36,6 +36,7 @@ public class LowStockController implements Initializable, AdminShell.Aware {
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
 
     // KPI cards
+    // (criticalValue / criticalSub keep their fx:id but now show the OUT OF STOCK card)
     @FXML private Label needsValue, needsSub;
     @FXML private Label criticalValue, criticalSub;
     @FXML private Label reviewValue, reviewSub;
@@ -144,18 +145,18 @@ public class LowStockController implements Initializable, AdminShell.Aware {
 
     private void loadKpis(List<InventoryItem> all) {
         int out = countStatus(StockStatus.OUT_OF_STOCK);
-        int critical = countStatus(StockStatus.CRITICAL);
-        int low = countStatus(StockStatus.LOW) + critical;
+        int low = countStatus(StockStatus.LOW);
 
         needsValue.setText(attentionItems.size() + (attentionItems.size() == 1 ? " item" : " items"));
         needsSub.setText(low + " low stock + " + out + " out of stock");
 
-        List<String> urgent = new ArrayList<>();
+        // Second card: out of stock items
+        List<String> outNames = new ArrayList<>();
         for (InventoryItem item : attentionItems) {
-            if (item.status().getSeverity() <= StockStatus.CRITICAL.getSeverity()) urgent.add(item.name());
+            if (item.status() == StockStatus.OUT_OF_STOCK) outNames.add(item.name());
         }
-        criticalValue.setText(urgent.size() + (urgent.size() == 1 ? " item" : " items"));
-        criticalSub.setText(join(urgent, " & "));
+        criticalValue.setText(outNames.size() + (outNames.size() == 1 ? " item" : " items"));
+        criticalSub.setText(outNames.isEmpty() ? "Nothing is unavailable" : join(outNames, " & "));
 
         Optional<LocalDateTime> latest = all.stream().map(InventoryItem::lastUpdated)
                 .max(Comparator.naturalOrder());
@@ -174,13 +175,10 @@ public class LowStockController implements Initializable, AdminShell.Aware {
 
     private void loadBanner() {
         List<String> outNames = new ArrayList<>();
-        List<String> criticalDetails = new ArrayList<>();
         List<String> lowNames = new ArrayList<>();
         for (InventoryItem item : attentionItems) {
             switch (item.status()) {
                 case OUT_OF_STOCK -> outNames.add(item.name());
-                case CRITICAL -> criticalDetails.add(item.name() + " (" + item.quantityText()
-                        + " of " + item.minimumText() + " minimum)");
                 case LOW -> lowNames.add(item.name());
                 default -> { }
             }
@@ -189,15 +187,12 @@ public class LowStockController implements Initializable, AdminShell.Aware {
         alertBanner.setVisible(true);
         alertBanner.setManaged(true);
 
-        String critical = criticalDetails.isEmpty() ? "" : "Critically low: " + join(criticalDetails, " and ") + ".";
+        String running = lowNames.isEmpty() ? "" : " Running low: " + join(lowNames, " and ") + ".";
 
         if (!outNames.isEmpty()) {
             alertTitle.setText("Restock unavailable items first");
             alertSub.setText((join(outNames, " and ") + (outNames.size() == 1 ? " is" : " are")
-                    + " unavailable. " + critical).trim());
-        } else if (!criticalDetails.isEmpty()) {
-            alertTitle.setText("Restock critical items first");
-            alertSub.setText(critical);
+                    + " unavailable." + running).trim());
         } else if (!lowNames.isEmpty()) {
             alertTitle.setText("Top up low items soon");
             alertSub.setText("Running low: " + join(lowNames, " and ") + ".");
@@ -251,12 +246,14 @@ public class LowStockController implements Initializable, AdminShell.Aware {
             empty.getStyleClass().add("adm-td");
             empty.setMaxWidth(Double.MAX_VALUE);
             lowStockGrid.add(empty, 0, 1, headers.length, 1);
+            TableRowUtil.polish(lowStockGrid, headers.length);
             return;
         }
 
         for (int i = 0; i < rows.size(); i++) {
             addRow(i + 1, rows.get(i));
         }
+        TableRowUtil.polish(lowStockGrid, headers.length);   // stretch cells + straight row lines
     }
 
     private void addRow(int row, InventoryItem item) {
@@ -297,7 +294,6 @@ public class LowStockController implements Initializable, AdminShell.Aware {
         if (shell != null) shell.navigate(AdminPage.INVENTORY);
     }
 
-    /** Opens the edit form, where the quantity can be changed. */
     private void handleUpdateQuantity(InventoryItem item) {
         if (shell != null) shell.navigate(AdminPage.INVENTORY_EDIT, item.id());
     }

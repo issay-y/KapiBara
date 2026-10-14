@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <StackPane fx:id="shell" styleClass="alert-shell"
-           stylesheets="@/com/cafe/kapibara/kapibara/css/Alert.css"
+           stylesheets="@/com/cafe/kapibara/kapibara/css/util/Alert.css"
            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.cafe.kapibara.kapibara.controller.util.AlertController">
 

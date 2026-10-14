@@ -18,8 +18,8 @@
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cafe.kapibara.kapibara.controller.main.cashier.CashierController">
    <stylesheets>
-      <URL value="@/com/cafe/kapibara/kapibara/css/AdminShell.css" />
-      <URL value="@/com/cafe/kapibara/kapibara/css/Cashier.css" />
+      <URL value="@/com/cafe/kapibara/kapibara/css/main/admin/AdminShell.css" />
+      <URL value="@/com/cafe/kapibara/kapibara/css/main/cashier/Cashier.css" />
    </stylesheets>
 
    <!-- ================= SIDEBAR ================= -->

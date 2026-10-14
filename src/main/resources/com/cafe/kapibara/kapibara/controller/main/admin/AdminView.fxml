@@ -13,7 +13,7 @@
 <!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/AdminView.fxml
      The shell: sidebar + top bar. Pages are loaded into contentHolder by AdminController. -->
 <BorderPane fx:id="root" prefHeight="800.0" prefWidth="1280.0" styleClass="adm-root"
-            stylesheets="@/com/cafe/kapibara/kapibara/css/AdminShell.css"
+            stylesheets="@/com/cafe/kapibara/kapibara/css/main/admin/AdminShell.css"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.AdminController">
 

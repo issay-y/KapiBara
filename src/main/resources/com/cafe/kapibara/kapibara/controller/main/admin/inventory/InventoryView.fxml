@@ -48,7 +48,7 @@
          <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
             <Label styleClass="adm-kpi-label" text="Low Stock" />
             <Label fx:id="lowValue" styleClass="adm-kpi-value" text="4" />
-            <Label fx:id="lowSub" styleClass="adm-kpi-sub" text="Includes 1 critical item" />
+            <Label fx:id="lowSub" styleClass="adm-kpi-sub" text="At or below minimum stock" />
          </VBox>
          <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
             <Label styleClass="adm-kpi-label" text="Out of Stock" />
@@ -82,6 +82,7 @@
             <Label styleClass="adm-filter-label" text="Stock status" />
             <ComboBox fx:id="statusCombo" minHeight="52.0" prefHeight="52.0" prefWidth="240.0" styleClass="adm-combo" />
          </VBox>
+         <Button minHeight="52.0" onAction="#handleManageCategories" prefHeight="52.0" styleClass="adm-outline-btn" text="Manage categories" />
          <Button minHeight="52.0" onAction="#handleViewLowStock" prefHeight="52.0" styleClass="adm-outline-btn" text="⚠   View Low Stock" />
       </HBox>
 

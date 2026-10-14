@@ -12,7 +12,7 @@ import java.net.URL;
 /** Styled message boxes (confirm / info / warning) that match the admin screens. */
 public final class DialogUtil {
 
-    private static final String CSS = "/com/cafe/kapibara/kapibara/css/AdminShell.css";
+    private static final String CSS = "/com/cafe/kapibara/kapibara/css/main/admin/AdminShell.css";
 
     private DialogUtil() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");

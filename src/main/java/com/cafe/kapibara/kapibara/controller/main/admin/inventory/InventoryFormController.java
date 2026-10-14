@@ -29,11 +29,10 @@ import java.util.TreeSet;
 /**
  * One form for both "Add inventory item" and "Edit inventory item".
  * Edit mode is used when the page was opened with an item id as its payload.
+ * Categories come from the inventory_categories table and can be managed from here.
  */
 public class InventoryFormController implements Initializable, AdminShell.Aware {
 
-    private static final List<String> DEFAULT_CATEGORIES =
-            List.of("Coffee", "Dairy", "Non-Coffee", "Supplies", "Add-ons", "Pastry");
     private static final List<String> DEFAULT_UNITS =
             List.of("kg", "g", "liters", "ml", "pcs", "packs", "cans", "boxes", "bottles");
     private static final DateTimeFormatter UPDATED = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
@@ -160,8 +159,8 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
     private void fill(List<String> categoriesInDb, InventoryForm form) {
         loading = true;
 
+        // Categories come from the inventory_categories table only.
         TreeSet<String> categories = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        categories.addAll(DEFAULT_CATEGORIES);
         categories.addAll(categoriesInDb);
         if (form != null) categories.add(form.category());
         categoryCombo.getItems().setAll(categories);
@@ -213,6 +212,47 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    // =====================================================================
+    //  CATEGORIES (add / delete live in the Manage categories window)
+    // =====================================================================
+
+    @FXML
+    private void handleManageCategories(ActionEvent event) {
+        CategoryManagerDialog.show(saveBtn, this::reloadCategories);
+    }
+
+    /** Reloads the category list after the Manage categories window changed something. */
+    private void reloadCategories() {
+        Thread worker = new Thread(() -> {
+            List<String> categories = List.of();
+            Throwable failure = null;
+            try {
+                categories = inventoryDAO.findCategories();
+            } catch (Throwable t) {
+                failure = t;
+            }
+
+            final List<String> finalCategories = categories;
+            final Throwable finalFailure = failure;
+            Platform.runLater(() -> {
+                if (finalFailure != null) {
+                    finalFailure.printStackTrace();
+                    AlertsUtil.error(saveBtn, "Could not load categories",
+                            "Please make sure the database is running and try again.");
+                    return;
+                }
+                String selected = categoryCombo.getValue();
+                boolean wasLoading = loading;
+                loading = true;   // reloading the list is not a change made by the person
+                categoryCombo.getItems().setAll(finalCategories);
+                categoryCombo.setValue(selected != null && finalCategories.contains(selected) ? selected : null);
+                loading = wasLoading;
+            });
+        }, "reload-categories");
+        worker.setDaemon(true);
+        worker.start();
     }
 
     // =====================================================================
@@ -317,7 +357,11 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
 
         if (name.isEmpty()) return "Please enter the item name.";
         if (name.length() > 100) return "The item name can be at most 100 characters.";
-        if (categoryCombo.getValue() == null) return "Please choose a category.";
+        if (categoryCombo.getValue() == null) {
+            return categoryCombo.getItems().isEmpty()
+                    ? "There are no categories yet. Use \"Manage categories\" to add one."
+                    : "Please choose a category.";
+        }
         if (parse(quantityField.getText()) == null) return "Please enter the quantity (0 or more).";
         if (unitCombo.getValue() == null) return "Please choose a unit.";
         if (parse(minimumField.getText()) == null) return "Please enter the minimum stock (0 or more).";

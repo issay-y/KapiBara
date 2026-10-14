@@ -6,6 +6,7 @@ import com.cafe.kapibara.kapibara.controller.main.admin.AdminShell;
 import com.cafe.kapibara.kapibara.model.inventory.InventoryItem;
 import com.cafe.kapibara.kapibara.model.inventory.StockStatus;
 import com.cafe.kapibara.kapibara.util.AlertsUtil;
+import com.cafe.kapibara.kapibara.util.TableRowUtil;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -58,6 +59,7 @@ public class InventoryController implements Initializable, AdminShell.Aware {
     private final InventoryDAO inventoryDAO = new InventoryDAO();
     private final List<InventoryItem> allItems = new ArrayList<>();
     private List<InventoryItem> filtered = List.of();
+    private List<String> categoryNames = List.of();   // from the inventory_categories table
     private int page = 0;
     private AdminShell shell;
 
@@ -91,14 +93,17 @@ public class InventoryController implements Initializable, AdminShell.Aware {
     private void loadItems() {
         Thread worker = new Thread(() -> {
             List<InventoryItem> items = null;
+            List<String> categories = List.of();
             Throwable failure = null;
             try {
                 items = inventoryDAO.findAll();
+                categories = inventoryDAO.findCategories();
             } catch (Throwable t) {
                 failure = t;
             }
 
             final List<InventoryItem> finalItems = items;
+            final List<String> finalCategories = categories;
             final Throwable finalFailure = failure;
 
             Platform.runLater(() -> {
@@ -109,6 +114,7 @@ public class InventoryController implements Initializable, AdminShell.Aware {
                 }
                 allItems.clear();
                 allItems.addAll(finalItems);
+                categoryNames = finalCategories;
                 refreshCategories();
                 loadKpis();
                 applyFilters();
@@ -128,16 +134,13 @@ public class InventoryController implements Initializable, AdminShell.Aware {
         paginationBox.getChildren().clear();
     }
 
-    /** Rebuilds the category filter from the items, keeping the current choice if it still exists. */
+    /** Rebuilds the category filter from the categories table, keeping the current choice if it still exists. */
     private void refreshCategories() {
         String selected = categoryCombo.getValue();
 
-        TreeSet<String> categories = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        for (InventoryItem item : allItems) categories.add(item.category());
-
         List<String> options = new ArrayList<>();
         options.add(ALL_CATEGORIES);
-        options.addAll(categories);
+        options.addAll(categoryNames);
         categoryCombo.getItems().setAll(options);
 
         categoryCombo.setValue(selected != null && options.contains(selected) ? selected : ALL_CATEGORIES);
@@ -150,8 +153,7 @@ public class InventoryController implements Initializable, AdminShell.Aware {
     private void loadKpis() {
         int total = allItems.size();
         int inStock = count(StockStatus.IN_STOCK);
-        int critical = count(StockStatus.CRITICAL);
-        int low = count(StockStatus.LOW) + critical;   // "low stock" includes critical items
+        int low = count(StockStatus.LOW);
         int out = count(StockStatus.OUT_OF_STOCK);
 
         totalValue.setText(String.valueOf(total));
@@ -161,7 +163,7 @@ public class InventoryController implements Initializable, AdminShell.Aware {
         inStockSub.setText("Above minimum stock");
 
         lowValue.setText(String.valueOf(low));
-        lowSub.setText("Includes " + critical + " critical item" + (critical == 1 ? "" : "s"));
+        lowSub.setText("At or below minimum stock");
 
         outValue.setText(String.valueOf(out));
         outSub.setText("Replenishment required");
@@ -179,8 +181,7 @@ public class InventoryController implements Initializable, AdminShell.Aware {
 
         List<String> names = new ArrayList<>();
         for (InventoryItem item : allItems) {
-            StockStatus s = item.status();
-            if (s == StockStatus.LOW || s == StockStatus.CRITICAL) names.add(item.name().toLowerCase(Locale.ROOT));
+            if (item.status() == StockStatus.LOW) names.add(item.name().toLowerCase(Locale.ROOT));
         }
         if (names.isEmpty()) {
             for (InventoryItem item : allItems) {
@@ -240,7 +241,9 @@ public class InventoryController implements Initializable, AdminShell.Aware {
         int to = Math.min(from + PAGE_SIZE, filtered.size());
 
         if (filtered.isEmpty()) {
-            Label empty = new Label("No inventory items match your filters.");
+            Label empty = new Label(allItems.isEmpty()
+                    ? "No inventory items yet. Click \"Add item\" to get started."
+                    : "No inventory items match your filters.");
             empty.getStyleClass().add("adm-td");
             empty.setMaxWidth(Double.MAX_VALUE);
             inventoryGrid.add(empty, 0, 1, headers.length, 1);
@@ -252,6 +255,7 @@ public class InventoryController implements Initializable, AdminShell.Aware {
             showingLabel.setText("Showing " + (from + 1) + "–" + to + " of " + filtered.size() + " inventory items");
         }
 
+        TableRowUtil.polish(inventoryGrid, headers.length);   // stretch cells + straight row lines
         buildPagination();
     }
 
@@ -352,6 +356,11 @@ public class InventoryController implements Initializable, AdminShell.Aware {
     @FXML
     private void handleAddItem(ActionEvent event) {
         if (shell != null) shell.navigate(AdminPage.INVENTORY_ADD);
+    }
+
+    @FXML
+    private void handleManageCategories(ActionEvent event) {
+        CategoryManagerDialog.show(inventoryGrid, this::loadItems);
     }
 
     @FXML

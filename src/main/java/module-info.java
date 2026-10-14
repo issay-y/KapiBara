@@ -25,7 +25,6 @@ module com.cafe.kapibara.kapibara {
     opens com.cafe.kapibara.kapibara.controller.util to javafx.fxml;
 
     opens com.cafe.kapibara.kapibara.images;
-    opens com.cafe.kapibara.kapibara.css;
 
     // admin shell + pages
     exports com.cafe.kapibara.kapibara.controller.main.admin;
@@ -44,6 +43,12 @@ module com.cafe.kapibara.kapibara {
     opens com.cafe.kapibara.kapibara.controller.main.cashier.receipt to javafx.fxml;
     opens com.cafe.kapibara.kapibara.controller.main.cashier.checkout to javafx.fxml;
     opens com.cafe.kapibara.kapibara.controller.main.cashier.transactions to javafx.fxml;
+
+
+    opens com.cafe.kapibara.kapibara.css.id;
+    opens com.cafe.kapibara.kapibara.css.util;
+    opens com.cafe.kapibara.kapibara.css.main.admin;
+    opens com.cafe.kapibara.kapibara.css.main.cashier;
 
     opens com.cafe.kapibara.kapibara.controller.main.cashier to javafx.fxml;
     exports com.cafe.kapibara.kapibara.util;

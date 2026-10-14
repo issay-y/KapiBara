@@ -47,7 +47,11 @@
             </VBox>
 
             <VBox spacing="8.0">
-               <Label styleClass="adm-form-label" text="Category *" />
+               <HBox alignment="CENTER_LEFT">
+                  <Label styleClass="adm-form-label" text="Category *" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Button onAction="#handleManageCategories" styleClass="adm-link" text="Manage categories" />
+               </HBox>
                <ComboBox fx:id="categoryCombo" maxWidth="Infinity" promptText="Select a category" styleClass="adm-combo" />
             </VBox>
 
