@@ -22,7 +22,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -62,6 +62,7 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
     @FXML private VBox photoPlaceholder;
     @FXML private Button photoBtn, removePhotoBtn;
 
+    private static final double PHOTO_SIZE = 200;   // must match the StackPane size in the FXML
     private final InventoryDAO inventoryDAO = new InventoryDAO();
     private AdminShell shell;
 
@@ -103,9 +104,10 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         minimumField.textProperty().addListener((obs, old, now) -> updateStatusPreview());
         updateStatusPreview();
 
-        // The photo preview follows the card's size.
-        photoBox.widthProperty().addListener((obs, old, now) -> layoutPhoto());
-        photoBox.heightProperty().addListener((obs, old, now) -> layoutPhoto());
+        // Fixed-size circular photo. No listeners, so it can never feed back into layout.
+        photoBox.setClip(new Circle(PHOTO_SIZE / 2, PHOTO_SIZE / 2, PHOTO_SIZE / 2));
+        photoView.setFitWidth(PHOTO_SIZE);
+        photoView.setFitHeight(PHOTO_SIZE);
         showPhoto(null);
 
         clearError();
@@ -313,26 +315,16 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         layoutPhoto();
     }
 
-    /** Rounds the corners and crops the picture so it fills the box (like a cover photo). */
+    /** Crops the picture to a centered square so it fills the circle (like a cover photo). */
     private void layoutPhoto() {
-        double w = photoBox.getWidth();
-        double h = photoBox.getHeight();
-        if (w <= 0 || h <= 0) return;
-
-        Rectangle clip = new Rectangle(w, h);
-        clip.setArcWidth(28);
-        clip.setArcHeight(28);
-        photoBox.setClip(clip);
-
-        if (photoImage == null || photoImage.getWidth() <= 0) return;
+        if (photoImage == null || photoImage.getWidth() <= 0) {
+            photoView.setViewport(null);
+            return;
+        }
         double iw = photoImage.getWidth();
         double ih = photoImage.getHeight();
-        double scale = Math.max(w / iw, h / ih);
-        double vw = w / scale;
-        double vh = h / scale;
-        photoView.setViewport(new Rectangle2D((iw - vw) / 2, (ih - vh) / 2, vw, vh));
-        photoView.setFitWidth(w);
-        photoView.setFitHeight(h);
+        double side = Math.min(iw, ih);
+        photoView.setViewport(new Rectangle2D((iw - side) / 2, (ih - side) / 2, side, side));
     }
 
     // =====================================================================

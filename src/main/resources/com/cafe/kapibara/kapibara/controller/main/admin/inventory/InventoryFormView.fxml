@@ -14,10 +14,6 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
 
-<!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/inventory/InventoryFormView.fxml
-     One form for both "Add inventory item" and "Edit inventory item".
-     Content only: the sidebar and top bar come from AdminView.fxml.
-     Scaled up with the "adm-lg" modifier (see AdminShell.css). -->
 <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.inventory.InventoryFormController">
@@ -35,7 +31,6 @@
          <Button onAction="#handleBack" styleClass="adm-primary-btn" text="←   Back to inventory" />
       </HBox>
 
-      <!-- fillHeight + vgrow: both cards stretch to the bottom of the window -->
       <HBox alignment="TOP_LEFT" fillHeight="true" spacing="24.0" VBox.vgrow="ALWAYS">
 
          <!-- ================= FORM CARD ================= -->
@@ -102,27 +97,61 @@
             </HBox>
          </VBox>
 
-         <!-- ================= STOCK GUIDANCE ================= -->
-         <VBox styleClass="adm-card" prefWidth="380.0" minWidth="340.0" maxWidth="380.0" spacing="20.0">
-            <Label styleClass="adm-card-title" text="Stock guidance" />
-            <Label styleClass="adm-guide-icon" text="📦" />
-            <Label styleClass="adm-role-desc" text="Use the same unit for quantity and minimum stock." wrapText="true" />
+          <!-- ================= RIGHT COLUMN: PHOTO (top) + STOCK GUIDANCE ================= -->
+          <VBox prefWidth="380.0" minWidth="340.0" maxWidth="380.0" spacing="24.0">
 
-            <HBox alignment="CENTER_LEFT">
-               <Label styleClass="adm-stock-name" text="In stock" />
-               <Region HBox.hgrow="ALWAYS" />
-               <Label styleClass="adm-stock-value" text="Above minimum" />
-            </HBox>
-            <HBox alignment="CENTER_LEFT">
-               <Label styleClass="adm-stock-name" text="Low stock" />
-               <Region HBox.hgrow="ALWAYS" />
-               <Label styleClass="adm-stock-value" text="At / below minimum" />
-            </HBox>
-            <HBox alignment="CENTER_LEFT">
-               <Label styleClass="adm-stock-name" text="Out of stock" />
-               <Region HBox.hgrow="ALWAYS" />
-               <Label styleClass="adm-stock-value" text="Quantity is zero" />
-            </HBox>
+              <!-- Item photo (circle) -->
+              <VBox styleClass="adm-card" spacing="16.0">
+                  <Label styleClass="adm-card-title" text="Item photo" />
+
+                  <HBox alignment="CENTER">
+                      <StackPane fx:id="photoBox" styleClass="adm-photo-box"
+                                 minWidth="200.0" prefWidth="200.0" maxWidth="200.0"
+                                 minHeight="200.0" prefHeight="200.0" maxHeight="200.0">
+                          <ImageView fx:id="photoView" preserveRatio="false" smooth="true" />
+                          <VBox fx:id="photoPlaceholder" alignment="CENTER" spacing="6.0" mouseTransparent="true">
+                              <Label styleClass="adm-photo-icon" text="📷" />
+                              <Label styleClass="adm-photo-title" text="No photo yet" />
+                              <Label styleClass="adm-form-note" text="PNG or JPG, up to 5 MB" />
+                          </VBox>
+                      </StackPane>
+                  </HBox>
+
+                  <HBox alignment="CENTER_LEFT" spacing="14.0">
+                      <Button fx:id="photoBtn" onAction="#handleChoosePhoto" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                              styleClass="adm-outline-btn" text="Choose photo" />
+                      <Button fx:id="removePhotoBtn" onAction="#handleRemovePhoto" styleClass="adm-link" text="Remove" />
+                  </HBox>
+                  <Label styleClass="adm-form-note" wrapText="true"
+                         text="A clear, well-lit photo helps the team recognise the item at a glance." />
+              </VBox>
+
+              <!-- Stock guidance -->
+              <VBox styleClass="adm-card" spacing="20.0" VBox.vgrow="ALWAYS">
+                  <Label styleClass="adm-card-title" text="Stock guidance" />
+                  <Label styleClass="adm-guide-icon" text="📦" />
+                  <Label styleClass="adm-role-desc" text="Use the same unit for quantity and minimum stock." wrapText="true" />
+
+                  <HBox alignment="CENTER_LEFT">
+                      <Label styleClass="adm-stock-name" text="In stock" />
+                      <Region HBox.hgrow="ALWAYS" />
+                      <Label styleClass="adm-stock-value" text="Above minimum" />
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT">
+                      <Label styleClass="adm-stock-name" text="Low stock" />
+                      <Region HBox.hgrow="ALWAYS" />
+                      <Label styleClass="adm-stock-value" text="At / below minimum" />
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT">
+                      <Label styleClass="adm-stock-name" text="Out of stock" />
+                      <Region HBox.hgrow="ALWAYS" />
+                      <Label styleClass="adm-stock-value" text="Quantity is zero" />
+                  </HBox>
+              </VBox>
+          </VBox>
+      </HBox>
+   </VBox>
+</ScrollPane>
 
             <!-- ================= RIGHT COLUMN: PHOTO + GUIDANCE ================= -->
             <VBox prefWidth="380.0" minWidth="340.0" maxWidth="380.0" spacing="24.0">
