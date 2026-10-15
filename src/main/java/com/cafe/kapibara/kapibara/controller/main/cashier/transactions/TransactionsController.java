@@ -25,7 +25,6 @@ import java.util.TreeSet;
 
 import static com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore.money;
 
-/** "Transactions": every completed counter order, with search, filters, sorting and pages. */
 public class TransactionsController implements CashierShell.Aware {
 
     private static final int PAGE_SIZE = 7;
@@ -71,6 +70,13 @@ public class TransactionsController implements CashierShell.Aware {
     @Override
     public void attach(CashierShell shell) {
         this.shell = shell;
+
+        try {
+            store.refreshSalesHistory();
+        } catch (java.sql.SQLException e) {
+            System.err.println("Could not load transactions from database: " + e.getMessage());
+        }
+
         render();
     }
 

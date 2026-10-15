@@ -26,10 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-/**
- * The cashier shell: sidebar + top bar. Every cashier page (home, new order, browse menu,
- * profile) is loaded into {@link #contentHolder}.
- */
+
 public class CashierController implements Initializable, CashierShell {
 
     private static final String BRANCH = "Caloocan branch";
@@ -58,12 +55,12 @@ public class CashierController implements Initializable, CashierShell {
         pageByButton.put(navHome, CashierPage.HOME);
         pageByButton.put(navNewOrder, CashierPage.NEW_ORDER);
         pageByButton.put(navProfile, CashierPage.PROFILE);
+        pageByButton.put(navTransactions, CashierPage.TRANSACTIONS);
+
 
         dateLabel.setText(LocalDate.now().format(TOP_DATE));
         loadLogo();
 
-        // Open the home page after the login code has called setCurrentUser(...),
-        // so the page can greet the signed-in cashier by name.
         Platform.runLater(() -> {
             if (currentPage == null) navigate(CashierPage.HOME);
         });
@@ -78,11 +75,18 @@ public class CashierController implements Initializable, CashierShell {
         }
     }
 
-    /** Call this right after login to show the signed-in cashier in the top bar. */
-    public void setCurrentUser(String name, String role) {
+    private int userId;
+
+    public void setCurrentUser(int id, String name, String role) {
+        this.userId = id;
         this.userName = (name == null || name.isBlank()) ? "User" : name;
         this.userRole = (role == null || role.isBlank()) ? "Cashier" : role;
         userLabel.setText(userName + " · " + userRole + "  ▾");
+    }
+
+    @Override
+    public int getCurrentUserId() {
+        return userId;
     }
 
     // =====================================================================
@@ -165,7 +169,12 @@ public class CashierController implements Initializable, CashierShell {
         if (page != null) navigate(page);
     }
 
-    @FXML private void handleTransactions(ActionEvent event) { MessageBox.comingSoon(root, "Transactions"); }
+    @FXML
+    private void handleTransactions(ActionEvent event) {
+        CashierPage page = pageByButton.get(event.getSource());
+        if (page != null) navigate(page);
+    }
+
     @FXML private void handleSettings(ActionEvent event)     { MessageBox.comingSoon(root, "Settings"); }
     @FXML private void handleLogout(ActionEvent event)       { logout(); }
 }

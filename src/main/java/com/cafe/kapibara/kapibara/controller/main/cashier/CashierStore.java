@@ -2,6 +2,7 @@ package com.cafe.kapibara.kapibara.controller.main.cashier;
 
 import com.cafe.kapibara.kapibara.DAO.InventoryDAO;
 import com.cafe.kapibara.kapibara.DAO.InventoryDAO.MenuRow;
+import com.cafe.kapibara.kapibara.DAO.TransactionDAO;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -28,10 +29,6 @@ public final class CashierStore {
     public static final String BRANCH_SHORT = "Caloocan";
     public static final String BRANCH_ADDRESS = "Caloocan City";
 
-    /**
-     * Category names that currently have at least one sellable product. It starts empty and is
-     * refilled in place by {@link #refreshMenu()}, so existing code that reads CATEGORIES keeps working.
-     */
     public static final List<String> CATEGORIES = new ArrayList<>();
 
     public static final BigDecimal DISCOUNT_RATE = new BigDecimal("0.20");
@@ -102,7 +99,6 @@ public final class CashierStore {
         public BigDecimal lineTotal() { return product.price.multiply(BigDecimal.valueOf(qty)); }
     }
 
-    /** One row of a finished sale (a snapshot, so the receipt never changes). */
     public record SaleLine(String name, BigDecimal unitPrice, int qty) {
         public BigDecimal amount() { return unitPrice.multiply(BigDecimal.valueOf(qty)); }
     }
@@ -112,6 +108,8 @@ public final class CashierStore {
                        BigDecimal discount, boolean seniorPwd, BigDecimal total,
                        BigDecimal cashReceived, BigDecimal change) { }
 
+    private String currentOrderId;
+
     // ------------------------------------------------------------------
     // State
     // ------------------------------------------------------------------
@@ -120,8 +118,6 @@ public final class CashierStore {
     private final List<Product> products = new ArrayList<>();
     private final List<Sale> sales = new ArrayList<>();
     private final Map<Product, Line> cart = new LinkedHashMap<>();
-    private int nextSeq = 1;
-    private LocalDate seqDay = LocalDate.now();
     private LocalDateTime orderStarted;
     private boolean seniorPwd;
     private Sale lastSale;
@@ -135,11 +131,8 @@ public final class CashierStore {
     // Menu (read from the inventory tables)
     // ------------------------------------------------------------------
 
-    /**
-     * Reloads the menu from the database. Call it whenever a page that shows products opens.
-     * Products already in the cart keep their identity, so the order survives a refresh;
-     * lines whose item was deleted are dropped and quantities are trimmed to the new stock.
-     */
+
+
     public void refreshMenu() throws SQLException {
         List<MenuRow> rows = dao.findMenuRows();
 
@@ -194,15 +187,15 @@ public final class CashierStore {
     // Current order
     // ------------------------------------------------------------------
 
+
     public String currentOrderNumber() {
-        if (cart.isEmpty()) {
-            LocalDate today = LocalDate.now();
-            if (!today.equals(seqDay)) {
-                seqDay = today;
-                nextSeq = 1;
-            }
+        if (currentOrderId == null) {
+            String dateStr = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+            String randomHash = java.util.UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+
+            currentOrderId = "KB-" + dateStr + "-" + randomHash;
         }
-        return "KB-" + seqDay.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + String.format("%03d", nextSeq);
+        return currentOrderId;
     }
 
     public LocalDateTime orderTime() {
@@ -228,12 +221,16 @@ public final class CashierStore {
 
     public void remove(Product p) {
         cart.remove(p);
-        if (cart.isEmpty()) seniorPwd = false;
+        if (cart.isEmpty()) {
+            seniorPwd = false;
+            currentOrderId = null;
+        }
     }
 
     public void clear() {
         cart.clear();
         seniorPwd = false;
+        currentOrderId = null;
     }
 
     public List<Line> lines() {
@@ -281,7 +278,9 @@ public final class CashierStore {
         return seniorPwd ? subtotal().subtract(discount()) : gross();
     }
 
-    public Sale checkout(BigDecimal cashReceived, String cashier) {
+    private final TransactionDAO transactionDAO = new TransactionDAO();
+
+    public Sale checkout(BigDecimal cashReceived, String cashier, int userId) {
         if (cart.isEmpty()) throw new IllegalStateException("The order is empty.");
         BigDecimal total = total();
         if (cashReceived == null || cashReceived.compareTo(total) < 0) {
@@ -314,15 +313,23 @@ public final class CashierStore {
 
         cart.values().forEach(l -> l.product.stock -= l.qty);
 
+
         Sale sale = new Sale(number, LocalDateTime.now(), cashier, items, lines, subtotal, vat,
                 discount, pwd, total, cashReceived, cashReceived.subtract(total));
+
+        try {
+            transactionDAO.insertTransaction(sale, userId);
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not save the transaction: " + e.getMessage(), e);
+        }
+
         sales.add(sale);
         lastSale = sale;
         viewedSale = sale;
         receiptReturn = null;
         cart.clear();
         seniorPwd = false;
-        nextSeq++;
+        currentOrderId = null;
         return sale;
     }
 
@@ -415,5 +422,10 @@ public final class CashierStore {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    public void refreshSalesHistory() throws java.sql.SQLException {
+        sales.clear();
+        sales.addAll(transactionDAO.findAllTransactions());
     }
 }

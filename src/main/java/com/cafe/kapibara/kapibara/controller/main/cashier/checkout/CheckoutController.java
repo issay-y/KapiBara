@@ -214,7 +214,6 @@ public class CheckoutController implements CashierShell.Aware {
     // Buttons
     // ------------------------------------------------------------------
 
-    /** The PWD / Senior Citizen check box. Asking first stops an accidental tick. */
     @FXML
     private void handleDiscount() {
         if (discountCheck.isSelected()) {
@@ -272,7 +271,7 @@ public class CheckoutController implements CashierShell.Aware {
         }
 
         try {
-            store.checkout(cash, shell.getCurrentUserName());
+            store.checkout(cash, shell.getCurrentUserName(), shell.getCurrentUserId());
             shell.navigate(CashierPage.RECEIPT);
         } catch (IllegalStateException ex) {
             MessageBox.info(confirmBtn, "Couldn't complete the order", ex.getMessage());

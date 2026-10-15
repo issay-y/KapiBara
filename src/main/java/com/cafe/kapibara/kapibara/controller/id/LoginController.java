@@ -2,6 +2,7 @@ package com.cafe.kapibara.kapibara.controller.id;
 
 import com.cafe.kapibara.kapibara.DAO.UserDAO;
 import com.cafe.kapibara.kapibara.controller.main.admin.AdminController;
+import com.cafe.kapibara.kapibara.controller.main.cashier.CashierController;
 import com.cafe.kapibara.kapibara.model.account.AccountRole;
 import com.cafe.kapibara.kapibara.model.account.User;
 import com.cafe.kapibara.kapibara.util.AlertsUtil;
@@ -197,10 +198,15 @@ public class LoginController implements Initializable {
         Stage stage = WindowUtil.stageOf(loginBtn);
 
         if (user.getRole() == AccountRole.CASHIER) {
-            WindowUtil.showCashier(stage);
+            CashierController cashier = WindowUtil.showCashier(stage);
+            if (cashier != null) {
+                cashier.setCurrentUser(user.getUserId(), user.getUsername(), user.getRole().getDisplayName());
+            }
         } else {
             AdminController admin = WindowUtil.showAdmin(stage);
-            if (admin != null) admin.setCurrentUser(user.getUsername(), user.getRole().getDisplayName());
+            if (admin != null) {
+                admin.setCurrentUser(user.getUsername(), user.getRole().getDisplayName());
+            }
         }
     }
 

@@ -39,6 +39,13 @@ public class CashierHomeController implements CashierShell.Aware {
     @Override
     public void attach(CashierShell shell) {
         this.shell = shell;
+
+        try {
+            CashierStore.get().refreshSalesHistory();
+        } catch (java.sql.SQLException e) {
+            System.err.println("Could not load transactions from database: " + e.getMessage());
+        }
+
         render();
     }
 
