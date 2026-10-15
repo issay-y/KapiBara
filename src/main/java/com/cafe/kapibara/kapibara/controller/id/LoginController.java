@@ -42,7 +42,6 @@ public class LoginController implements Initializable {
     private final UserDAO userDAO = new UserDAO();
     private boolean passwordShown = false;
 
-    /** Outcome of a login attempt, computed off the FX thread. */
     private enum AuthStatus { SUCCESS, INVALID, INACTIVE }
 
     private record AuthResult(AuthStatus status, User user) {}

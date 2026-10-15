@@ -1,12 +1,17 @@
 package com.cafe.kapibara.kapibara.controller.main.cashier;
 
+import com.cafe.kapibara.kapibara.DAO.InventoryDAO;
+import com.cafe.kapibara.kapibara.DAO.InventoryDAO.MenuRow;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -23,8 +28,11 @@ public final class CashierStore {
     public static final String BRANCH_SHORT = "Caloocan";
     public static final String BRANCH_ADDRESS = "Caloocan City";
 
-    public static final List<String> CATEGORIES =
-            List.of("Coffee", "Non-Coffee", "Pastries", "Snacks", "Add-ons");
+    /**
+     * Category names that currently have at least one sellable product. It starts empty and is
+     * refilled in place by {@link #refreshMenu()}, so existing code that reads CATEGORIES keeps working.
+     */
+    public static final List<String> CATEGORIES = new ArrayList<>();
 
     public static final BigDecimal DISCOUNT_RATE = new BigDecimal("0.20");
 
@@ -40,27 +48,44 @@ public final class CashierStore {
     // ------------------------------------------------------------------
 
     public static final class Product {
+        private final long itemId;
         private final String id;
-        private final String name;
-        private final String description;
-        private final String category;
-        private final BigDecimal price;
+        private String name;
+        private String description;
+        private String category;
+        private String imagePath;
+        private String unit;
+        private double minimum;
+        private BigDecimal price;
         private int stock;
 
-        private Product(String id, String name, String description, String category,
-                        String price, int stock) {
-            this.id = id;
-            this.name = name;
-            this.description = description;
-            this.category = category;
-            this.price = new BigDecimal(price).setScale(2);
-            this.stock = stock;
+        private Product(MenuRow row) {
+            this.itemId = row.id();
+            this.id = String.valueOf(row.id());
+            update(row);
         }
 
+        private void update(MenuRow row) {
+            this.name = row.name();
+            this.description = row.notes() == null ? "" : row.notes();
+            this.category = row.category();
+            this.imagePath = row.imagePath();
+            this.unit = row.unit();
+            this.minimum = row.minimum();
+            this.price = row.price().setScale(2, RoundingMode.HALF_UP);
+            this.stock = (int) Math.floor(row.quantity());
+        }
+
+        public long getItemId() { return itemId; }
         public String getId() { return id; }
         public String getName() { return name; }
         public String getDescription() { return description; }
         public String getCategory() { return category; }
+        public String getImagePath() { return imagePath; }
+        public String getUnit() { return unit; }
+        public double getMinimum() { return minimum; }
+        /** In stock, but at or below the minimum set in the inventory. */
+        public boolean isLow() { return stock > 0 && stock <= minimum; }
         public BigDecimal getPrice() { return price; }
         public int getStock() { return stock; }
         public boolean isAvailable() { return stock > 0; }
@@ -91,6 +116,7 @@ public final class CashierStore {
     // State
     // ------------------------------------------------------------------
 
+    private final InventoryDAO dao = new InventoryDAO();
     private final List<Product> products = new ArrayList<>();
     private final List<Sale> sales = new ArrayList<>();
     private final Map<Product, Line> cart = new LinkedHashMap<>();
@@ -103,42 +129,42 @@ public final class CashierStore {
     private Sale viewedSale;
     private CashierPage receiptReturn;
 
-    private CashierStore() {
-        seed();
-    }
-
-    private void seed() {
-        add("latte", "Cafe Latte", "Bold brew, perfectly chilled", "Coffee", "95", 32);
-        add("spanish-latte", "Spanish Latte", "Espresso & sweet creamy milk", "Coffee", "125", 24);
-        add("caramel-macchiato", "Caramel Macchiato", "Caramel drizzle & espresso", "Coffee", "145", 18);
-        add("americano", "Café Americano", "Smooth, full-bodied espresso", "Coffee", "95", 30);
-        add("cappuccino", "Cappuccino", "Velvety foam, rich espresso", "Coffee", "120", 0);
-        add("mocha", "Mocha", "Chocolate meets espresso", "Coffee", "135", 20);
-        add("flat-white", "Flat White", "Silky microfoam, double shot", "Coffee", "130", 22);
-
-        add("matcha-latte", "Matcha Latte", "Earthy matcha & milk", "Non-Coffee", "135", 16);
-        add("chocolate", "Chocolate", "Rich cocoa comfort", "Non-Coffee", "110", 20);
-        add("milk-tea", "Milk Tea", "Black tea & creamy milk", "Non-Coffee", "110", 15);
-
-        add("croissant", "Croissant", "Buttery, flaky layers", "Pastries", "85", 12);
-        add("muffin", "Muffin", "Freshly baked blueberry", "Pastries", "70", 8);
-        add("cookies", "Cookies", "Chocolate chip classic", "Pastries", "55", 18);
-
-        add("sandwich", "Sandwich", "Ham, cheese & greens", "Snacks", "125", 10);
-        add("french-fries", "French Fries", "Crisp, golden & salted", "Snacks", "65", 14);
-
-        add("extra-espresso", "Extra Espresso", "One extra espresso shot", "Add-ons", "30", 30);
-        add("whipped-cream", "Whipped Cream", "A fluffy finishing touch", "Add-ons", "20", 24);
-        add("caramel-syrup", "Caramel Syrup", "Sweet caramel boost", "Add-ons", "20", 0);
-    }
-
-    private void add(String id, String name, String desc, String category, String price, int stock) {
-        products.add(new Product(id, name, desc, category, price, stock));
-    }
+    private CashierStore() { }
 
     // ------------------------------------------------------------------
-    // Menu
+    // Menu (read from the inventory tables)
     // ------------------------------------------------------------------
+
+    /**
+     * Reloads the menu from the database. Call it whenever a page that shows products opens.
+     * Products already in the cart keep their identity, so the order survives a refresh;
+     * lines whose item was deleted are dropped and quantities are trimmed to the new stock.
+     */
+    public void refreshMenu() throws SQLException {
+        List<MenuRow> rows = dao.findMenuRows();
+
+        Map<Long, Product> existing = new HashMap<>();
+        for (Product p : products) existing.put(p.itemId, p);
+
+        products.clear();
+        CATEGORIES.clear();
+        for (MenuRow row : rows) {
+            Product p = existing.get(row.id());
+            if (p == null) p = new Product(row);
+            else p.update(row);
+            products.add(p);
+            if (!CATEGORIES.contains(row.category())) CATEGORIES.add(row.category());
+        }
+
+        cart.keySet().removeIf(p -> !products.contains(p));
+        cart.values().forEach(l -> l.qty = Math.min(l.qty, l.product.stock));
+        cart.values().removeIf(l -> l.qty <= 0);
+        if (cart.isEmpty()) seniorPwd = false;
+    }
+
+    public List<String> categories() {
+        return Collections.unmodifiableList(CATEGORIES);
+    }
 
     public List<Product> products() {
         return Collections.unmodifiableList(products);
@@ -265,6 +291,15 @@ public final class CashierStore {
             if (l.qty > l.product.stock) {
                 throw new IllegalStateException(l.product.name + " only has " + l.product.stock + " left.");
             }
+        }
+
+        // Take the stock out of the database first; if it fails nothing is sold.
+        Map<Long, Integer> sold = new LinkedHashMap<>();
+        cart.values().forEach(l -> sold.put(l.product.itemId, l.qty));
+        try {
+            dao.deductStock(sold);
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not update the stock: " + e.getMessage(), e);
         }
 
         String number = currentOrderNumber();

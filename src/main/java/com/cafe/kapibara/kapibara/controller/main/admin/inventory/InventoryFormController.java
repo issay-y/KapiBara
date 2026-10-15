@@ -26,6 +26,8 @@ import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -51,7 +53,7 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
     private static final DateTimeFormatter UPDATED = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
 
     @FXML private Label titleLabel, subtitleLabel;
-    @FXML private TextField nameField, quantityField, minimumField, statusField, notesField;
+    @FXML private TextField nameField, quantityField, minimumField, priceField, statusField, notesField;
     @FXML private ComboBox<String> categoryCombo, unitCombo;
     @FXML private Label footNoteLabel, errorLabel;
     @FXML private Button cancelBtn, saveBtn;
@@ -87,8 +89,10 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
     public void initialize(URL location, ResourceBundle resources) {
         numbersOnly(quantityField);
         numbersOnly(minimumField);
+        numbersOnly(priceField);
         quantityField.setText("0");
         minimumField.setText("0");
+        priceField.setText("0");
         statusField.setEditable(false);
         statusField.setFocusTraversable(false);
 
@@ -96,6 +100,7 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         notesField.textProperty().addListener(markDirty);
         quantityField.textProperty().addListener(markDirty);
         minimumField.textProperty().addListener(markDirty);
+        priceField.textProperty().addListener(markDirty);
         categoryCombo.valueProperty().addListener(markDirty);
         unitCombo.valueProperty().addListener(markDirty);
 
@@ -157,16 +162,21 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         Thread worker = new Thread(() -> {
             List<String> categories = List.of();
             Optional<InventoryForm> found = Optional.empty();
+            BigDecimal price = BigDecimal.ZERO;
             Throwable failure = null;
             try {
                 categories = inventoryDAO.findCategories();
-                if (editMode) found = inventoryDAO.findById(editingId);
+                if (editMode) {
+                    found = inventoryDAO.findById(editingId);
+                    price = inventoryDAO.findPrice(editingId);
+                }
             } catch (Throwable t) {
                 failure = t;
             }
 
             final List<String> finalCategories = categories;
             final Optional<InventoryForm> finalFound = found;
+            final BigDecimal finalPrice = price;
             final Throwable finalFailure = failure;
             Platform.runLater(() -> {
                 if (finalFailure != null) {
@@ -181,14 +191,14 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
                     shell.navigate(AdminPage.INVENTORY);
                     return;
                 }
-                fill(finalCategories, finalFound.orElse(null));
+                fill(finalCategories, finalFound.orElse(null), finalPrice);
             });
         }, "load-inventory-form");
         worker.setDaemon(true);
         worker.start();
     }
 
-    private void fill(List<String> categoriesInDb, InventoryForm form) {
+    private void fill(List<String> categoriesInDb, InventoryForm form, BigDecimal price) {
         loading = true;
 
         // Categories come from the inventory_categories table only.
@@ -207,6 +217,7 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
             quantityField.setText(numberText(form.quantity()));
             unitCombo.setValue(form.unit());
             minimumField.setText(numberText(form.minimum()));
+            priceField.setText(numberText(price == null ? 0 : price.doubleValue()));
             notesField.setText(form.notes() == null ? "" : form.notes());
             subtitleLabel.setText("Update stock details for " + form.name() + ".");
             footNoteLabel.setText(lastUpdatedText(form));
@@ -417,6 +428,7 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         final Path picked = pickedFile;
         final boolean remove = removeImage;
         final String previous = currentImage;
+        final BigDecimal price = priceValue();
 
         saveBtn.setDisable(true);
         saveBtn.setText("Saving...");
@@ -439,9 +451,9 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
                     }
                     InventoryForm toSave = form.withImage(stored);
                     if (editMode) {
-                        inventoryDAO.update(toSave, user);
+                        inventoryDAO.update(toSave, price, user);
                     } else {
-                        inventoryDAO.insert(toSave, user);
+                        inventoryDAO.insert(toSave, price, user);
                     }
                     if (replaced && previous != null) InventoryImages.delete(previous);
                 }
@@ -496,8 +508,18 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         if (parse(quantityField.getText()) == null) return "Please enter the quantity (0 or more).";
         if (unitCombo.getValue() == null) return "Please choose a unit.";
         if (parse(minimumField.getText()) == null) return "Please enter the minimum stock (0 or more).";
+        if (parse(priceField.getText()) == null) return "Please enter the selling price (0 or more).";
         if (notesField.getText().trim().length() > 255) return "Notes can be at most 255 characters.";
         return null;
+    }
+
+    private BigDecimal priceValue() {
+        String text = priceField.getText() == null ? "" : priceField.getText().trim();
+        try {
+            return new BigDecimal(text).setScale(2, RoundingMode.HALF_UP);
+        } catch (NumberFormatException e) {
+            return BigDecimal.ZERO.setScale(2);
+        }
     }
 
     private InventoryForm collectForm() {

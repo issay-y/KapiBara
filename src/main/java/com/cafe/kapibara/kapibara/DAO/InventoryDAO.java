@@ -5,6 +5,7 @@ import com.cafe.kapibara.kapibara.model.inventory.InventoryCategory;
 import com.cafe.kapibara.kapibara.model.inventory.InventoryForm;
 import com.cafe.kapibara.kapibara.model.inventory.InventoryItem;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +15,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -46,9 +48,9 @@ public class InventoryDAO {
                     + "quantity DECIMAL(10,2) NOT NULL DEFAULT 0, "
                     + "unit VARCHAR(20) NOT NULL, "
                     + "minimum_stock DECIMAL(10,2) NOT NULL DEFAULT 0, "
+                    + "price DECIMAL(10,2) NOT NULL DEFAULT 0, "
                     + "notes VARCHAR(255) NULL, "
                     + "image_path VARCHAR(255) NULL, "
-                    + "updated_by VARCHAR(100) NULL, "
                     + "updated_by VARCHAR(100) NULL, "
                     + "updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, "
                     + "CONSTRAINT fk_inventory_items_category FOREIGN KEY (category_id) "
@@ -132,9 +134,13 @@ public class InventoryDAO {
     // =====================================================================
 
     public void insert(InventoryForm form, String updatedBy) throws SQLException {
+        insert(form, BigDecimal.ZERO, updatedBy);
+    }
+
+    public void insert(InventoryForm form, BigDecimal price, String updatedBy) throws SQLException {
         String sql = "INSERT INTO inventory_items "
-                + "(name, category_id, quantity, unit, minimum_stock, notes, image_path, updated_by) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                + "(name, category_id, quantity, unit, minimum_stock, price, notes, image_path, updated_by) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnector.getConnection()) {
             ensureSchema(conn);
             long categoryId = categoryId(conn, form.category());
@@ -144,17 +150,24 @@ public class InventoryDAO {
                 ps.setDouble(3, form.quantity());
                 ps.setString(4, form.unit());
                 ps.setDouble(5, form.minimum());
-                ps.setString(6, form.notes());
-                ps.setString(7, form.imagePath());
-                ps.setString(8, updatedBy);
+                ps.setBigDecimal(6, price == null ? BigDecimal.ZERO : price);
+                ps.setString(7, form.notes());
+                ps.setString(8, form.imagePath());
+                ps.setString(9, updatedBy);
                 ps.executeUpdate();
             }
         }
     }
 
     public void update(InventoryForm form, String updatedBy) throws SQLException {
+        update(form, null, updatedBy);
+    }
+
+    /** A null price leaves the stored price unchanged. */
+    public void update(InventoryForm form, BigDecimal price, String updatedBy) throws SQLException {
         String sql = "UPDATE inventory_items SET name = ?, category_id = ?, quantity = ?, unit = ?, "
-                + "minimum_stock = ?, notes = ?, image_path = ?, updated_by = ?, updated_at = NOW() "
+                + "minimum_stock = ?, price = COALESCE(?, price), notes = ?, image_path = ?, "
+                + "updated_by = ?, updated_at = NOW() "
                 + "WHERE item_id = ?";
         try (Connection conn = DatabaseConnector.getConnection()) {
             ensureSchema(conn);
@@ -165,10 +178,11 @@ public class InventoryDAO {
                 ps.setDouble(3, form.quantity());
                 ps.setString(4, form.unit());
                 ps.setDouble(5, form.minimum());
-                ps.setString(6, form.notes());
-                ps.setString(7, form.imagePath());
-                ps.setString(8, updatedBy);
-                ps.setLong(9, form.id());
+                ps.setBigDecimal(6, price);
+                ps.setString(7, form.notes());
+                ps.setString(8, form.imagePath());
+                ps.setString(9, updatedBy);
+                ps.setLong(10, form.id());
                 ps.executeUpdate();
             }
         }
@@ -272,6 +286,78 @@ public class InventoryDAO {
     }
 
     // =====================================================================
+    //  CASHIER MENU
+    // =====================================================================
+
+    /** The stored selling price of one item (0 when none has been set). */
+    public BigDecimal findPrice(long id) throws SQLException {
+        String sql = "SELECT price FROM inventory_items WHERE item_id = ?";
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            ensureSchema(conn);
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setLong(1, id);
+                try (ResultSet rs = ps.executeQuery()) {
+                    BigDecimal price = rs.next() ? rs.getBigDecimal(1) : null;
+                    return price == null ? BigDecimal.ZERO : price;
+                }
+            }
+        }
+    }
+
+    /** One sellable item for the cashier screens. */
+    public record MenuRow(long id, String name, String category, double quantity,
+                          String unit, double minimum, BigDecimal price, String notes, String imagePath) { }
+
+    /** Items that can be sold: only those with a price above 0 appear on the cashier screens. */
+    public List<MenuRow> findMenuRows() throws SQLException {
+        String sql = "SELECT i.item_id, i.name, c.name AS category, i.quantity, i.unit, i.minimum_stock, i.price, i.notes, i.image_path "
+                + "FROM inventory_items i JOIN inventory_categories c ON c.category_id = i.category_id "
+                + "WHERE i.price > 0 ORDER BY c.name, i.name";
+        List<MenuRow> rows = new ArrayList<>();
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            ensureSchema(conn);
+            try (PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    rows.add(new MenuRow(rs.getLong("item_id"), rs.getString("name"),
+                            rs.getString("category"), rs.getDouble("quantity"),
+                            rs.getString("unit"), rs.getDouble("minimum_stock"),
+                            rs.getBigDecimal("price"), rs.getString("notes"),
+                            rs.getString("image_path")));
+                }
+            }
+        }
+        return rows;
+    }
+
+    /** Subtracts sold quantities in one transaction; rolls everything back if any item is short. */
+    public void deductStock(Map<Long, Integer> qtyById) throws SQLException {
+        String sql = "UPDATE inventory_items SET quantity = quantity - ?, updated_at = NOW() "
+                + "WHERE item_id = ? AND quantity >= ?";
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            ensureSchema(conn);
+            boolean oldAuto = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                for (Map.Entry<Long, Integer> e : qtyById.entrySet()) {
+                    ps.setInt(1, e.getValue());
+                    ps.setLong(2, e.getKey());
+                    ps.setInt(3, e.getValue());
+                    if (ps.executeUpdate() == 0) {
+                        throw new SQLException("Not enough stock left for item #" + e.getKey() + ".");
+                    }
+                }
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw ex;
+            } finally {
+                conn.setAutoCommit(oldAuto);
+            }
+        }
+    }
+
+    // =====================================================================
     //  SCHEMA (+ one-time migration of the old text category column)
     // =====================================================================
 
@@ -290,6 +376,12 @@ public class InventoryDAO {
             if (!hasColumn(conn, "inventory_items", "image_path")) {
                 try (Statement st = conn.createStatement()) {
                     st.executeUpdate("ALTER TABLE inventory_items ADD COLUMN image_path VARCHAR(255) NULL AFTER notes");
+                }
+            }
+            if (!hasColumn(conn, "inventory_items", "price")) {
+                try (Statement st = conn.createStatement()) {
+                    st.executeUpdate("ALTER TABLE inventory_items "
+                            + "ADD COLUMN price DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER minimum_stock");
                 }
             }
             ready = true;

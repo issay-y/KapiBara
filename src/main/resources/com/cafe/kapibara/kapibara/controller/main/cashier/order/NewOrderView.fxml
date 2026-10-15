@@ -12,107 +12,103 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<!-- resources/com/cafe/kapibara/kapibara/controller/main/cashier/order/NewOrderView.fxml
-     Content only: the sidebar and top bar come from CashierView.fxml. -->
-<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
-            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.cafe.kapibara.kapibara.controller.main.cashier.order.NewOrderController">
-   <VBox spacing="24.0" styleClass="adm-page, adm-lg">
-      <padding>
-         <Insets top="32.0" right="40.0" bottom="32.0" left="40.0" />
-      </padding>
+<VBox spacing="24.0" styleClass="adm-page, adm-lg"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cafe.kapibara.kapibara.controller.main.cashier.order.NewOrderController">
+   <padding>
+      <Insets top="32.0" right="40.0" bottom="32.0" left="40.0" />
+   </padding>
 
-      <!-- Header -->
-      <VBox spacing="5.0">
-         <Label styleClass="adm-page-title" text="New order" />
-         <Label styleClass="adm-page-sub" text="A fresh cup is just a few taps away." />
-      </VBox>
+   <VBox spacing="5.0">
+      <Label styleClass="adm-page-title" text="New order" />
+      <Label styleClass="adm-page-sub" text="A fresh cup is just a few taps away." />
+   </VBox>
 
-      <HBox alignment="TOP_LEFT" fillHeight="true" spacing="24.0" VBox.vgrow="ALWAYS">
+   <HBox alignment="TOP_LEFT" fillHeight="true" spacing="24.0" VBox.vgrow="ALWAYS">
 
-         <!-- ================= MENU ================= -->
-         <VBox HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="18.0">
-            <StackPane>
-               <TextField fx:id="searchField" promptText="Search coffee, pastries, snacks..." styleClass="adm-search" />
-               <Label mouseTransparent="true" styleClass="adm-search-icon" text="🔍" StackPane.alignment="CENTER_LEFT">
-                  <StackPane.margin><Insets left="18.0" /></StackPane.margin>
-               </Label>
-            </StackPane>
+      <!-- ================= MENU ================= -->
+      <VBox HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="18.0">
+         <StackPane minHeight="52.0" prefHeight="52.0" maxHeight="52.0">
+            <TextField fx:id="searchField" promptText="Search coffee, pastries, snacks..." styleClass="adm-search" />
+            <Label mouseTransparent="true" styleClass="adm-search-icon" text="🔍" StackPane.alignment="CENTER_LEFT">
+               <StackPane.margin><Insets left="18.0" /></StackPane.margin>
+            </Label>
+         </StackPane>
 
-            <HBox fx:id="chipRow" spacing="10.0" />
+         <HBox fx:id="chipRow" minHeight="-Infinity" spacing="10.0" />
 
-            <HBox alignment="CENTER_LEFT">
-               <Label fx:id="sectionLabel" styleClass="csh-section-title" text="Coffee" />
-               <Region HBox.hgrow="ALWAYS" />
-               <Label fx:id="countLabel" styleClass="csh-count" text="" />
-            </HBox>
+         <HBox alignment="CENTER_LEFT">
+            <Label fx:id="sectionLabel" styleClass="csh-section-title" text="Coffee" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="countLabel" styleClass="csh-count" text="" />
+         </HBox>
 
-            <GridPane fx:id="productGrid" hgap="18.0" vgap="18.0">
+         <!-- Wrapping the product grid in its own ScrollPane prevents it from stretching the entire view -->
+         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll" VBox.vgrow="ALWAYS">
+            <GridPane fx:id="productGrid" hgap="18.0" minHeight="-Infinity" vgap="18.0">
                <columnConstraints>
                   <ColumnConstraints hgrow="ALWAYS" percentWidth="33.333" />
                   <ColumnConstraints hgrow="ALWAYS" percentWidth="33.333" />
                   <ColumnConstraints hgrow="ALWAYS" percentWidth="33.334" />
                </columnConstraints>
             </GridPane>
+         </ScrollPane>
 
-            <Region VBox.vgrow="ALWAYS" />
+         <HBox alignment="CENTER_LEFT">
+            <Label styleClass="adm-card-foot" text="Freshly prepared • Prices include VAT" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button onAction="#handleBrowse" styleClass="adm-link" text="Browse full menu →" />
+         </HBox>
+      </VBox>
 
-            <HBox alignment="CENTER_LEFT">
-               <Label styleClass="adm-card-foot" text="Freshly prepared • Prices include VAT" />
-               <Region HBox.hgrow="ALWAYS" />
-               <Button onAction="#handleBrowse" styleClass="adm-link" text="Browse full menu →" />
-            </HBox>
+      <!-- ================= CURRENT ORDER ================= -->
+      <VBox styleClass="adm-card" prefWidth="440.0" minWidth="400.0" maxWidth="440.0" spacing="14.0">
+         <HBox alignment="CENTER_LEFT">
+            <Label styleClass="csh-order-title" text="Current order" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="itemsPill" styleClass="csh-count-pill" text="0 items" />
+         </HBox>
+
+         <VBox spacing="3.0">
+            <Label fx:id="orderNoLabel" styleClass="csh-order-no" text="" />
+            <Label fx:id="orderTimeLabel" styleClass="adm-form-note" text="" />
          </VBox>
 
-         <!-- ================= CURRENT ORDER ================= -->
-         <VBox styleClass="adm-card" prefWidth="440.0" minWidth="400.0" maxWidth="440.0" spacing="14.0">
-            <HBox alignment="CENTER_LEFT">
-               <Label styleClass="csh-order-title" text="Current order" />
-               <Region HBox.hgrow="ALWAYS" />
-               <Label fx:id="itemsPill" styleClass="csh-count-pill" text="0 items" />
-            </HBox>
+         <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
 
-            <VBox spacing="3.0">
-               <Label fx:id="orderNoLabel" styleClass="csh-order-no" text="" />
-               <Label fx:id="orderTimeLabel" styleClass="adm-form-note" text="" />
-            </VBox>
+         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minHeight="140.0" styleClass="adm-scroll" VBox.vgrow="ALWAYS">
+            <VBox fx:id="linesBox" spacing="18.0" />
+         </ScrollPane>
 
-            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
+         <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
 
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minHeight="140.0" styleClass="adm-scroll" VBox.vgrow="ALWAYS">
-               <VBox fx:id="linesBox" spacing="18.0" />
-            </ScrollPane>
+         <HBox alignment="CENTER_LEFT">
+            <Label styleClass="adm-stock-name" text="Subtotal (VAT-exclusive)" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="subtotalLabel" styleClass="adm-stock-value" text="₱0.00" />
+         </HBox>
+         <HBox alignment="CENTER_LEFT">
+            <Label fx:id="vatCaption" styleClass="adm-stock-name" text="VAT (12%, included)" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="vatLabel" styleClass="adm-stock-value" text="₱0.00" />
+         </HBox>
+         <HBox alignment="CENTER_LEFT">
+            <Label fx:id="discountCaption" styleClass="adm-stock-name" text="Discount" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="discountLabel" styleClass="adm-stock-value" text="₱0.00" />
+         </HBox>
 
-            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
+         <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
 
-            <HBox alignment="CENTER_LEFT">
-               <Label styleClass="adm-stock-name" text="Subtotal (VAT-exclusive)" />
-               <Region HBox.hgrow="ALWAYS" />
-               <Label fx:id="subtotalLabel" styleClass="adm-stock-value" text="₱0.00" />
-            </HBox>
-            <HBox alignment="CENTER_LEFT">
-               <Label fx:id="vatCaption" styleClass="adm-stock-name" text="VAT (12%, included)" />
-               <Region HBox.hgrow="ALWAYS" />
-               <Label fx:id="vatLabel" styleClass="adm-stock-value" text="₱0.00" />
-            </HBox>
-            <HBox alignment="CENTER_LEFT">
-               <Label fx:id="discountCaption" styleClass="adm-stock-name" text="Discount" />
-               <Region HBox.hgrow="ALWAYS" />
-               <Label fx:id="discountLabel" styleClass="adm-stock-value" text="₱0.00" />
-            </HBox>
+         <HBox alignment="CENTER_LEFT">
+            <Label styleClass="csh-total-label" text="Total" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="totalLabel" styleClass="csh-total-value" text="₱0.00" />
+         </HBox>
+         <Label styleClass="adm-form-note" text="Prices include 12% VAT • Cash payment only" />
 
-            <Region maxHeight="1.0" minHeight="1.0" prefHeight="1.0" styleClass="adm-divider" />
-
-            <HBox alignment="CENTER_LEFT">
-               <Label styleClass="csh-total-label" text="Total" />
-               <Region HBox.hgrow="ALWAYS" />
-               <Label fx:id="totalLabel" styleClass="csh-total-value" text="₱0.00" />
-            </HBox>
-            <Label styleClass="adm-form-note" text="Prices include 12% VAT • Cash payment only" />
-
-            <Button fx:id="payBtn" maxWidth="Infinity" onAction="#handlePay" styleClass="adm-primary-btn" text="→   Proceed to Payment" />
-            <Button maxWidth="Infinity" onAction="#handleClear" styleClass="adm-outline-btn" text="Clear order" />
-         </VBox>
-      </HBox>
-   </VBox>
-</ScrollPane>
+         <Button fx:id="payBtn" maxWidth="Infinity" onAction="#handlePay" styleClass="adm-primary-btn" text="→   Proceed to Payment" />
+         <Button maxWidth="Infinity" onAction="#handleClear" styleClass="adm-outline-btn" text="Clear order" />
+      </VBox>
+   </HBox>
+</VBox>

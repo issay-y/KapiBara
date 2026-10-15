@@ -17,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -26,7 +27,6 @@ import static com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore.mo
 /** "New order": pick products on the left, review and pay on the right. */
 public class NewOrderController implements CashierShell.Aware {
 
-    private static final int VISIBLE_PRODUCTS = 6;
     private static final int COLUMNS = 3;
     private static final DateTimeFormatter STAMP =
             DateTimeFormatter.ofPattern("dd MMM yyyy • h:mm a", Locale.ENGLISH);
@@ -43,7 +43,8 @@ public class NewOrderController implements CashierShell.Aware {
 
     private final CashierStore store = CashierStore.get();
     private CashierShell shell;
-    private String category = "Coffee";
+    private String category;
+    private String loadError;
 
     @FXML
     private void initialize() {
@@ -53,9 +54,26 @@ public class NewOrderController implements CashierShell.Aware {
     @Override
     public void attach(CashierShell shell) {
         this.shell = shell;
+        loadMenu();
         renderChips();
         renderProducts();
         renderOrder();
+    }
+
+    /** Reads the products from the database every time this page opens. */
+    private void loadMenu() {
+        loadError = null;
+        try {
+            store.refreshMenu();
+        } catch (SQLException e) {
+            loadError = e.getMessage();
+        }
+        ProductCards.clearImageCache();
+
+        List<String> categories = store.categories();
+        if (category != null && !categories.contains(category)) {
+            category = null;   // the chosen category no longer exists: fall back to "All"
+        }
     }
 
     // ------------------------------------------------------------------
@@ -64,7 +82,13 @@ public class NewOrderController implements CashierShell.Aware {
 
     private void renderChips() {
         chipRow.getChildren().clear();
-        for (String name : CashierStore.CATEGORIES) {
+        chipRow.getChildren().add(ProductCards.chip("All", category == null, () -> {
+            category = null;
+            searchField.clear();
+            renderChips();
+            renderProducts();
+        }));
+        for (String name : store.categories()) {
             chipRow.getChildren().add(ProductCards.chip(name, name.equals(category), () -> {
                 category = name;
                 searchField.clear();
@@ -79,14 +103,19 @@ public class NewOrderController implements CashierShell.Aware {
         boolean searching = query != null && !query.isBlank();
 
         List<Product> matches = store.search(category, query);
-        List<Product> shown = matches.size() > VISIBLE_PRODUCTS ? matches.subList(0, VISIBLE_PRODUCTS) : matches;
+        List<Product> shown = matches;
 
-        sectionLabel.setText(searching ? "Search results" : category);
-        countLabel.setText(shown.size() + " of " + matches.size() + " products");
+        sectionLabel.setText(searching ? "Search results" : (category == null ? "All items" : category));
+        countLabel.setText(matches.size() + (matches.size() == 1 ? " product" : " products"));
 
         productGrid.getChildren().clear();
         if (matches.isEmpty()) {
-            Label none = ProductCards.label("No items match your search.", "adm-card-foot");
+            String message = loadError != null
+                    ? "Could not load the products: " + loadError
+                    : searching ? "No items match your search."
+                    : "No products to sell yet. Set a price on your inventory items to show them here.";
+            Label none = ProductCards.label(message, "adm-card-foot");
+            none.setWrapText(true);
             productGrid.add(none, 0, 0, COLUMNS, 1);
             return;
         }

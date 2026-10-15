@@ -88,23 +88,23 @@
     -fx-border-color: -adm-line;
     -fx-border-radius: 16;
     -fx-border-width: 1;
-    -fx-padding: 18;
+    -fx-padding: 12;
     -fx-effect: dropshadow(gaussian, rgba(78,34,22,0.06), 8, 0, 0, 2);
 }
 
 .csh-product-card-selected {
     -fx-border-color: -adm-orange;
     -fx-border-width: 2;
-    -fx-padding: 17;
+    -fx-padding: 11;
 }
 
 .csh-product-img {
     -fx-background-color: #F0E4D4;
-    -fx-background-radius: 14;
+    -fx-background-radius: 12;
 }
 
 .csh-product-emoji {
-    -fx-font-size: 40px;
+    -fx-font-size: 54px;
     -fx-text-fill: -adm-text;
 }
 
@@ -179,6 +179,91 @@
     -fx-text-fill: -adm-muted;
     -fx-opacity: 1;
     -fx-cursor: default;
+}
+
+/* ---------- Product card details ---------- */
+.csh-tag {
+    -fx-background-radius: 999;
+    -fx-padding: 4 11 4 11;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.csh-tag-cat {
+    -fx-background-color: rgba(255, 251, 245, 0.94);
+    -fx-text-fill: -adm-text;
+}
+
+.csh-tag-ok {
+    -fx-background-color: #E3F3E3;
+    -fx-text-fill: #2F7D4A;
+}
+
+.csh-tag-low {
+    -fx-background-color: #FFF0C9;
+    -fx-text-fill: #A86A00;
+}
+
+.csh-tag-out {
+    -fx-background-color: #FBE3DF;
+    -fx-text-fill: -adm-red;
+}
+
+.csh-product-placeholder-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-muted;
+}
+
+.csh-product-monogram {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 56px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #CDB8A3;
+}
+
+.csh-product-category {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-orange;
+}
+
+.csh-product-desc-empty {
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
+    -fx-text-fill: #B8A898;
+}
+
+.csh-product-divider {
+    -fx-background-color: -adm-line;
+}
+
+.csh-product-unit {
+    -fx-font-size: 13px;
+    -fx-text-fill: -adm-muted;
+    -fx-padding: 0 0 3 0;
+}
+
+.csh-detail-key {
+    -fx-font-size: 13px;
+    -fx-text-fill: -adm-muted;
+}
+
+.csh-detail-val {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.csh-detail-ok {
+    -fx-text-fill: #2F7D4A;
+}
+
+.csh-detail-low {
+    -fx-text-fill: #A86A00;
+}
+
+.csh-detail-out {
+    -fx-text-fill: -adm-red;
 }
 
 /* ---------- Current order panel ---------- */
