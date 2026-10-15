@@ -6,18 +6,30 @@ import com.cafe.kapibara.kapibara.controller.main.admin.AdminShell;
 import com.cafe.kapibara.kapibara.model.inventory.InventoryForm;
 import com.cafe.kapibara.kapibara.model.inventory.StockStatus;
 import com.cafe.kapibara.kapibara.util.AlertsUtil;
+import com.cafe.kapibara.kapibara.util.InventoryImages;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,6 +42,7 @@ import java.util.TreeSet;
  * One form for both "Add inventory item" and "Edit inventory item".
  * Edit mode is used when the page was opened with an item id as its payload.
  * Categories come from the inventory_categories table and can be managed from here.
+ * An item can carry one photo (PNG / JPG, up to 5 MB).
  */
 public class InventoryFormController implements Initializable, AdminShell.Aware {
 
@@ -43,6 +56,12 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
     @FXML private Label footNoteLabel, errorLabel;
     @FXML private Button cancelBtn, saveBtn;
 
+    // photo card
+    @FXML private StackPane photoBox;
+    @FXML private ImageView photoView;
+    @FXML private VBox photoPlaceholder;
+    @FXML private Button photoBtn, removePhotoBtn;
+
     private final InventoryDAO inventoryDAO = new InventoryDAO();
     private AdminShell shell;
 
@@ -52,6 +71,12 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
 
     private boolean loading = true;   // true while fields are being filled in code
     private boolean dirty;            // true once the person has changed something
+
+    // photo state
+    private String currentImage;      // file name already stored for this item (edit mode)
+    private Path pickedFile;          // a new photo chosen in this session, not saved yet
+    private boolean removeImage;      // the stored photo should be removed on save
+    private Image photoImage;         // what the preview currently shows
 
     private final ChangeListener<Object> markDirty = (obs, old, now) -> {
         if (!loading) dirty = true;
@@ -77,6 +102,11 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         quantityField.textProperty().addListener((obs, old, now) -> updateStatusPreview());
         minimumField.textProperty().addListener((obs, old, now) -> updateStatusPreview());
         updateStatusPreview();
+
+        // The photo preview follows the card's size.
+        photoBox.widthProperty().addListener((obs, old, now) -> layoutPhoto());
+        photoBox.heightProperty().addListener((obs, old, now) -> layoutPhoto());
+        showPhoto(null);
 
         clearError();
     }
@@ -178,6 +208,10 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
             notesField.setText(form.notes() == null ? "" : form.notes());
             subtitleLabel.setText("Update stock details for " + form.name() + ".");
             footNoteLabel.setText(lastUpdatedText(form));
+
+            currentImage = form.imagePath();
+            InventoryImages.find(currentImage)
+                    .ifPresent(p -> showPhoto(new Image(p.toUri().toString(), 1200, 0, true, true)));
         }
 
         updateStatusPreview();
@@ -212,6 +246,93 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    // =====================================================================
+    //  PHOTO
+    // =====================================================================
+
+    @FXML
+    private void handleChoosePhoto(ActionEvent event) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Choose an item photo");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Images (PNG, JPG)", "*.png", "*.jpg", "*.jpeg"));
+        File file = chooser.showOpenDialog(photoBtn.getScene().getWindow());
+        if (file == null) return;
+
+        Path path = file.toPath();
+        try {
+            if (!InventoryImages.isSupported(path)) {
+                showError("Please choose a PNG or JPG image.");
+                return;
+            }
+            if (Files.size(path) > InventoryImages.MAX_BYTES) {
+                showError("That photo is larger than 5 MB. Please choose a smaller one.");
+                return;
+            }
+        } catch (IOException e) {
+            showError("Could not read that file.");
+            return;
+        }
+
+        Image image = new Image(path.toUri().toString(), 1200, 0, true, true);
+        if (image.isError()) {
+            showError("That image could not be opened. Try another file.");
+            return;
+        }
+
+        clearError();
+        pickedFile = path;
+        removeImage = false;
+        dirty = true;
+        showPhoto(image);
+    }
+
+    @FXML
+    private void handleRemovePhoto(ActionEvent event) {
+        pickedFile = null;
+        removeImage = currentImage != null;
+        dirty = true;
+        showPhoto(null);
+    }
+
+    private void showPhoto(Image image) {
+        photoImage = image;
+        photoView.setImage(image);
+        photoView.setVisible(image != null);
+
+        photoPlaceholder.setVisible(image == null);
+        photoPlaceholder.setManaged(image == null);
+
+        photoBox.getStyleClass().remove("adm-photo-box-filled");
+        if (image != null) photoBox.getStyleClass().add("adm-photo-box-filled");
+
+        photoBtn.setText(image == null ? "Choose photo" : "Change photo");
+        removePhotoBtn.setDisable(image == null);
+        layoutPhoto();
+    }
+
+    /** Rounds the corners and crops the picture so it fills the box (like a cover photo). */
+    private void layoutPhoto() {
+        double w = photoBox.getWidth();
+        double h = photoBox.getHeight();
+        if (w <= 0 || h <= 0) return;
+
+        Rectangle clip = new Rectangle(w, h);
+        clip.setArcWidth(28);
+        clip.setArcHeight(28);
+        photoBox.setClip(clip);
+
+        if (photoImage == null || photoImage.getWidth() <= 0) return;
+        double iw = photoImage.getWidth();
+        double ih = photoImage.getHeight();
+        double scale = Math.max(w / iw, h / ih);
+        double vw = w / scale;
+        double vh = h / scale;
+        photoView.setViewport(new Rectangle2D((iw - vw) / 2, (ih - vh) / 2, vw, vh));
+        photoView.setFitWidth(w);
+        photoView.setFitHeight(h);
     }
 
     // =====================================================================
@@ -301,6 +422,9 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         if (!confirmed) return;
 
         final String user = shell.getCurrentUserName();
+        final Path picked = pickedFile;
+        final boolean remove = removeImage;
+        final String previous = currentImage;
 
         saveBtn.setDisable(true);
         saveBtn.setText("Saving...");
@@ -308,16 +432,31 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         Thread worker = new Thread(() -> {
             String duplicate = null;
             Throwable failure = null;
+            String stored = previous;
+            boolean replaced = false;
             try {
                 if (inventoryDAO.nameExists(form.name(), editMode ? editingId : 0)) {
                     duplicate = "An item with this name already exists.";
-                } else if (editMode) {
-                    inventoryDAO.update(form, user);
                 } else {
-                    inventoryDAO.insert(form, user);
+                    if (picked != null) {
+                        stored = InventoryImages.save(picked);
+                        replaced = true;
+                    } else if (remove) {
+                        stored = null;
+                        replaced = true;
+                    }
+                    InventoryForm toSave = form.withImage(stored);
+                    if (editMode) {
+                        inventoryDAO.update(toSave, user);
+                    } else {
+                        inventoryDAO.insert(toSave, user);
+                    }
+                    if (replaced && previous != null) InventoryImages.delete(previous);
                 }
             } catch (Throwable t) {
                 failure = t;
+                // the database save failed, so don't leave the copied photo behind
+                if (replaced && stored != null && !stored.equals(previous)) InventoryImages.delete(stored);
             }
 
             final String finalDuplicate = duplicate;
@@ -380,7 +519,8 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
                 parse(minimumField.getText()),
                 notes.isEmpty() ? null : notes,
                 null,
-                null);
+                null,
+                currentImage);
     }
 
     private void showError(String message) {

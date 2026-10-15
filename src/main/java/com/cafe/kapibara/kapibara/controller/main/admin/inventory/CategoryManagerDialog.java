@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -20,8 +21,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
+/** "Manage categories": add a category, or delete one that no item uses. */
 public final class CategoryManagerDialog {
 
     private interface Work<T> { T run() throws Exception; }
@@ -32,6 +35,7 @@ public final class CategoryManagerDialog {
 
     private final TextField nameField = new TextField();
     private final Label errorLabel = new Label();
+    private final Label summaryLabel = new Label();
     private final VBox rows = new VBox();
     private boolean changed;
 
@@ -43,11 +47,12 @@ public final class CategoryManagerDialog {
         this.onChanged = onChanged;
 
         Label title = new Label("Manage categories");
-        title.getStyleClass().add("adm-card-title");
-        Label note = new Label("Add a category, or delete one that no item uses.");
-        note.getStyleClass().add("adm-form-note");
+        title.getStyleClass().add("cm-title");
+        Label note = new Label("Add a new category, or remove one that no item uses.");
+        note.getStyleClass().add("adm-page-sub");
+        VBox header = new VBox(4, title, note);
 
-        nameField.setPromptText("New category name");
+        nameField.setPromptText("New category name, e.g. Syrups");
         nameField.getStyleClass().add("adm-field");
         HBox.setHgrow(nameField, Priority.ALWAYS);
         nameField.setOnAction(e -> handleAdd());
@@ -64,27 +69,29 @@ public final class CategoryManagerDialog {
         errorLabel.setWrapText(true);
         clearError();
 
+        summaryLabel.getStyleClass().add("cm-section");
+
         rows.setFillWidth(true);
         ScrollPane scroll = new ScrollPane(rows);
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.getStyleClass().add("adm-scroll");
+        VBox.setVgrow(scroll, Priority.ALWAYS);
         VBox listCard = new VBox(scroll);
-        listCard.getStyleClass().add("adm-card");
-        listCard.setPadding(new Insets(6, 8, 6, 8));
+        listCard.getStyleClass().add("cm-card");
         VBox.setVgrow(listCard, Priority.ALWAYS);
 
         Button done = new Button("Done");
-        done.getStyleClass().add("adm-page-btn");
+        done.getStyleClass().add("cm-done");
         done.setOnAction(e -> stage.close());
         HBox footer = new HBox(done);
         footer.setAlignment(Pos.CENTER_RIGHT);
 
-        VBox root = new VBox(16, title, note, addRow, errorLabel, listCard, footer);
-        root.getStyleClass().addAll("adm-root", "adm-page", "adm-lg");
-        root.setPadding(new Insets(24));
+        VBox root = new VBox(16, header, addRow, errorLabel, summaryLabel, listCard, footer);
+        root.getStyleClass().addAll("adm-root", "adm-lg");
+        root.setPadding(new Insets(28, 32, 26, 32));
 
-        Scene scene = new Scene(root, 560, 640);
+        Scene scene = new Scene(root, 580, 700);
         if (owner.getScene() != null) {
             scene.getStylesheets().addAll(owner.getScene().getStylesheets());
             stage.initOwner(owner.getScene().getWindow());
@@ -92,8 +99,9 @@ public final class CategoryManagerDialog {
         stage.initModality(Modality.WINDOW_MODAL);
         stage.setTitle("Manage categories");
         stage.setScene(scene);
-        stage.setMinWidth(480);
-        stage.setMinHeight(480);
+        stage.setMinWidth(500);
+        stage.setMinHeight(520);
+        stage.setOnShown(e -> nameField.requestFocus());
         stage.setOnHidden(e -> {
             if (changed && onChanged != null) onChanged.run();
         });
@@ -112,33 +120,48 @@ public final class CategoryManagerDialog {
     private void renderRows(List<InventoryCategory> categories) {
         rows.getChildren().clear();
 
+        int items = categories.stream().mapToInt(InventoryCategory::itemCount).sum();
+        summaryLabel.setText(categories.size() + (categories.size() == 1 ? " category" : " categories")
+                + "   ·   " + items + (items == 1 ? " item" : " items") + " in total");
+
         if (categories.isEmpty()) {
-            Label empty = new Label("No categories yet. Add one above.");
-            empty.getStyleClass().add("adm-form-note");
-            empty.setPadding(new Insets(18, 16, 18, 16));
+            Label empty = new Label("No categories yet.\nAdd your first one above.");
+            empty.getStyleClass().add("cm-empty");
+            empty.setMaxWidth(Double.MAX_VALUE);
+            empty.setAlignment(Pos.CENTER);
             rows.getChildren().add(empty);
             return;
         }
 
         for (int i = 0; i < categories.size(); i++) {
             InventoryCategory c = categories.get(i);
+            boolean inUse = c.itemCount() > 0;
+
+            String letter = c.name().isBlank() ? "?" : c.name().substring(0, 1).toUpperCase(Locale.ROOT);
+            Label badge = new Label(letter);
+            badge.getStyleClass().add("cm-badge");
 
             Label name = new Label(c.name());
-            name.getStyleClass().add("adm-role-name");
+            name.getStyleClass().add("cm-row-name");
 
             Label count = new Label(c.itemCount() + (c.itemCount() == 1 ? " item" : " items"));
-            count.getStyleClass().add("adm-stock-name");
+            count.getStyleClass().add("adm-pill-tan");
 
             Button delete = new Button("Delete");
-            delete.getStyleClass().add("adm-link");
+            delete.getStyleClass().add("cm-delete");
+            if (inUse) {
+                delete.getStyleClass().add("cm-delete-locked");
+                delete.setTooltip(new Tooltip("Move or delete its " + c.itemCount()
+                        + (c.itemCount() == 1 ? " item" : " items") + " first."));
+            }
             delete.setOnAction(e -> handleDelete(c));
 
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
-            HBox row = new HBox(14, name, spacer, count, delete);
+            HBox row = new HBox(14, badge, name, spacer, count, delete);
             row.setAlignment(Pos.CENTER_LEFT);
-            row.setPadding(new Insets(14, 16, 14, 16));
+            row.getStyleClass().add("cm-row");
             rows.getChildren().add(row);
 
             if (i < categories.size() - 1) {
@@ -179,6 +202,7 @@ public final class CategoryManagerDialog {
             }
             changed = true;
             nameField.clear();
+            nameField.requestFocus();
             load();
         });
     }

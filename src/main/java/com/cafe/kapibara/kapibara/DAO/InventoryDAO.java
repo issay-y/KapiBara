@@ -47,6 +47,8 @@ public class InventoryDAO {
                     + "unit VARCHAR(20) NOT NULL, "
                     + "minimum_stock DECIMAL(10,2) NOT NULL DEFAULT 0, "
                     + "notes VARCHAR(255) NULL, "
+                    + "image_path VARCHAR(255) NULL, "
+                    + "updated_by VARCHAR(100) NULL, "
                     + "updated_by VARCHAR(100) NULL, "
                     + "updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, "
                     + "CONSTRAINT fk_inventory_items_category FOREIGN KEY (category_id) "
@@ -84,7 +86,7 @@ public class InventoryDAO {
 
     public Optional<InventoryForm> findById(long id) throws SQLException {
         String sql = "SELECT i.item_id, i.name, c.name AS category, i.quantity, i.unit, i.minimum_stock, "
-                + "i.notes, i.updated_by, i.updated_at "
+                + "i.notes, i.image_path, i.updated_by, i.updated_at "
                 + "FROM inventory_items i JOIN inventory_categories c ON c.category_id = i.category_id "
                 + "WHERE i.item_id = ?";
         try (Connection conn = DatabaseConnector.getConnection()) {
@@ -103,7 +105,8 @@ public class InventoryDAO {
                             rs.getDouble("minimum_stock"),
                             rs.getString("notes"),
                             rs.getString("updated_by"),
-                            updated == null ? null : updated.toLocalDateTime()));
+                            updated == null ? null : updated.toLocalDateTime(),
+                            rs.getString("image_path")));
                 }
             }
         }
@@ -129,8 +132,9 @@ public class InventoryDAO {
     // =====================================================================
 
     public void insert(InventoryForm form, String updatedBy) throws SQLException {
-        String sql = "INSERT INTO inventory_items (name, category_id, quantity, unit, minimum_stock, notes, updated_by) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO inventory_items "
+                + "(name, category_id, quantity, unit, minimum_stock, notes, image_path, updated_by) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnector.getConnection()) {
             ensureSchema(conn);
             long categoryId = categoryId(conn, form.category());
@@ -141,7 +145,8 @@ public class InventoryDAO {
                 ps.setString(4, form.unit());
                 ps.setDouble(5, form.minimum());
                 ps.setString(6, form.notes());
-                ps.setString(7, updatedBy);
+                ps.setString(7, form.imagePath());
+                ps.setString(8, updatedBy);
                 ps.executeUpdate();
             }
         }
@@ -149,7 +154,8 @@ public class InventoryDAO {
 
     public void update(InventoryForm form, String updatedBy) throws SQLException {
         String sql = "UPDATE inventory_items SET name = ?, category_id = ?, quantity = ?, unit = ?, "
-                + "minimum_stock = ?, notes = ?, updated_by = ?, updated_at = NOW() WHERE item_id = ?";
+                + "minimum_stock = ?, notes = ?, image_path = ?, updated_by = ?, updated_at = NOW() "
+                + "WHERE item_id = ?";
         try (Connection conn = DatabaseConnector.getConnection()) {
             ensureSchema(conn);
             long categoryId = categoryId(conn, form.category());
@@ -160,8 +166,9 @@ public class InventoryDAO {
                 ps.setString(4, form.unit());
                 ps.setDouble(5, form.minimum());
                 ps.setString(6, form.notes());
-                ps.setString(7, updatedBy);
-                ps.setLong(8, form.id());
+                ps.setString(7, form.imagePath());
+                ps.setString(8, updatedBy);
+                ps.setLong(9, form.id());
                 ps.executeUpdate();
             }
         }
@@ -241,12 +248,7 @@ public class InventoryDAO {
         }
     }
 
-    /**
-     * Deletes a category that no item uses. If an item still uses it, the database
-     * refuses (foreign key) and an SQLException is thrown.
-     *
-     * @return true if a row was deleted
-     */
+
     public boolean deleteCategory(long id) throws SQLException {
         String sql = "DELETE FROM inventory_categories WHERE category_id = ?";
         try (Connection conn = DatabaseConnector.getConnection()) {
@@ -280,10 +282,15 @@ public class InventoryDAO {
 
             try (Statement st = conn.createStatement()) {
                 st.execute(CREATE_CATEGORIES);
-                st.execute(CREATE_ITEMS);   // no-op when the table already exists
+                st.execute(CREATE_ITEMS);
             }
             if (hasColumn(conn, "inventory_items", "category")) {
                 migrateTextCategories(conn);
+            }
+            if (!hasColumn(conn, "inventory_items", "image_path")) {
+                try (Statement st = conn.createStatement()) {
+                    st.executeUpdate("ALTER TABLE inventory_items ADD COLUMN image_path VARCHAR(255) NULL AFTER notes");
+                }
             }
             ready = true;
         }
@@ -291,19 +298,16 @@ public class InventoryDAO {
 
     private static void migrateTextCategories(Connection conn) throws SQLException {
         try (Statement st = conn.createStatement()) {
-            // 1) every distinct text category becomes a row in inventory_categories
             st.executeUpdate("INSERT IGNORE INTO inventory_categories (name) "
                     + "SELECT DISTINCT TRIM(category) FROM inventory_items "
                     + "WHERE category IS NOT NULL AND TRIM(category) <> ''");
 
-            // 2) add category_id and point each item at its category
             if (!hasColumn(conn, "inventory_items", "category_id")) {
                 st.executeUpdate("ALTER TABLE inventory_items ADD COLUMN category_id INT NULL AFTER name");
             }
             st.executeUpdate("UPDATE inventory_items i JOIN inventory_categories c ON c.name = TRIM(i.category) "
                     + "SET i.category_id = c.category_id");
 
-            // 3) items that had no category at all
             try (ResultSet rs = st.executeQuery(
                     "SELECT COUNT(*) FROM inventory_items WHERE category_id IS NULL")) {
                 rs.next();
@@ -315,7 +319,6 @@ public class InventoryDAO {
                 }
             }
 
-            // 4) lock it down and drop the old text column
             st.executeUpdate("ALTER TABLE inventory_items MODIFY category_id INT NOT NULL");
             st.executeUpdate("ALTER TABLE inventory_items ADD CONSTRAINT fk_inventory_items_category "
                     + "FOREIGN KEY (category_id) REFERENCES inventory_categories (category_id) ON DELETE RESTRICT");

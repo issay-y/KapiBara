@@ -11,6 +11,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
 
 <!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/inventory/InventoryFormView.fxml
      One form for both "Add inventory item" and "Edit inventory item".
@@ -122,13 +124,37 @@
                <Label styleClass="adm-stock-value" text="Quantity is zero" />
             </HBox>
 
-            <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="adm-banner">
-               <Label styleClass="adm-alert-icon" text="⚠" />
-               <VBox spacing="3.0">
-                  <Label styleClass="adm-alert-title" text="Set a useful minimum" />
-                  <Label styleClass="adm-alert-sub" text="This helps the team spot low stock before service is affected." wrapText="true" />
+            <!-- ================= RIGHT COLUMN: PHOTO + GUIDANCE ================= -->
+            <VBox prefWidth="380.0" minWidth="340.0" maxWidth="380.0" spacing="24.0">
+
+               <!-- Item photo -->
+               <VBox styleClass="adm-card" spacing="16.0">
+                  <Label styleClass="adm-card-title" text="Item photo" />
+
+                  <StackPane fx:id="photoBox" styleClass="adm-photo-box"
+                             minHeight="220.0" prefHeight="220.0" maxHeight="220.0" maxWidth="Infinity">
+                     <ImageView fx:id="photoView" preserveRatio="false" smooth="true" />
+                     <VBox fx:id="photoPlaceholder" alignment="CENTER" spacing="6.0" mouseTransparent="true">
+                        <Label styleClass="adm-photo-icon" text="📷" />
+                        <Label styleClass="adm-photo-title" text="No photo yet" />
+                        <Label styleClass="adm-form-note" text="PNG or JPG, up to 5 MB" />
+                     </VBox>
+                  </StackPane>
+
+                  <HBox alignment="CENTER_LEFT" spacing="14.0">
+                     <Button fx:id="photoBtn" onAction="#handleChoosePhoto" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                             styleClass="adm-outline-btn" text="Choose photo" />
+                     <Button fx:id="removePhotoBtn" onAction="#handleRemovePhoto" styleClass="adm-link" text="Remove" />
+                  </HBox>
+                  <Label styleClass="adm-form-note" wrapText="true"
+                         text="A clear, well-lit photo helps the team recognise the item at a glance." />
                </VBox>
-            </HBox>
+
+               <!-- Stock guidance (your existing card, now with VBox.vgrow) -->
+               <VBox styleClass="adm-card" spacing="20.0" VBox.vgrow="ALWAYS">
+                  <!-- ...keep your existing Stock guidance children exactly as they are... -->
+               </VBox>
+            </VBox>
          </VBox>
       </HBox>
    </VBox>

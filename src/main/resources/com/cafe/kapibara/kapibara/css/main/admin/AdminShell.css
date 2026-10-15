@@ -915,3 +915,130 @@
 .adm-row-line {
     -fx-background-color: #F0E4D6;
 }
+
+/* =====================================================================
+   Manage categories dialog + item photo tile
+   ===================================================================== */
+
+.cm-title {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.cm-section {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-muted;
+}
+
+.cm-card {
+    -fx-background-color: -adm-card;
+    -fx-background-radius: 16;
+    -fx-border-color: -adm-line;
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-padding: 4 0 4 0;
+    -fx-effect: dropshadow(gaussian, rgba(78,34,22,0.06), 8, 0, 0, 2);
+}
+
+.cm-card .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 10;
+    -fx-padding: 4;
+}
+.cm-card .scroll-bar .increment-button,
+.cm-card .scroll-bar .decrement-button { -fx-pref-height: 0; -fx-padding: 0; }
+.cm-card .scroll-bar .increment-arrow,
+.cm-card .scroll-bar .decrement-arrow  { -fx-padding: 0; -fx-shape: ""; }
+.cm-card .scroll-bar .track { -fx-background-color: transparent; }
+.cm-card .scroll-bar .thumb {
+    -fx-background-color: #D9C7B2;
+    -fx-background-radius: 6;
+}
+
+.cm-row {
+    -fx-padding: 12 22 12 22;
+    -fx-min-height: 68;
+}
+.cm-row:hover { -fx-background-color: #FBF3E8; }
+
+.cm-badge {
+    -fx-background-color: #F6E7D3;
+    -fx-background-radius: 11;
+    -fx-text-fill: #8A3B1F;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-pref-width: 40;
+    -fx-pref-height: 40;
+}
+
+.cm-row-name {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.cm-delete {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10;
+    -fx-border-color: #EDBFB5;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-padding: 7 18 7 18;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-red;
+    -fx-cursor: hand;
+}
+.cm-delete:hover { -fx-background-color: #FDECE8; }
+
+.cm-delete-locked {
+    -fx-border-color: -adm-line;
+    -fx-text-fill: #B9A99C;
+    -fx-cursor: default;
+}
+.cm-delete-locked:hover { -fx-background-color: transparent; }
+
+.cm-empty {
+    -fx-padding: 60 0 60 0;
+    -fx-font-size: 15px;
+    -fx-text-fill: -adm-muted;
+    -fx-text-alignment: center;
+}
+
+.cm-done {
+    -fx-background-color: -adm-brown;
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-pref-height: 46;
+    -fx-padding: 0 34 0 34;
+    -fx-cursor: hand;
+}
+.cm-done:hover { -fx-background-color: #3A190F; }
+
+/* Item photo tile (Add / Edit inventory form) */
+.adm-photo-box {
+    -fx-background-color: #FBF1E3;
+    -fx-background-radius: 14;
+    -fx-border-color: #E2CDB3;
+    -fx-border-style: dashed;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 14;
+}
+.adm-photo-box-filled {
+    -fx-border-style: solid;
+    -fx-border-color: -adm-line;
+}
+.adm-photo-icon  { -fx-font-size: 38px; }
+.adm-photo-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
