@@ -129,7 +129,6 @@ public class CashierController implements Initializable, CashierShell {
         return userRole;
     }
 
-    /** Asks first, because an unpaid order is thrown away when the cashier signs out. */
     @Override
     public void logout() {
         CashierStore store = CashierStore.get();
@@ -139,7 +138,9 @@ public class CashierController implements Initializable, CashierShell {
                 : "The current order has " + unpaid + (unpaid == 1 ? " item" : " items")
                 + " that haven't been paid. Logging out will discard it.";
 
-        if (!MessageBox.confirm(root, "Log out?", message, "Log out", "Stay signed in", true)) return;
+        if (!AlertsUtil.confirm(root, AlertsUtil.Type.WARNING, "Log out?", message, "Log out")) {
+            return;
+        }
 
         store.clear();
         WindowUtil.showLogin(WindowUtil.stageOf(root));

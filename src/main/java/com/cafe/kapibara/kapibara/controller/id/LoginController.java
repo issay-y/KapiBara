@@ -49,9 +49,7 @@ public class LoginController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         passwordVisibleField.textProperty().bindBidirectional(passwordField.textProperty());
-
         setupRoundedHeroImage(16);
-        loadRememberedUser();
 
         usernameField.setOnAction(e -> activePasswordField().requestFocus());
         passwordField.setOnAction(this::handleLogin);
@@ -116,7 +114,6 @@ public class LoginController implements Initializable {
         loginBtn.setDisable(true);
         loginBtn.setText("Signing in...");
 
-        final long t0 = System.nanoTime(); // TEMP timing, remove once the slowness is found
 
         Thread worker = new Thread(() -> {
             AuthResult result = null;
@@ -127,8 +124,6 @@ public class LoginController implements Initializable {
             } catch (Exception e) {
                 failure = e;
             }
-
-            System.out.println("[login] database + password check: " + ms(t0) + " ms");
 
             final AuthResult finalResult = result;
             final Exception finalFailure = failure;
@@ -147,9 +142,9 @@ public class LoginController implements Initializable {
 
                 switch (finalResult.status()) {
                     case SUCCESS -> {
-                        saveRememberedUser(username);
+                        AlertsUtil.info(loginBtn, "Login Success",
+                                "Welcome user: " + username );
                         onLoginSuccess(finalResult.user());
-                        System.out.println("[login] next screen loaded and shown: " + ms(t0) + " ms total");
                     }
                     case INACTIVE -> {
                         AlertsUtil.warning(loginBtn, "Account Disabled",
@@ -168,9 +163,6 @@ public class LoginController implements Initializable {
         worker.start();
     }
 
-    private static long ms(long startNanos) {
-        return (System.nanoTime() - startNanos) / 1_000_000;
-    }
 
     private AuthResult authenticate(String username, String password) throws Exception {
         Optional<User> match = userDAO.authenticate(username, password);

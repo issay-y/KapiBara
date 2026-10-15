@@ -174,8 +174,12 @@ public class AdminController implements Initializable, AdminShell {
     @FXML private void handleProfile(ActionEvent event)  { navigate(AdminPage.PROFILE); }
     @FXML private void handleSettings(ActionEvent event) { /* TODO: settings page */ }
 
-    @FXML
-    private void handleLogout(ActionEvent event) {
-        logout();
+    public void handleLogout() {
+        // Add confirmation before logging out the admin
+        if (!AlertsUtil.confirm(root, AlertsUtil.Type.CONFIRMATION, "Log out?", "You'll return to the sign-in screen.", "Log out")) {
+            return;
+        }
+
+        WindowUtil.showLogin(WindowUtil.stageOf(root));
     }
 }
