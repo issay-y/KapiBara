@@ -43,8 +43,6 @@
 
          <Region VBox.vgrow="ALWAYS" />
 
-         <Button fx:id="navProfile" maxWidth="Infinity" onAction="#handleNav" styleClass="adm-nav" text="◉   Profile" />
-         <Button fx:id="navSettings" maxWidth="Infinity" onAction="#handleSettings" styleClass="adm-nav" text="⚙   Settings" />
          <Button fx:id="navLogout" maxWidth="Infinity" onAction="#handleLogout" styleClass="adm-nav" text="⇥   Logout" />
          <Label styleClass="adm-side-version" text="KapiBara v1.0 • Caloocan">
             <VBox.margin><Insets top="10.0" /></VBox.margin>

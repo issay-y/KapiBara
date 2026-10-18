@@ -1,7 +1,6 @@
 package com.cafe.kapibara.kapibara.controller.main.cashier;
 
 import com.cafe.kapibara.kapibara.util.AlertsUtil;
-import com.cafe.kapibara.kapibara.util.MessageBox;
 import com.cafe.kapibara.kapibara.util.WindowUtil;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -43,7 +42,7 @@ public class CashierController implements Initializable, CashierShell {
     @FXML private Label userLabel;
 
     @FXML private Button navHome, navNewOrder, navTransactions;
-    @FXML private Button navProfile, navSettings, navLogout;
+    @FXML private Button navLogout;
 
     private final Map<Button, CashierPage> pageByButton = new LinkedHashMap<>();
     private CashierPage currentPage;
@@ -54,7 +53,6 @@ public class CashierController implements Initializable, CashierShell {
     public void initialize(URL location, ResourceBundle resources) {
         pageByButton.put(navHome, CashierPage.HOME);
         pageByButton.put(navNewOrder, CashierPage.NEW_ORDER);
-        pageByButton.put(navProfile, CashierPage.PROFILE);
         pageByButton.put(navTransactions, CashierPage.TRANSACTIONS);
 
 
@@ -175,6 +173,5 @@ public class CashierController implements Initializable, CashierShell {
         if (page != null) navigate(page);
     }
 
-    @FXML private void handleSettings(ActionEvent event)     { MessageBox.comingSoon(root, "Settings"); }
     @FXML private void handleLogout(ActionEvent event)       { logout(); }
 }

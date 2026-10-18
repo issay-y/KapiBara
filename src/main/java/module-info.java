@@ -13,6 +13,10 @@ module com.cafe.kapibara.kapibara {
     requires java.sql;
     requires jbcrypt;
 
+    // Excel export
+    requires org.apache.poi.poi;
+    requires org.apache.poi.ooxml;
+
     exports com.cafe.kapibara.kapibara.config;
 
     opens com.cafe.kapibara.kapibara to javafx.fxml;
@@ -53,4 +57,6 @@ module com.cafe.kapibara.kapibara {
     opens com.cafe.kapibara.kapibara.controller.main.cashier to javafx.fxml;
     exports com.cafe.kapibara.kapibara.util;
     opens com.cafe.kapibara.kapibara.util to javafx.fxml;
+    exports com.cafe.kapibara.kapibara.controller.main.admin.settings;
+    opens com.cafe.kapibara.kapibara.controller.main.admin.settings to javafx.fxml;
 }

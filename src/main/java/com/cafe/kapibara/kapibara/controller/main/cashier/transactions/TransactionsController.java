@@ -1,9 +1,12 @@
 package com.cafe.kapibara.kapibara.controller.main.cashier.transactions;
 
+import com.cafe.kapibara.kapibara.DAO.TransactionDAO;
 import com.cafe.kapibara.kapibara.controller.main.cashier.CashierPage;
 import com.cafe.kapibara.kapibara.controller.main.cashier.CashierShell;
 import com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore;
 import com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore.Sale;
+import com.cafe.kapibara.kapibara.util.MessageBox;
+import com.cafe.kapibara.kapibara.util.VoidGuard;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -15,6 +18,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -70,14 +74,16 @@ public class TransactionsController implements CashierShell.Aware {
     @Override
     public void attach(CashierShell shell) {
         this.shell = shell;
+        reloadHistory();
+        render();
+    }
 
+    private void reloadHistory() {
         try {
             store.refreshSalesHistory();
-        } catch (java.sql.SQLException e) {
+        } catch (SQLException e) {
             System.err.println("Could not load transactions from database: " + e.getMessage());
         }
-
-        render();
     }
 
     private void resetAndRender() {
@@ -94,8 +100,7 @@ public class TransactionsController implements CashierShell.Aware {
         String date = dateCombo.getValue();
         String query = searchField.getText() == null ? "" : searchField.getText().trim().toLowerCase(Locale.ROOT);
 
-        // Every sale in this build is a completed cash payment, so the Payment and Status
-        // filters keep everything for now. Add real checks here when voids/refunds exist.
+        // The list only holds COMPLETED sales (voided ones are excluded by the DAO query).
         List<Sale> list = new ArrayList<>(store.sales());
         list.removeIf(s -> !matchesDate(s, date, today));
         if (!query.isEmpty()) {
@@ -154,7 +159,7 @@ public class TransactionsController implements CashierShell.Aware {
             txGrid.add(textCell(money(sale.total()), "adm-td"), 4, row);
             txGrid.add(pillCell("Paid"), 5, row);
             txGrid.add(pillCell("Complete"), 6, row);
-            txGrid.add(viewCell(sale), 7, row);
+            txGrid.add(actionCell(sale), 7, row);
             row++;
         }
 
@@ -173,8 +178,8 @@ public class TransactionsController implements CashierShell.Aware {
         return l;
     }
 
-    private static HBox boxCell(Node content) {
-        HBox cell = new HBox(content);
+    private static HBox boxCell(Node... content) {
+        HBox cell = new HBox(14, content);
         cell.setAlignment(Pos.CENTER_LEFT);
         cell.getStyleClass().add("adm-td");
         cell.setMaxWidth(Double.MAX_VALUE);
@@ -188,7 +193,7 @@ public class TransactionsController implements CashierShell.Aware {
         return boxCell(pill);
     }
 
-    private HBox viewCell(Sale sale) {
+    private HBox actionCell(Sale sale) {
         Button view = new Button("View →");
         view.getStyleClass().add("adm-link");
         view.setFocusTraversable(false);
@@ -196,7 +201,38 @@ public class TransactionsController implements CashierShell.Aware {
             store.setViewedSale(sale);
             shell.navigate(CashierPage.TRANSACTION_DETAIL);
         });
-        return boxCell(view);
+
+        Button voidBtn = new Button("Void");
+        voidBtn.getStyleClass().add("adm-link");
+        voidBtn.setFocusTraversable(false);
+        voidBtn.setOnAction(e -> voidSale(sale, voidBtn));
+
+        return boxCell(view, voidBtn);
+    }
+
+    // ------------------------------------------------------------------
+    // Void (PIN-protected when the Settings switch is ON)
+    // ------------------------------------------------------------------
+
+    private void voidSale(Sale sale, Node owner) {
+        if (!VoidGuard.authorize(owner)) return;          // PIN check
+
+        if (!MessageBox.confirm(owner, "Void transaction?",
+                "Order #" + sale.number() + " (" + money(sale.total()) + ") will be voided.",
+                "Void", "Keep it", true)) {
+            return;
+        }
+        try {
+            if (new TransactionDAO().voidTransaction(sale.number())) {
+                MessageBox.info(owner, "Transaction voided", "Order #" + sale.number() + " was voided.");
+            } else {
+                MessageBox.info(owner, "Nothing changed", "That order was not found or is already voided.");
+            }
+        } catch (SQLException ex) {
+            MessageBox.info(owner, "Could not void", ex.getMessage());
+        }
+        reloadHistory();
+        render();
     }
 
     // ------------------------------------------------------------------

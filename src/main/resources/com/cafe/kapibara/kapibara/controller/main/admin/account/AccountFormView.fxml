@@ -13,11 +13,9 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
 
-<!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/account/AccountFormView.fxml
-     One form for both "Add team account" and "Edit account".
-     Content only: the sidebar and top bar come from AdminView.fxml.
-     Scaled up with the "adm-lg" modifier (see adm-lg-additions.css). -->
 <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.account.AccountFormController">
@@ -35,13 +33,17 @@
          <Button onAction="#handleBack" styleClass="adm-primary-btn" text="←   Back to accounts" />
       </HBox>
 
-      <!-- fillHeight + vgrow: both cards stretch to the bottom of the window -->
       <HBox alignment="TOP_LEFT" fillHeight="true" spacing="24.0" VBox.vgrow="ALWAYS">
 
-         <!-- ================= FORM CARD ================= -->
+         <!-- ================= FORM CARD (full height) ================= -->
          <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="20.0">
             <Label styleClass="adm-card-title" text="Account details" />
-            <Label styleClass="adm-form-note" text="Fields marked * are required." />
+
+            <TextFlow>
+               <Text styleClass="adm-note-text" text="Fields marked " />
+               <Text styleClass="adm-note-star" text="*" />
+               <Text styleClass="adm-note-text" text=" are required." />
+            </TextFlow>
 
             <GridPane hgap="28.0" vgap="20.0">
                <columnConstraints>
@@ -50,20 +52,28 @@
                </columnConstraints>
 
                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                  <Label styleClass="adm-form-label" text="Full name *" />
+                  <Label contentDisplay="RIGHT" graphicTextGap="3.0" styleClass="adm-form-label" text="Full name">
+                     <graphic><Label styleClass="adm-required" text="*" /></graphic>
+                  </Label>
                   <TextField fx:id="fullNameField" promptText="Enter full name" styleClass="adm-field" />
                </VBox>
                <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                  <Label styleClass="adm-form-label" text="Username *" />
+                  <Label contentDisplay="RIGHT" graphicTextGap="3.0" styleClass="adm-form-label" text="Username">
+                     <graphic><Label styleClass="adm-required" text="*" /></graphic>
+                  </Label>
                   <TextField fx:id="usernameField" promptText="e.g. mika.santos" styleClass="adm-field" />
                </VBox>
 
                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                  <Label styleClass="adm-form-label" text="Role *" />
+                  <Label contentDisplay="RIGHT" graphicTextGap="3.0" styleClass="adm-form-label" text="Role">
+                     <graphic><Label styleClass="adm-required" text="*" /></graphic>
+                  </Label>
                   <ComboBox fx:id="roleCombo" maxWidth="Infinity" styleClass="adm-combo" />
                </VBox>
                <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                  <Label styleClass="adm-form-label" text="Account status *" />
+                  <Label contentDisplay="RIGHT" graphicTextGap="3.0" styleClass="adm-form-label" text="Account status">
+                     <graphic><Label styleClass="adm-required" text="*" /></graphic>
+                  </Label>
                   <ComboBox fx:id="statusCombo" maxWidth="Infinity" styleClass="adm-combo" />
                </VBox>
             </GridPane>
@@ -81,7 +91,9 @@
                </columnConstraints>
 
                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                  <Label fx:id="passwordLabel" styleClass="adm-form-label" text="Password *" />
+                  <Label fx:id="passwordLabel" contentDisplay="RIGHT" graphicTextGap="3.0" styleClass="adm-form-label" text="Password">
+                     <graphic><Label styleClass="adm-required" text="*" /></graphic>
+                  </Label>
                   <StackPane>
                      <PasswordField fx:id="passwordField" promptText="Enter a password" styleClass="adm-field, adm-field-pw" />
                      <TextField fx:id="passwordVisibleField" managed="false" promptText="Enter a password" styleClass="adm-field, adm-field-pw" visible="false" />
@@ -92,7 +104,9 @@
                </VBox>
 
                <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                  <Label fx:id="confirmLabel" styleClass="adm-form-label" text="Confirm password *" />
+                  <Label fx:id="confirmLabel" contentDisplay="RIGHT" graphicTextGap="3.0" styleClass="adm-form-label" text="Confirm password">
+                     <graphic><Label styleClass="adm-required" text="*" /></graphic>
+                  </Label>
                   <StackPane>
                      <PasswordField fx:id="confirmField" promptText="Re-enter password" styleClass="adm-field, adm-field-pw" />
                      <TextField fx:id="confirmVisibleField" managed="false" promptText="Re-enter password" styleClass="adm-field, adm-field-pw" visible="false" />
@@ -106,7 +120,6 @@
             <Label fx:id="hintLabel" styleClass="adm-form-note" text="Use at least 8 characters. Confirm the details with your team member." />
             <Label fx:id="errorLabel" styleClass="adm-form-error" text="" wrapText="true" />
 
-            <!-- Pushes the buttons to the bottom of the card -->
             <Region VBox.vgrow="ALWAYS" />
 
             <HBox alignment="CENTER_RIGHT" spacing="14.0">
@@ -115,8 +128,9 @@
             </HBox>
          </VBox>
 
-         <!-- ================= WORKSPACE ROLES ================= -->
-         <VBox styleClass="adm-card" prefWidth="380.0" minWidth="340.0" maxWidth="380.0" spacing="22.0">
+         <!-- ============ WORKSPACE ROLES (hugs its text, brown stroke) ============ -->
+         <VBox styleClass="adm-card, adm-roles-card" prefWidth="380.0" minWidth="340.0" maxWidth="380.0"
+               maxHeight="-Infinity" spacing="22.0">
             <Label styleClass="adm-card-title" text="Workspace roles" />
             <VBox spacing="4.0">
                <Label styleClass="adm-role-name" text="Cashier" />

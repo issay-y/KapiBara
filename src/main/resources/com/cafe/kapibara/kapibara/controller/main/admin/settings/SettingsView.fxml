@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.settings.SettingsController">
+    <VBox spacing="24.0" styleClass="adm-page, adm-lg">
+        <padding>
+            <Insets top="32.0" right="40.0" bottom="32.0" left="40.0" />
+        </padding>
+
+        <!-- Header -->
+        <VBox spacing="5.0">
+            <Label styleClass="adm-page-title" text="Settings" />
+            <Label styleClass="adm-page-sub" text="Receipt details, sales exports and security for your café." />
+        </VBox>
+
+        <HBox alignment="TOP_LEFT" spacing="24.0" VBox.vgrow="ALWAYS">
+
+            <!-- ================= LEFT: RECEIPT INFORMATION ================= -->
+            <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" maxHeight="-Infinity" spacing="18.0">
+                <Label styleClass="adm-card-title" text="Receipt information" />
+                <Label styleClass="adm-form-note" text="These details are printed on every customer receipt." />
+
+                <VBox spacing="8.0">
+                    <Label styleClass="adm-form-label" text="Contact number" />
+                    <TextField fx:id="phoneField" promptText="e.g. 0917 123 4567" styleClass="adm-field" />
+                </VBox>
+                <VBox spacing="8.0">
+                    <Label styleClass="adm-form-label" text="Email address" />
+                    <TextField fx:id="emailField" promptText="e.g. hello@kapibara.cafe" styleClass="adm-field" />
+                </VBox>
+                <VBox spacing="8.0">
+                    <Label styleClass="adm-form-label" text="Address" />
+                    <TextArea fx:id="addressArea" prefRowCount="3" wrapText="true"
+                              promptText="Street, barangay, city" styleClass="adm-textarea" />
+                </VBox>
+
+                <Label fx:id="receiptStatus" styleClass="adm-form-note" text="" wrapText="true" />
+
+                <HBox alignment="CENTER_RIGHT" spacing="14.0">
+                    <Button fx:id="receiptResetBtn" onAction="#handleReceiptReset" styleClass="adm-page-btn" text="Reset" />
+                    <Button fx:id="receiptSaveBtn" onAction="#handleReceiptSave" styleClass="adm-primary-btn" text="✓   Save receipt info" />
+                </HBox>
+            </VBox>
+
+            <!-- ================= RIGHT COLUMN ================= -->
+            <VBox spacing="24.0" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+
+                <!-- EXPORT -->
+                <VBox styleClass="adm-card" maxHeight="-Infinity" spacing="18.0">
+                    <Label styleClass="adm-card-title" text="Export sales to Excel" />
+                    <Label styleClass="adm-form-note" text="Pick a month and download its transactions as an .xlsx file." />
+
+                    <HBox spacing="16.0">
+                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                            <Label styleClass="adm-form-label" text="Month" />
+                            <ComboBox fx:id="monthCombo" maxWidth="Infinity" styleClass="adm-combo" />
+                        </VBox>
+                        <VBox spacing="8.0" prefWidth="160.0" minWidth="160.0">
+                            <Label styleClass="adm-form-label" text="Year" />
+                            <ComboBox fx:id="yearCombo" maxWidth="Infinity" styleClass="adm-combo" />
+                        </VBox>
+                    </HBox>
+
+                    <Label fx:id="exportStatus" styleClass="adm-form-note" text="" wrapText="true" />
+
+                    <HBox alignment="CENTER_RIGHT">
+                        <Button fx:id="exportBtn" onAction="#handleExport" styleClass="adm-primary-btn" text="⭳   Export month" />
+                    </HBox>
+                </VBox>
+
+                <!-- SECURITY -->
+                <VBox styleClass="adm-card" maxHeight="-Infinity" spacing="18.0">
+                    <Label styleClass="adm-card-title" text="Security" />
+
+                    <HBox alignment="CENTER_LEFT" spacing="16.0">
+                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                            <Label styleClass="adm-role-name" text="Require PIN for voiding" />
+                            <Label styleClass="adm-role-desc" text="Cashiers must enter the PIN before a transaction can be voided." wrapText="true" />
+                        </VBox>
+                        <ToggleButton fx:id="pinSwitch" focusTraversable="false" styleClass="adm-switch" text="OFF" />
+                    </HBox>
+
+                    <VBox fx:id="pinBox" spacing="18.0" managed="false" visible="false">
+                        <HBox spacing="16.0">
+                            <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                <Label fx:id="pinLabel" styleClass="adm-form-label" text="PIN (4–6 digits)" />
+                                <PasswordField fx:id="pinField" promptText="Enter PIN" styleClass="adm-field" />
+                            </VBox>
+                            <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                <Label styleClass="adm-form-label" text="Confirm PIN" />
+                                <PasswordField fx:id="confirmPinField" promptText="Re-enter PIN" styleClass="adm-field" />
+                            </VBox>
+                        </HBox>
+                        <HBox alignment="CENTER_RIGHT">
+                            <Button fx:id="pinSaveBtn" onAction="#handlePinSave" styleClass="adm-page-btn" text="Save PIN" />
+                        </HBox>
+                    </VBox>
+
+                    <Label fx:id="pinStatus" styleClass="adm-form-note" text="" wrapText="true" />
+                </VBox>
+
+                <Region VBox.vgrow="ALWAYS" />
+            </VBox>
+        </HBox>
+    </VBox>
+</ScrollPane>

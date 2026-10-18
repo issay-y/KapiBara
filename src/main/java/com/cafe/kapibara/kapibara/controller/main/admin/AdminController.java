@@ -25,10 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-/**
- * The admin shell: sidebar + top bar. Every admin page (home, transactions, sales,
- * inventory, accounts, profile) is loaded into {@link #contentHolder}.
- */
+
 public class AdminController implements Initializable, AdminShell {
 
     private static final String BRANCH = "Caloocan branch";
@@ -45,7 +42,7 @@ public class AdminController implements Initializable, AdminShell {
     @FXML private Label userLabel;
 
     @FXML private Button navHome, navTransactions, navSales, navInventory, navAccounts;
-    @FXML private Button navProfile, navSettings, navLogout;
+    @FXML private Button navSettings, navLogout;
 
     private final Map<Button, AdminPage> pageByButton = new LinkedHashMap<>();
     private AdminPage currentPage;
@@ -60,13 +57,12 @@ public class AdminController implements Initializable, AdminShell {
         pageByButton.put(navSales, AdminPage.SALES);
         pageByButton.put(navInventory, AdminPage.INVENTORY);
         pageByButton.put(navAccounts, AdminPage.ACCOUNTS);
-        pageByButton.put(navProfile, AdminPage.PROFILE);
+        pageByButton.put(navSettings, AdminPage.SETTINGS);
+
 
         dateLabel.setText(LocalDate.now().format(TOP_DATE));
         loadLogo();
 
-        // Open the home page after the login code has called setCurrentUser(...),
-        // so pages can greet the signed-in user by name.
         Platform.runLater(() -> {
             if (currentPage == null) navigate(AdminPage.HOME);
         });
@@ -146,7 +142,6 @@ public class AdminController implements Initializable, AdminShell {
         return userRole;
     }
 
-    /** Signs out and returns to the login window. Used by the sidebar and the profile page. */
     @Override
     public void logout() {
         WindowUtil.showLogin(WindowUtil.stageOf(root));
@@ -171,11 +166,7 @@ public class AdminController implements Initializable, AdminShell {
         if (page != null) navigate(page);
     }
 
-    @FXML private void handleProfile(ActionEvent event)  { navigate(AdminPage.PROFILE); }
-    @FXML private void handleSettings(ActionEvent event) { /* TODO: settings page */ }
-
     public void handleLogout() {
-        // Add confirmation before logging out the admin
         if (!AlertsUtil.confirm(root, AlertsUtil.Type.WARNING, "Log out?", "You'll return to the sign-in screen.", "Log out")) {
             return;
         }

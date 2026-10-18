@@ -5,6 +5,8 @@ import com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore.Sale;
 import com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore.SaleLine;
 
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,6 +77,21 @@ public class TransactionDAO {
     }
 
     // =====================================================================
+    //  WRITE: VOID TRANSACTION
+    // =====================================================================
+
+    /** Marks a completed transaction as VOIDED. Returns false if it was not found or already voided. */
+    public boolean voidTransaction(String orderNumber) throws SQLException {
+        String sql = "UPDATE transactions SET status = 'VOIDED' "
+                + "WHERE order_number = ? AND status = 'COMPLETED'";
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, orderNumber);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // =====================================================================
     //  READ: GET ALL TRANSACTIONS
     // =====================================================================
 
@@ -125,5 +142,47 @@ public class TransactionDAO {
             }
         }
         return sales;
+    }
+
+    // =====================================================================
+    //  READ: ROWS FOR EXCEL EXPORT (one month)
+    // =====================================================================
+
+    public List<List<Object>> findForExport(YearMonth ym) throws SQLException {
+        LocalDateTime from = ym.atDay(1).atStartOfDay();
+        LocalDateTime to = ym.plusMonths(1).atDay(1).atStartOfDay();
+
+        String sql = "SELECT t.created_at, t.order_number, t.cashier_name, "
+                + "(SELECT GROUP_CONCAT(CONCAT(ti.quantity, ' x ', ti.item_name) SEPARATOR ', ') "
+                + "   FROM transaction_items ti WHERE ti.transaction_id = t.transaction_id) AS items, "
+                + "t.subtotal, t.vat, t.discount, t.total_amount, t.status "
+                + "FROM transactions t "
+                + "WHERE t.created_at >= ? AND t.created_at < ? "
+                + "ORDER BY t.created_at ASC";
+
+        List<List<Object>> rows = new ArrayList<>();
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setTimestamp(1, Timestamp.valueOf(from));
+            ps.setTimestamp(2, Timestamp.valueOf(to));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Timestamp ts = rs.getTimestamp("created_at");
+                    List<Object> row = new ArrayList<>();
+                    row.add(ts == null ? "" : ts.toLocalDateTime().toString().replace('T', ' '));
+                    row.add(rs.getString("order_number"));
+                    row.add(rs.getString("cashier_name"));
+                    row.add(rs.getString("items"));
+                    row.add(rs.getDouble("subtotal"));
+                    row.add(rs.getDouble("vat"));
+                    row.add(rs.getDouble("discount"));
+                    row.add(rs.getDouble("total_amount"));
+                    row.add(rs.getString("status"));
+                    rows.add(row);
+                }
+            }
+        }
+        return rows;
     }
 }

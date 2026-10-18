@@ -1093,3 +1093,144 @@
 .adm-sales .adm-seller-bar > .bar {
     -fx-padding: 6;
 }
+
+/* =====================================================================
+   Account form: red required asterisk + compact roles card
+   ===================================================================== */
+
+.adm-required {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-red;
+}
+.adm-lg .adm-required { -fx-font-size: 14px; }
+
+/* "Fields marked * are required." line (Text nodes use -fx-fill) */
+.adm-note-text {
+    -fx-font-size: 11px;
+    -fx-fill: -adm-muted;
+}
+.adm-note-star {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-fill: -adm-red;
+}
+.adm-lg .adm-note-text,
+.adm-lg .adm-note-star { -fx-font-size: 13px; }
+
+/* Workspace roles card: brown outline, same as the sidebar */
+.adm-card.adm-roles-card {
+    -fx-border-color: -adm-brown;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+}
+
+/* =====================================================================
+   Settings page
+   ===================================================================== */
+
+.adm-textarea {
+    -fx-background-color: -adm-card;
+    -fx-background-radius: 12;
+    -fx-border-color: #E8DACB;
+    -fx-border-radius: 12;
+    -fx-font-size: 16px;
+    -fx-text-fill: -adm-text;
+    -fx-prompt-text-fill: #A89A90;
+    -fx-padding: 0;
+}
+.adm-textarea:focused { -fx-border-color: -adm-red; }
+.adm-textarea .scroll-pane,
+.adm-textarea .viewport,
+.adm-textarea .content {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-text-fill: -adm-text;
+}
+.adm-textarea .content { -fx-padding: 10 14 10 14; }
+
+.adm-switch {
+    -fx-background-color: #E3D2BF;
+    -fx-background-radius: 999;
+    -fx-text-fill: -adm-text;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-min-width: 92px;
+    -fx-padding: 10 22 10 22;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.adm-switch:selected {
+    -fx-background-color: #2F8F4E;
+    -fx-text-fill: white;
+}
+
+.adm-lg .adm-card {
+    -fx-border-color: -adm-brown;
+    -fx-border-width: 1.5;
+}
+
+/* =====================================================================
+   PIN dialog (VoidGuard)
+   ===================================================================== */
+
+.adm-root.pin-root {
+    -fx-background-color: transparent;
+    -fx-padding: 24;
+}
+
+.pin-card {
+    -fx-background-color: #FFFCF8;
+    -fx-background-radius: 18;
+    -fx-border-color: #4E2216;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 18;
+    -fx-padding: 28 28 24 28;
+    -fx-effect: dropshadow(gaussian, rgba(78,34,22,0.35), 24, 0, 0, 6);
+}
+
+.pin-icon-wrap {
+    -fx-background-color: #F6E7D3;
+    -fx-background-radius: 999;
+    -fx-min-width: 60px;
+    -fx-min-height: 60px;
+    -fx-pref-width: 60px;
+    -fx-pref-height: 60px;
+    -fx-max-width: 60px;
+    -fx-max-height: 60px;
+}
+
+.pin-icon {
+    -fx-font-size: 26px;
+}
+
+.pin-title {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4E2216;
+}
+
+.pin-note {
+    -fx-font-size: 13px;
+    -fx-text-fill: #8A7A70;
+    -fx-text-alignment: center;
+}
+
+.pin-field {
+    -fx-alignment: center;
+    -fx-font-size: 20px;
+    -fx-pref-height: 50px;
+}
+
+.pin-card .adm-form-error {
+    -fx-text-alignment: center;
+}
+
+.pin-btn {
+    -fx-pref-height: 46px;
+    -fx-padding: 0 20 0 20;
+    -fx-font-size: 14px;
+}

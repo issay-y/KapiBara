@@ -9,6 +9,7 @@ import com.cafe.kapibara.kapibara.controller.main.cashier.ProductCards;
 import com.cafe.kapibara.kapibara.util.MessageBox;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import com.cafe.kapibara.kapibara.util.VoidGuard;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -247,7 +248,26 @@ public class NewOrderController implements CashierShell.Aware {
                 "Remove " + p.getName() + " from this order?", "Remove", "Keep it", true)) {
             return;
         }
+        if (!VoidGuard.authorize(payBtn)) return;   // PIN check
         store.remove(p);
+        renderProducts();
+        renderOrder();
+    }
+
+    @FXML
+    private void handleClear() {
+        if (store.isEmpty()) {
+            MessageBox.info(payBtn, "Nothing to clear", "The order is already empty.");
+            return;
+        }
+        int n = store.itemCount();
+        if (!MessageBox.confirm(payBtn, "Clear order?",
+                "All " + n + (n == 1 ? " item" : " items") + " will be removed from this order.",
+                "Clear order", "Keep order", true)) {
+            return;
+        }
+        if (!VoidGuard.authorize(payBtn)) return;   // PIN check
+        store.clear();
         renderProducts();
         renderOrder();
     }
@@ -265,22 +285,6 @@ public class NewOrderController implements CashierShell.Aware {
         shell.navigate(CashierPage.CHECKOUT);
     }
 
-    @FXML
-    private void handleClear() {
-        if (store.isEmpty()) {
-            MessageBox.info(payBtn, "Nothing to clear", "The order is already empty.");
-            return;
-        }
-        int n = store.itemCount();
-        if (!MessageBox.confirm(payBtn, "Clear order?",
-                "All " + n + (n == 1 ? " item" : " items") + " will be removed from this order.",
-                "Clear order", "Keep order", true)) {
-            return;
-        }
-        store.clear();
-        renderProducts();
-        renderOrder();
-    }
 
     @FXML
     private void handleBrowse() {
