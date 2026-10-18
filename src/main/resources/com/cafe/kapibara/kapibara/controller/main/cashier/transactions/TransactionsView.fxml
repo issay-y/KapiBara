@@ -13,8 +13,6 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<!-- resources/com/cafe/kapibara/kapibara/controller/main/cashier/transactions/TransactionsView.fxml
-     Content only: the sidebar and top bar come from CashierView.fxml. -->
 <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cafe.kapibara.kapibara.controller.main.cashier.transactions.TransactionsController">
@@ -23,15 +21,13 @@
          <Insets top="32.0" right="40.0" bottom="32.0" left="40.0" />
       </padding>
 
-      <!-- Header -->
       <VBox spacing="5.0">
          <Label styleClass="adm-page-title" text="Transactions" />
          <Label styleClass="adm-page-sub" text="A clear record of every completed counter order." />
       </VBox>
 
-      <!-- Filters -->
       <HBox alignment="BOTTOM_LEFT" spacing="16.0">
-         <StackPane HBox.hgrow="ALWAYS">
+         <StackPane HBox.hgrow="ALWAYS" minHeight="52.0" prefHeight="52.0" maxHeight="52.0">
             <TextField fx:id="searchField" promptText="Search transaction number or cashier..." styleClass="adm-search" />
             <Label mouseTransparent="true" styleClass="adm-search-icon" text="🔍" StackPane.alignment="CENTER_LEFT">
                <StackPane.margin><Insets left="18.0" /></StackPane.margin>
@@ -39,20 +35,19 @@
          </StackPane>
          <VBox spacing="8.0">
             <Label styleClass="adm-filter-label" text="Date Filter" />
-            <ComboBox fx:id="dateCombo" prefWidth="230.0" styleClass="adm-combo" />
+            <ComboBox fx:id="dateCombo" minHeight="52.0" prefHeight="52.0" prefWidth="230.0" styleClass="adm-combo" />
          </VBox>
          <VBox spacing="8.0">
             <Label styleClass="adm-filter-label" text="Payment" />
-            <ComboBox fx:id="paymentCombo" prefWidth="270.0" styleClass="adm-combo" />
+            <ComboBox fx:id="paymentCombo" minHeight="52.0" prefHeight="52.0" prefWidth="270.0" styleClass="adm-combo" />
          </VBox>
          <VBox spacing="8.0">
             <Label styleClass="adm-filter-label" text="Status" />
-            <ComboBox fx:id="statusCombo" prefWidth="250.0" styleClass="adm-combo" />
+            <ComboBox fx:id="statusCombo" minHeight="52.0" prefHeight="52.0" prefWidth="250.0" styleClass="adm-combo" />
          </VBox>
          <Button fx:id="sortBtn" minHeight="52.0" onAction="#handleSort" prefHeight="52.0" styleClass="adm-outline-btn" text="⇅   Newest first" />
       </HBox>
 
-      <!-- Table -->
       <GridPane fx:id="txGrid" styleClass="adm-table">
          <columnConstraints>
             <ColumnConstraints percentWidth="19.0" />
@@ -68,7 +63,6 @@
 
       <Region VBox.vgrow="ALWAYS" />
 
-      <!-- Footer: count + pagination -->
       <HBox alignment="CENTER_LEFT">
          <Label fx:id="showingLabel" styleClass="adm-card-foot" text="" />
          <Region HBox.hgrow="ALWAYS" />

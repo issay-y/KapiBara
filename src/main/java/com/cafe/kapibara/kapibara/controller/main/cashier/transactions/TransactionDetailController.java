@@ -19,7 +19,6 @@
 
     import static com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore.money;
 
-    /** "Transaction details": one completed sale, opened from the Transactions list or a receipt. */
     public class TransactionDetailController implements CashierShell.Aware {
 
         private static final DateTimeFormatter LONG_DAY = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
