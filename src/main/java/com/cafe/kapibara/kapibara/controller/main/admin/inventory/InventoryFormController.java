@@ -40,12 +40,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.TreeSet;
 
-/**
- * One form for both "Add inventory item" and "Edit inventory item".
- * Edit mode is used when the page was opened with an item id as its payload.
- * Categories come from the inventory_categories table and can be managed from here.
- * An item can carry one photo (PNG / JPG, up to 5 MB).
- */
 public class InventoryFormController implements Initializable, AdminShell.Aware {
 
     private static final List<String> DEFAULT_UNITS =
@@ -64,7 +58,7 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
     @FXML private VBox photoPlaceholder;
     @FXML private Button photoBtn, removePhotoBtn;
 
-    private static final double PHOTO_SIZE = 200;   // must match the StackPane size in the FXML
+    private static final double PHOTO_SIZE = 200;
     private final InventoryDAO inventoryDAO = new InventoryDAO();
     private AdminShell shell;
 
@@ -72,14 +66,13 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
     private long editingId;
     private String saveText = "✓   Save item";
 
-    private boolean loading = true;   // true while fields are being filled in code
-    private boolean dirty;            // true once the person has changed something
+    private boolean loading = true;
+    private boolean dirty;
 
-    // photo state
-    private String currentImage;      // file name already stored for this item (edit mode)
-    private Path pickedFile;          // a new photo chosen in this session, not saved yet
-    private boolean removeImage;      // the stored photo should be removed on save
-    private Image photoImage;         // what the preview currently shows
+    private String currentImage;
+    private Path pickedFile;
+    private boolean removeImage;
+    private Image photoImage;
 
     private final ChangeListener<Object> markDirty = (obs, old, now) -> {
         if (!loading) dirty = true;
@@ -104,12 +97,10 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         categoryCombo.valueProperty().addListener(markDirty);
         unitCombo.valueProperty().addListener(markDirty);
 
-        // Status is worked out from quantity and minimum, so it updates as they type.
         quantityField.textProperty().addListener((obs, old, now) -> updateStatusPreview());
         minimumField.textProperty().addListener((obs, old, now) -> updateStatusPreview());
         updateStatusPreview();
 
-        // Fixed-size circular photo. No listeners, so it can never feed back into layout.
         photoBox.setClip(new Circle(PHOTO_SIZE / 2, PHOTO_SIZE / 2, PHOTO_SIZE / 2));
         photoView.setFitWidth(PHOTO_SIZE);
         photoView.setFitHeight(PHOTO_SIZE);
@@ -129,7 +120,7 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         }
         configureTexts();
 
-        saveBtn.setDisable(true);   // until the lists (and the item, when editing) have loaded
+        saveBtn.setDisable(true);
         loadLookups();
     }
 
@@ -152,7 +143,6 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         saveBtn.setText(saveText);
     }
 
-    /** Only digits and one decimal point (up to 2 decimals), so quantities can't be negative or text. */
     private static void numbersOnly(TextField field) {
         field.setTextFormatter(new TextFormatter<String>(change ->
                 change.getControlNewText().matches("\\d{0,7}([.]\\d{0,2})?") ? change : null));
@@ -326,7 +316,6 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         layoutPhoto();
     }
 
-    /** Crops the picture to a centered square so it fills the circle (like a cover photo). */
     private void layoutPhoto() {
         if (photoImage == null || photoImage.getWidth() <= 0) {
             photoView.setViewport(null);
@@ -347,7 +336,6 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         CategoryManagerDialog.show(saveBtn, this::reloadCategories);
     }
 
-    /** Reloads the category list after the Manage categories window changed something. */
     private void reloadCategories() {
         Thread worker = new Thread(() -> {
             List<String> categories = List.of();
@@ -459,7 +447,6 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
                 }
             } catch (Throwable t) {
                 failure = t;
-                // the database save failed, so don't leave the copied photo behind
                 if (replaced && stored != null && !stored.equals(previous)) InventoryImages.delete(stored);
             }
 
@@ -478,11 +465,20 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
                     nameField.requestFocus();
                 } else {
                     dirty = false;
-                    AlertsUtil.info(saveBtn,
-                            editMode ? "Changes saved" : "Item added",
-                            editMode ? form.name() + " has been updated."
-                                    : form.name() + " has been added to the inventory.");
-                    shell.navigate(AdminPage.INVENTORY);
+                    if (editMode) {
+                        AlertsUtil.info(saveBtn, "Changes saved", form.name() + " has been updated.");
+                        shell.navigate(AdminPage.INVENTORY);
+                    } else {
+                        boolean another = AlertsUtil.confirm(saveBtn, AlertsUtil.Type.CONFIRMATION,
+                                "Item added",
+                                form.name() + " has been added to the inventory.\nDo you want to add another item?",
+                                "Add another");
+                        if (another) {
+                            resetForm();
+                        } else {
+                            shell.navigate(AdminPage.INVENTORY);
+                        }
+                    }
                 }
             });
         }, "save-inventory-item");
@@ -494,7 +490,6 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
     //  VALIDATION + HELPERS
     // =====================================================================
 
-    /** @return a message describing the first problem, or null if the form is valid */
     private String validate() {
         String name = nameField.getText().trim();
 
@@ -535,6 +530,29 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
                 null,
                 null,
                 currentImage);
+    }
+
+    private void resetForm() {
+        loading = true;
+        nameField.clear();
+        notesField.clear();
+        quantityField.setText("0");
+        minimumField.setText("0");
+        priceField.setText("0");
+        categoryCombo.setValue(null);
+        unitCombo.setValue(null);
+
+        pickedFile = null;
+        removeImage = false;
+        currentImage = null;
+        showPhoto(null);
+
+        updateStatusPreview();
+        clearError();
+
+        loading = false;
+        dirty = false;
+        nameField.requestFocus();
     }
 
     private void showError(String message) {
