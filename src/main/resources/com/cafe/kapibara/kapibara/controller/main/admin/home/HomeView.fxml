@@ -14,18 +14,19 @@
 <?import javafx.scene.layout.VBox?>
 
 <!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/home/HomeView.fxml
-     Content only: the sidebar and top bar come from AdminView.fxml. -->
+     Content only: the sidebar and top bar come from AdminView.fxml.
+     Scaled up with "adm-lg" (see AdminShell.css); "adm-home" keeps the Home-only tweaks. -->
 <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="adm-scroll"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.home.HomeController">
-   <VBox spacing="16.0" styleClass="adm-page, adm-home">
+   <VBox spacing="16.0" styleClass="adm-page, adm-lg, adm-home">
       <padding>
-         <Insets top="20.0" right="28.0" bottom="20.0" left="28.0" />
+         <Insets top="20.0" right="40.0" bottom="20.0" left="40.0" />
       </padding>
 
       <!-- Header -->
       <HBox alignment="CENTER_LEFT">
-         <VBox spacing="3.0" HBox.hgrow="ALWAYS">
+         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
             <Label styleClass="adm-page-title" text="Café administration" />
             <Label fx:id="greetingLabel" styleClass="adm-page-sub" text="Your team, records and stock in one view." />
          </VBox>
@@ -33,7 +34,7 @@
       </HBox>
 
       <!-- KPI row -->
-      <HBox spacing="14.0">
+      <HBox spacing="22.0">
          <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
             <Label styleClass="adm-kpi-label" text="Today's Sales" />
             <Label fx:id="todaySalesValue" styleClass="adm-kpi-value" text="₱18,480" />
@@ -57,7 +58,7 @@
       </HBox>
 
       <!-- Sales rhythm + best sellers -->
-      <HBox spacing="14.0" VBox.vgrow="ALWAYS" prefHeight="300.0">
+      <HBox spacing="22.0" VBox.vgrow="ALWAYS" prefHeight="300.0">
          <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="2.0">
             <HBox alignment="CENTER_LEFT">
                <Label styleClass="adm-card-title" text="Today's sales rhythm" />
@@ -83,14 +84,14 @@
             </HBox>
          </VBox>
 
-         <VBox styleClass="adm-card" prefWidth="400.0" minWidth="340.0" maxWidth="400.0" spacing="12.0">
+         <VBox styleClass="adm-card" prefWidth="440.0" minWidth="380.0" maxWidth="440.0" spacing="14.0">
             <Label styleClass="adm-card-title" text="Best sellers today" />
-            <VBox fx:id="bestSellersBox" spacing="12.0" />
+            <VBox fx:id="bestSellersBox" spacing="14.0" />
          </VBox>
       </HBox>
 
       <!-- Recent transactions + team & stock attention -->
-      <HBox spacing="14.0" VBox.vgrow="ALWAYS" prefHeight="300.0">
+      <HBox spacing="22.0" VBox.vgrow="ALWAYS" prefHeight="300.0">
          <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="12.0">
             <Label styleClass="adm-card-title" text="Recent transactions" />
             <GridPane fx:id="recentGrid" styleClass="adm-table">
@@ -105,7 +106,7 @@
             <Button onAction="#handleOpenTransactions" styleClass="adm-link" text="View transactions →" />
          </VBox>
 
-         <VBox styleClass="adm-card" prefWidth="400.0" minWidth="340.0" maxWidth="400.0" spacing="12.0">
+         <VBox styleClass="adm-card" prefWidth="440.0" minWidth="380.0" maxWidth="440.0" spacing="12.0">
             <Label styleClass="adm-card-title" text="Team &amp; stock attention" />
             <HBox styleClass="adm-alert" spacing="10.0" alignment="CENTER_LEFT">
                <Label styleClass="adm-alert-icon" text="⚠" />
