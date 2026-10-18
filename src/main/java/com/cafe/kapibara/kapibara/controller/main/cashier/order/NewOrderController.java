@@ -7,10 +7,13 @@ import com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore.Line;
 import com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore.Product;
 import com.cafe.kapibara.kapibara.controller.main.cashier.ProductCards;
 import com.cafe.kapibara.kapibara.util.MessageBox;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -54,6 +57,7 @@ public class NewOrderController implements CashierShell.Aware {
     @Override
     public void attach(CashierShell shell) {
         this.shell = shell;
+        hideScrollBars();
         loadMenu();
         renderChips();
         renderProducts();
@@ -73,6 +77,34 @@ public class NewOrderController implements CashierShell.Aware {
         List<String> categories = store.categories();
         if (category != null && !categories.contains(category)) {
             category = null;   // the chosen category no longer exists: fall back to "All"
+        }
+    }
+
+    /**
+     * Makes the scroll bars on this page invisible while the lists still scroll
+     * (mouse wheel, touch drag, keyboard). The CSS lives in Cashier.css (.csh-quiet).
+     */
+    private void hideScrollBars() {
+        Runnable apply = () -> {
+            if (productGrid.getScene() != null) {
+                productGrid.getScene().getRoot().applyCss();   // makes sure the scroll panes have their skins
+            }
+            quiet(productGrid);
+            quiet(linesBox);
+        };
+        productGrid.sceneProperty().addListener((obs, old, scene) -> {
+            if (scene != null) Platform.runLater(apply);
+        });
+        if (productGrid.getScene() != null) Platform.runLater(apply);
+    }
+
+    /** Marks the nearest scroll pane around the node. */
+    private static void quiet(Node start) {
+        for (Node n = start; n != null; n = n.getParent()) {
+            if (n instanceof ScrollPane) {
+                if (!n.getStyleClass().contains("csh-quiet")) n.getStyleClass().add("csh-quiet");
+                return;
+            }
         }
     }
 

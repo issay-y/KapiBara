@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -14,11 +15,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Circle;
 
 import java.io.File;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +32,9 @@ public final class ProductCards {
     private static final String IMG_DIR = "/com/cafe/kapibara/kapibara/images/menu/";
     private static final Map<String, Optional<Image>> IMAGES = new HashMap<>();
 
-    private static final double COVER_COMPACT = 200;
-    private static final double COVER_WIDE = 170;
+    private static final double PHOTO_COMPACT = 128;   // New Order (3 columns)
+    private static final double PHOTO_WIDE = 104;      // Browse (4 columns)
+    private static final double RIM = 5;               // cream ring around the photo
 
     private ProductCards() { }
 
@@ -68,36 +69,39 @@ public final class ProductCards {
     }
 
     // ------------------------------------------------------------------
-    // Cards: tall rectangle. Picture with tags on top, then name, description,
-    // details (availability, unit, in this order), price and the Add button.
+    // Cards: round photo on the left, details on the right
+    // (name, category, price, quantity, availability, Add button)
     // ------------------------------------------------------------------
 
     /** Used by the New Order grid (3 columns). */
     public static VBox compact(Product p, int inCart, Consumer<Product> onAdd) {
-        return build(p, inCart, onAdd, COVER_COMPACT);
+        return build(p, inCart, onAdd, PHOTO_COMPACT);
     }
 
-    /** Used by Browse (4 columns): same card with a slightly shorter picture. */
+    /** Used by Browse (4 columns): same card with a slightly smaller photo. */
     public static VBox wide(Product p, int inCart, Consumer<Product> onAdd) {
-        return build(p, inCart, onAdd, COVER_WIDE);
+        return build(p, inCart, onAdd, PHOTO_WIDE);
     }
 
-    private static VBox build(Product p, int inCart, Consumer<Product> onAdd, double coverHeight) {
+    private static VBox build(Product p, int inCart, Consumer<Product> onAdd, double photoSize) {
+        Button action = actionButton(p, inCart, onAdd);
+        VBox.setMargin(action, new Insets(6, 0, 0, 0));
+
+        VBox info = new VBox(3, name(p), category(p), priceRow(p), qty(p), status(p), action);
+        info.setAlignment(Pos.CENTER_LEFT);
+        info.setMinWidth(0);
+        HBox.setHgrow(info, Priority.ALWAYS);
+
+        HBox row = new HBox(14, photo(p, photoSize), info);
+        row.setAlignment(Pos.CENTER_LEFT);
+
         VBox card = baseCard(inCart);
-        card.getChildren().addAll(
-                cover(p, coverHeight),
-                name(p),
-                category(p),
-                divider(),
-                details(p, inCart),
-                grow(),
-                priceRow(p),
-                actionButton(p, inCart, onAdd));
+        card.getChildren().add(row);
         return card;
     }
 
     private static VBox baseCard(int inCart) {
-        VBox card = new VBox(10);
+        VBox card = new VBox();
         card.getStyleClass().add("csh-product-card");
         if (inCart > 0) card.getStyleClass().add("csh-product-card-selected");
         card.setMaxWidth(Double.MAX_VALUE);
@@ -106,80 +110,44 @@ public final class ProductCards {
         return card;
     }
 
+    /** One line; a long name ends in "..." and shows in full when hovered. */
     private static Label name(Product p) {
         Label l = label(p.getName(), "csh-product-name");
         l.setMaxWidth(Double.MAX_VALUE);
+        Tooltip.install(l, new Tooltip(p.getName()));
         return l;
     }
 
-    /** The item's category, shown under the name. */
     private static Label category(Product p) {
         Label l = label(p.getCategory(), "csh-product-category");
         l.setMaxWidth(Double.MAX_VALUE);
         return l;
     }
 
-    private static Region divider() {
-        Region line = new Region();
-        line.getStyleClass().add("csh-product-divider");
-        line.setMinHeight(1);
-        line.setPrefHeight(1);
-        line.setMaxHeight(1);
-        return line;
-    }
-
-    private static VBox details(Product p, int inCart) {
-        VBox box = new VBox(6);
-
-        String stockText;
-        String stockStyle;
-        if (!p.isAvailable()) {
-            stockText = "Out of stock";
-            stockStyle = "csh-detail-out";
-        } else if (p.isLow()) {
-            stockText = p.getStock() + " " + unit(p) + " left · low stock";
-            stockStyle = "csh-detail-low";
-        } else {
-            stockText = p.getStock() + " " + unit(p) + " available";
-            stockStyle = "csh-detail-ok";
-        }
-        box.getChildren().add(detailRow("Availability", stockText, stockStyle));
-        box.getChildren().add(detailRow("Sold per", unit(p), null));
-
-        if (inCart > 0) {
-            BigDecimal lineTotal = p.getPrice().multiply(BigDecimal.valueOf(inCart));
-            box.getChildren().add(detailRow("In this order",
-                    inCart + " × " + CashierStore.moneyShort(p.getPrice())
-                            + " = " + CashierStore.moneyShort(lineTotal), "csh-detail-ok"));
-        }
-        return box;
-    }
-
-    private static HBox detailRow(String key, String value, String valueStyle) {
-        Label val = label(value, "csh-detail-val");
-        if (valueStyle != null) val.getStyleClass().add(valueStyle);
-        HBox row = new HBox(label(key, "csh-detail-key"), spacer(), val);
-        row.setAlignment(Pos.CENTER_LEFT);
+    private static HBox priceRow(Product p) {
+        HBox row = new HBox(6, label(CashierStore.money(p.getPrice()), "csh-product-price"),
+                label("/ " + unit(p), "csh-product-unit"));
+        row.setAlignment(Pos.BOTTOM_LEFT);
         return row;
+    }
+
+    private static Label qty(Product p) {
+        return label("Qty: " + p.getStock() + " " + unit(p), "csh-product-qty");
+    }
+
+    private static HBox status(Product p) {
+        String text = !p.isAvailable() ? "Out of stock" : p.isLow() ? "Low stock" : "Available";
+        String style = !p.isAvailable() ? "csh-tag-out" : p.isLow() ? "csh-tag-low" : "csh-tag-ok";
+        Label pill = label(text, "csh-tag");
+        pill.getStyleClass().add(style);
+        HBox box = new HBox(pill);
+        box.setAlignment(Pos.CENTER_LEFT);
+        return box;
     }
 
     private static String unit(Product p) {
         String u = p.getUnit();
         return u == null || u.isBlank() ? "unit" : u;
-    }
-
-    /** Pushes the price row and button to the bottom so buttons line up across a row of cards. */
-    private static Region grow() {
-        Region r = new Region();
-        VBox.setVgrow(r, Priority.ALWAYS);
-        return r;
-    }
-
-    private static HBox priceRow(Product p) {
-        HBox row = new HBox(6, label(CashierStore.moneyShort(p.getPrice()), "csh-product-price"),
-                label("per " + unit(p), "csh-product-unit"));
-        row.setAlignment(Pos.BOTTOM_LEFT);
-        return row;
     }
 
     private static Button actionButton(Product p, int inCart, Consumer<Product> onAdd) {
@@ -202,70 +170,46 @@ public final class ProductCards {
     }
 
     // ------------------------------------------------------------------
-    // Picture. Photos saved from the inventory form are found through InventoryImages
-    // (image_path holds only the file name). The picture is cropped to fill the whole
-    // banner. Items without a photo show a category symbol instead.
+    // Photo: a circle with a cream ring and soft shadow. Photos saved from the inventory
+    // form are found through InventoryImages (image_path holds only the file name).
+    // The picture is cropped to fill the circle. Items without a photo show the first
+    // letter of their category.
     // ------------------------------------------------------------------
 
-    private static StackPane cover(Product p, double height) {
-        StackPane cover = new StackPane();
-        cover.getStyleClass().add("csh-product-img");
-        cover.setMinSize(0, height);
-        cover.setPrefHeight(height);
-        cover.setMaxSize(Double.MAX_VALUE, height);
+    private static StackPane photo(Product p, double size) {
+        double inner = size - RIM * 2;
 
-        Rectangle clip = new Rectangle();
-        clip.setArcWidth(24);
-        clip.setArcHeight(24);
-        clip.widthProperty().bind(cover.widthProperty());
-        clip.heightProperty().bind(cover.heightProperty());
-        cover.setClip(clip);
+        StackPane disc = new StackPane();
+        disc.setMinSize(inner, inner);
+        disc.setPrefSize(inner, inner);
+        disc.setMaxSize(inner, inner);
+        disc.setClip(new Circle(inner / 2, inner / 2, inner / 2));
+        disc.setOpacity(p.isAvailable() ? 1.0 : 0.5);
 
         String key = p.getImagePath() == null ? "" : p.getImagePath();
         Image image = IMAGES.computeIfAbsent(key, ProductCards::load).orElse(null);
-        double fade = p.isAvailable() ? 1.0 : 0.5;
-
         if (image != null) {
             ImageView view = new ImageView(image);
-            view.setManaged(false);   // sized by the banner, never the other way round
+            view.setManaged(false);   // sized here, never by the layout
             view.setSmooth(true);
-            view.setOpacity(fade);
-            cover.widthProperty().addListener((o, a, b) -> cropToBanner(view, image, cover));
-            cover.heightProperty().addListener((o, a, b) -> cropToBanner(view, image, cover));
-            cover.getChildren().add(view);
-            cropToBanner(view, image, cover);
+            cropToFill(view, image, inner, inner);
+            disc.getChildren().add(view);
         } else {
-            VBox placeholder = new VBox(4, label(monogram(p.getCategory()), "csh-product-monogram"),
-                    label("No photo yet", "csh-product-placeholder-text"));
-            placeholder.setAlignment(Pos.CENTER);
-            placeholder.setMouseTransparent(true);
-            placeholder.setOpacity(fade);
-            cover.getChildren().add(placeholder);
+            disc.getChildren().add(label(monogram(p.getCategory()), "csh-product-monogram"));
         }
 
-        // tags sit on top of the picture
-        Label status = label(statusText(p), "csh-tag");
-        status.getStyleClass().add(statusStyle(p));
-        StackPane.setAlignment(status, Pos.TOP_RIGHT);
-        StackPane.setMargin(status, new Insets(10));
-
-        cover.getChildren().add(status);
-        return cover;
+        StackPane ring = new StackPane(disc);
+        ring.getStyleClass().add("csh-photo-ring");
+        ring.setMinSize(size, size);
+        ring.setPrefSize(size, size);
+        ring.setMaxSize(size, size);
+        return ring;
     }
 
-    private static String statusText(Product p) {
-        return !p.isAvailable() ? "Out of stock" : p.isLow() ? "Low stock" : "In stock";
-    }
-
-    private static String statusStyle(Product p) {
-        return !p.isAvailable() ? "csh-tag-out" : p.isLow() ? "csh-tag-low" : "csh-tag-ok";
-    }
-
-    /** "Cover" fit: scale to fill the banner and crop the overflow from the centre, no stretching. */
-    private static void cropToBanner(ImageView view, Image image, StackPane banner) {
-        double w = banner.getWidth(), h = banner.getHeight();
+    /** "Cover" fit: scale to fill and crop the overflow from the centre, no stretching. */
+    private static void cropToFill(ImageView view, Image image, double w, double h) {
         double iw = image.getWidth(), ih = image.getHeight();
-        if (w <= 0 || h <= 0 || iw <= 0 || ih <= 0) return;
+        if (iw <= 0 || ih <= 0) return;
 
         double target = w / h;
         double vw, vh;
@@ -283,21 +227,27 @@ public final class ProductCards {
         view.relocate(0, 0);
     }
 
+    /** First letter of the category name, so any category added later gets a symbol automatically. */
+    private static String monogram(String category) {
+        if (category == null || category.isBlank()) return "?";
+        return category.trim().substring(0, 1).toUpperCase();
+    }
+
     private static Optional<Image> load(String path) {
         if (path == null || path.isBlank()) return Optional.empty();
         try {
             // 1. the photo saved by the inventory form
             Optional<Path> stored = InventoryImages.find(path);
             if (stored.isPresent()) {
-                return valid(new Image(stored.get().toUri().toString(), 720, 0, true, true));
+                return valid(new Image(stored.get().toUri().toString(), 400, 0, true, true));
             }
             // 2. a full file path or file: URL
             File file = new File(path);
             if (file.isFile()) {
-                return valid(new Image(file.toURI().toString(), 720, 0, true, true));
+                return valid(new Image(file.toURI().toString(), 400, 0, true, true));
             }
             if (path.startsWith("file:")) {
-                return valid(new Image(path, 720, 0, true, true));
+                return valid(new Image(path, 400, 0, true, true));
             }
             // 3. a picture bundled with the app
             String resource = path.startsWith("/") ? path : IMG_DIR + path;
@@ -305,18 +255,12 @@ public final class ProductCards {
                 if (in != null) return valid(new Image(in));
             }
         } catch (Exception ignored) {
-            // fall through to the category symbol
+            // fall through to the letter
         }
         return Optional.empty();
     }
 
     private static Optional<Image> valid(Image image) {
         return image.isError() ? Optional.empty() : Optional.of(image);
-    }
-
-    /** First letter of the category name, so any category added later gets a symbol automatically. */
-    private static String monogram(String category) {
-        if (category == null || category.isBlank()) return "?";
-        return category.trim().substring(0, 1).toUpperCase();
     }
 }

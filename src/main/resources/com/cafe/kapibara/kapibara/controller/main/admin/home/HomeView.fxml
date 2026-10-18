@@ -15,12 +15,12 @@
 
 <!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/home/HomeView.fxml
      Content only: the sidebar and top bar come from AdminView.fxml. -->
-<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="adm-scroll"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.home.HomeController">
-   <VBox spacing="16.0" styleClass="adm-page">
+   <VBox spacing="16.0" styleClass="adm-page, adm-home">
       <padding>
-         <Insets top="24.0" right="28.0" bottom="24.0" left="28.0" />
+         <Insets top="20.0" right="28.0" bottom="20.0" left="28.0" />
       </padding>
 
       <!-- Header -->
@@ -57,7 +57,7 @@
       </HBox>
 
       <!-- Sales rhythm + best sellers -->
-      <HBox spacing="14.0" VBox.vgrow="ALWAYS" prefHeight="290.0" minHeight="250.0">
+      <HBox spacing="14.0" VBox.vgrow="ALWAYS" prefHeight="300.0">
          <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="2.0">
             <HBox alignment="CENTER_LEFT">
                <Label styleClass="adm-card-title" text="Today's sales rhythm" />
@@ -83,14 +83,14 @@
             </HBox>
          </VBox>
 
-         <VBox styleClass="adm-card" prefWidth="360.0" minWidth="300.0" maxWidth="360.0" spacing="12.0">
+         <VBox styleClass="adm-card" prefWidth="400.0" minWidth="340.0" maxWidth="400.0" spacing="12.0">
             <Label styleClass="adm-card-title" text="Best sellers today" />
             <VBox fx:id="bestSellersBox" spacing="12.0" />
          </VBox>
       </HBox>
 
       <!-- Recent transactions + team & stock attention -->
-      <HBox spacing="14.0" VBox.vgrow="ALWAYS" prefHeight="250.0" minHeight="240.0">
+      <HBox spacing="14.0" VBox.vgrow="ALWAYS" prefHeight="300.0">
          <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="12.0">
             <Label styleClass="adm-card-title" text="Recent transactions" />
             <GridPane fx:id="recentGrid" styleClass="adm-table">
@@ -105,7 +105,7 @@
             <Button onAction="#handleOpenTransactions" styleClass="adm-link" text="View transactions →" />
          </VBox>
 
-         <VBox styleClass="adm-card" prefWidth="360.0" minWidth="300.0" maxWidth="360.0" spacing="12.0">
+         <VBox styleClass="adm-card" prefWidth="400.0" minWidth="340.0" maxWidth="400.0" spacing="12.0">
             <Label styleClass="adm-card-title" text="Team &amp; stock attention" />
             <HBox styleClass="adm-alert" spacing="10.0" alignment="CENTER_LEFT">
                <Label styleClass="adm-alert-icon" text="⚠" />

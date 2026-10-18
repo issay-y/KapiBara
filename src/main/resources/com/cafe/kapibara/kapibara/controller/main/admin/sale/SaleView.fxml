@@ -14,8 +14,9 @@
 <?import javafx.scene.layout.VBox?>
 
 <!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/sale/SaleView.fxml
-     Content only: the sidebar and top bar come from AdminView.fxml. -->
-<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
+     Content only: the sidebar and top bar come from AdminView.fxml.
+     Scaled up with the "adm-lg" modifier + "adm-sales" extras (see AdminShell.css). -->
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="adm-scroll"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.sale.SaleController">
 
@@ -23,14 +24,14 @@
       <ToggleGroup fx:id="periodGroup" />
    </fx:define>
 
-   <VBox spacing="16.0" styleClass="adm-page">
+   <VBox spacing="16.0" styleClass="adm-page, adm-lg, adm-sales">
       <padding>
-         <Insets top="24.0" right="28.0" bottom="24.0" left="28.0" />
+         <Insets top="20.0" right="40.0" bottom="20.0" left="40.0" />
       </padding>
 
       <!-- Header -->
       <HBox alignment="CENTER_LEFT">
-         <VBox spacing="3.0" HBox.hgrow="ALWAYS">
+         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
             <Label styleClass="adm-page-title" text="Sales overview" />
             <Label styleClass="adm-page-sub" text="Know what's brewing. Track sales and your customers' favorites." />
          </VBox>
@@ -38,7 +39,7 @@
       </HBox>
 
       <!-- KPI row -->
-      <HBox spacing="14.0">
+      <HBox spacing="22.0">
          <VBox styleClass="adm-card, adm-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="200.0">
             <Label styleClass="adm-kpi-label" text="Today's Sales" />
             <Label fx:id="todaySalesValue" styleClass="adm-kpi-value" text="₱18,480" />
@@ -67,9 +68,9 @@
       </HBox>
 
       <!-- Sales performance + best sellers -->
-      <HBox spacing="14.0" VBox.vgrow="ALWAYS" prefHeight="290.0" minHeight="250.0">
+      <HBox spacing="22.0" VBox.vgrow="ALWAYS" prefHeight="290.0" minHeight="250.0">
          <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="2.0">
-            <HBox alignment="TOP_LEFT" spacing="6.0">
+            <HBox alignment="TOP_LEFT" spacing="8.0">
                <VBox spacing="2.0" HBox.hgrow="ALWAYS">
                   <Label styleClass="adm-card-title" text="Sales performance" />
                   <Label fx:id="perfSubtitle" styleClass="adm-card-sub" text="₱252,560 total" />
@@ -92,16 +93,16 @@
             </BarChart>
          </VBox>
 
-         <VBox styleClass="adm-card" prefWidth="360.0" minWidth="300.0" maxWidth="360.0" spacing="12.0">
+         <VBox styleClass="adm-card" prefWidth="420.0" minWidth="360.0" maxWidth="420.0" spacing="14.0">
             <Label styleClass="adm-card-title" text="Today's best sellers" />
-            <VBox fx:id="bestSellersBox" spacing="12.0" />
+            <VBox fx:id="bestSellersBox" spacing="14.0" />
             <Region VBox.vgrow="ALWAYS" />
             <Label fx:id="bestSellersFooter" styleClass="adm-card-foot" text="122 of 168 items • Other products: 46 items" />
          </VBox>
       </HBox>
 
       <!-- Bottom charts -->
-      <HBox spacing="14.0" VBox.vgrow="ALWAYS" prefHeight="230.0" minHeight="210.0">
+      <HBox spacing="22.0" VBox.vgrow="ALWAYS" prefHeight="230.0" minHeight="210.0">
          <VBox styleClass="adm-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="400.0" spacing="2.0">
             <Label styleClass="adm-card-title" text="Daily • Hourly sales" />
             <Label styleClass="adm-chart-note" text="PHP · Scale 0 – 7,000" />

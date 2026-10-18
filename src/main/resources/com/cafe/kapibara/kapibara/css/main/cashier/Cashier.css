@@ -130,7 +130,7 @@
 }
 
 .csh-product-price {
-    -fx-font-size: 24px;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
     -fx-text-fill: -adm-text;
 }
@@ -216,7 +216,7 @@
 
 .csh-product-monogram {
     -fx-font-family: "Lora", "Georgia", serif;
-    -fx-font-size: 56px;
+    -fx-font-size: 44px;
     -fx-font-weight: bold;
     -fx-text-fill: #CDB8A3;
 }
@@ -264,6 +264,58 @@
 
 .csh-detail-out {
     -fx-text-fill: -adm-red;
+}
+
+/* ---------- Round-photo product cards (photo left, details right) ---------- */
+.csh-photo-ring {
+    -fx-background-color: #FBF1E3;
+    -fx-background-radius: 999;
+    -fx-border-color: -adm-line;
+    -fx-border-radius: 999;
+    -fx-effect: dropshadow(gaussian, rgba(78,34,22,0.16), 10, 0, 0, 3);
+}
+
+.csh-product-qty {
+    -fx-font-size: 13px;
+    -fx-text-fill: -adm-muted;
+}
+
+.csh-product-card .csh-add-btn,
+.csh-product-card .csh-added-btn,
+.csh-product-card .csh-unavail-btn {
+    -fx-padding: 9 14 9 14;
+    -fx-font-size: 13px;
+}
+
+/* ---------- Scroll bars that stay invisible but still scroll ---------- */
+.csh-quiet > .scroll-bar:vertical {
+    -fx-pref-width: 0;
+    -fx-min-width: 0;
+    -fx-max-width: 0;
+    -fx-padding: 0;
+    -fx-opacity: 0;
+}
+
+.csh-quiet > .scroll-bar:horizontal {
+    -fx-pref-height: 0;
+    -fx-min-height: 0;
+    -fx-max-height: 0;
+    -fx-padding: 0;
+    -fx-opacity: 0;
+}
+
+.csh-quiet > .scroll-bar > .track,
+.csh-quiet > .scroll-bar > .thumb,
+.csh-quiet > .scroll-bar > .increment-button,
+.csh-quiet > .scroll-bar > .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.csh-quiet > .scroll-bar .increment-arrow,
+.csh-quiet > .scroll-bar .decrement-arrow {
+    -fx-padding: 0;
+    -fx-shape: "";
 }
 
 /* ---------- Current order panel ---------- */

@@ -1035,10 +1035,61 @@
     -fx-border-style: solid;
     -fx-border-color: -adm-line;
 }
-}
 .adm-photo-icon  { -fx-font-size: 38px; }
 .adm-photo-title {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-text-fill: -adm-text;
+}
+
+/* =====================================================================
+   Sales page (adm-lg + adm-sales)
+   Extra sizes for the pieces adm-lg doesn't cover: date pill, period
+   toggle, chart notes/axes, best sellers, text-style KPI value.
+   ===================================================================== */
+
+/* Cards: slightly tighter than the 28px adm-lg padding so charts keep height */
+.adm-sales .adm-card {
+    -fx-padding: 22;
+}
+
+.adm-sales .adm-kpi-card {
+    -fx-padding: 18 28 18 28;
+    -fx-border-color: -adm-brown;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 16;
+}
+
+/* Header date pill */
+.adm-sales .adm-date-pill {
+    -fx-padding: 12 22 12 22;
+    -fx-font-size: 15px;
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+}
+
+/* KPI: "Most Sold Product" text value */
+.adm-sales .adm-kpi-value-text {
+    -fx-font-size: 30px;
+    -fx-padding: 8 0 8 0;
+}
+
+/* Card subtitles and chart notes */
+.adm-sales .adm-card-sub   { -fx-font-size: 15px; }
+.adm-sales .adm-chart-note { -fx-font-size: 13px; }
+
+/* Daily / Weekly / Monthly toggle */
+.adm-sales .adm-period-btn {
+    -fx-padding: 8 18 8 18;
+    -fx-font-size: 14px;
+    -fx-background-radius: 10;
+}
+
+/* Chart axis labels */
+.adm-sales .axis { -fx-font-size: 14px; }
+
+/* Best sellers */
+.adm-sales .adm-seller-label { -fx-font-size: 15px; }
+.adm-sales .adm-seller-bar > .bar {
+    -fx-padding: 6;
 }

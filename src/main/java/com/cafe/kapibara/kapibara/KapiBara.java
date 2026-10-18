@@ -39,7 +39,6 @@ public class KapiBara extends Application {
         warmup.start();
     }
 
-
     @Override
     public void stop() {
         DatabaseConnector.closePool();

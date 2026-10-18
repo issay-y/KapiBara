@@ -176,7 +176,7 @@ public class AdminController implements Initializable, AdminShell {
 
     public void handleLogout() {
         // Add confirmation before logging out the admin
-        if (!AlertsUtil.confirm(root, AlertsUtil.Type.CONFIRMATION, "Log out?", "You'll return to the sign-in screen.", "Log out")) {
+        if (!AlertsUtil.confirm(root, AlertsUtil.Type.WARNING, "Log out?", "You'll return to the sign-in screen.", "Log out")) {
             return;
         }
 
