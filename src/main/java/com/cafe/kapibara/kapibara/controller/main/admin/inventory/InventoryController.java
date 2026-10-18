@@ -36,6 +36,14 @@ public class InventoryController implements Initializable, AdminShell.Aware {
     private static final DateTimeFormatter UPDATED =
             DateTimeFormatter.ofPattern("dd MMM · h:mm a", Locale.ENGLISH);
 
+    // ---- Filter memory --------------------------------------------------
+    // This page is rebuilt every time you come back to it (for example after
+    // editing an item), so the filters and page are remembered here instead.
+    private static String savedSearch = "";
+    private static String savedCategory = ALL_CATEGORIES;
+    private static String savedStatus = ALL_STATUSES;
+    private static int savedPage = 0;
+
     // KPI cards
     @FXML private Label totalValue, totalSub;
     @FXML private Label inStockValue, inStockSub;
@@ -61,22 +69,28 @@ public class InventoryController implements Initializable, AdminShell.Aware {
     private List<InventoryItem> filtered = List.of();
     private List<String> categoryNames = List.of();   // from the inventory_categories table
     private int page = 0;
+    private int pendingPage = -1;          // page to return to after (re)loading
+    private boolean suppressFilter = false; // true while the filter controls are rebuilt in code
     private AdminShell shell;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         categoryCombo.getItems().add(ALL_CATEGORIES);
-        categoryCombo.getSelectionModel().selectFirst();
 
         statusCombo.getItems().add(ALL_STATUSES);
         for (StockStatus s : StockStatus.values()) {
             statusCombo.getItems().add(s.getDisplayName());
         }
-        statusCombo.getSelectionModel().selectFirst();
 
-        searchField.textProperty().addListener((obs, old, now) -> applyFilters());
-        categoryCombo.valueProperty().addListener((obs, old, now) -> applyFilters());
-        statusCombo.valueProperty().addListener((obs, old, now) -> applyFilters());
+        // Restore what was selected before leaving the page (set BEFORE the listeners exist).
+        searchField.setText(savedSearch);
+        categoryCombo.setValue(savedCategory);   // the full list is filled in once the items load
+        statusCombo.setValue(statusCombo.getItems().contains(savedStatus) ? savedStatus : ALL_STATUSES);
+        page = savedPage;
+
+        searchField.textProperty().addListener((obs, old, now) -> { if (!suppressFilter) applyFilters(); });
+        categoryCombo.valueProperty().addListener((obs, old, now) -> { if (!suppressFilter) applyFilters(); });
+        statusCombo.valueProperty().addListener((obs, old, now) -> { if (!suppressFilter) applyFilters(); });
 
         loadItems();
     }
@@ -91,6 +105,8 @@ public class InventoryController implements Initializable, AdminShell.Aware {
     // =====================================================================
 
     private void loadItems() {
+        pendingPage = page;   // stay on the same page after reloading
+
         Thread worker = new Thread(() -> {
             List<InventoryItem> items = null;
             List<String> categories = List.of();
@@ -134,16 +150,24 @@ public class InventoryController implements Initializable, AdminShell.Aware {
         paginationBox.getChildren().clear();
     }
 
-    /** Rebuilds the category filter from the categories table, keeping the current choice if it still exists. */
+    /**
+     * Rebuilds the category filter from the categories table, keeping the current choice if it still exists.
+     * The filter listeners are paused so rebuilding the list doesn't reset the selection or the page.
+     */
     private void refreshCategories() {
         String selected = categoryCombo.getValue();
 
         List<String> options = new ArrayList<>();
         options.add(ALL_CATEGORIES);
         options.addAll(categoryNames);
-        categoryCombo.getItems().setAll(options);
 
-        categoryCombo.setValue(selected != null && options.contains(selected) ? selected : ALL_CATEGORIES);
+        suppressFilter = true;
+        try {
+            categoryCombo.getItems().setAll(options);
+            categoryCombo.setValue(selected != null && options.contains(selected) ? selected : ALL_CATEGORIES);
+        } finally {
+            suppressFilter = false;
+        }
     }
 
     // =====================================================================
@@ -214,6 +238,11 @@ public class InventoryController implements Initializable, AdminShell.Aware {
         String category = categoryCombo.getValue();
         String status = statusCombo.getValue();
 
+        // remember the filters for the next time this page is opened
+        savedSearch = searchField.getText() == null ? "" : searchField.getText();
+        savedCategory = category == null ? ALL_CATEGORIES : category;
+        savedStatus = status == null ? ALL_STATUSES : status;
+
         filtered = allItems.stream()
                 .filter(i -> q.isEmpty()
                         || i.name().toLowerCase(Locale.ROOT).contains(q)
@@ -222,11 +251,18 @@ public class InventoryController implements Initializable, AdminShell.Aware {
                 .filter(i -> status == null || ALL_STATUSES.equals(status) || i.status().getDisplayName().equals(status))
                 .toList();
 
-        page = 0;
+        // a reload keeps the current page; a changed filter goes back to page 1
+        page = pendingPage >= 0 ? pendingPage : 0;
+        pendingPage = -1;
         render();
     }
 
     private void render() {
+        // clamp the page in case items were removed
+        int lastPage = Math.max(0, (int) Math.ceil(filtered.size() / (double) PAGE_SIZE) - 1);
+        if (page > lastPage) page = lastPage;
+        savedPage = page;
+
         inventoryGrid.getChildren().clear();
 
         String[] headers = {"Item name", "Category", "Qty", "Unit", "Status", "Last updated", "Actions"};

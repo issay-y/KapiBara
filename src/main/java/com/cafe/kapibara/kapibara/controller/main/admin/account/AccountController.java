@@ -320,6 +320,11 @@ public class AccountController implements Initializable, AdminShell.Aware {
     }
 
     private void handleEdit(AccountRow account) {
+        if (account.role() == AccountRole.ADMIN) {
+            AlertsUtil.warning(accountsGrid, "Admin account is permanent",
+                    "The admin account can't be edited or deleted.");
+            return;
+        }
         if (shell != null) shell.navigate(AdminPage.ACCOUNT_EDIT, account.id());
     }
 
