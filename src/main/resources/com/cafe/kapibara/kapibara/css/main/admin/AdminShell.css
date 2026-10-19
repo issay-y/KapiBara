@@ -1234,3 +1234,42 @@
     -fx-padding: 0 20 0 20;
     -fx-font-size: 14px;
 }
+
+.adm-orange-btn {
+    -fx-background-color: #FB8530;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 12 16 12 16;
+}
+
+.adm-orange-btn:hover {
+    -fx-background-color: #E9731C;
+}
+
+.adm-orange-btn:pressed {
+    -fx-background-color: #D4650F;
+}
+
+.adm-tx .adm-search,
+.adm-tx .adm-combo,
+.adm-tx .adm-outline-btn {
+    -fx-border-color: -adm-brown;
+    -fx-border-width: 1.5;
+}
+
+.adm-tx .adm-search:focused,
+.adm-tx .adm-combo:focused {
+    -fx-border-color: -adm-red;
+}
+
+/* Invisible scrollbars on admin pages (scrolling still works) */
+.adm-scroll .scroll-bar:vertical,
+.adm-scroll .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-padding: 0;
+}

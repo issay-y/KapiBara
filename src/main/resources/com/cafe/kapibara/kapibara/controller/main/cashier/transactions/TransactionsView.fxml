@@ -16,15 +16,19 @@
 <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cafe.kapibara.kapibara.controller.main.cashier.transactions.TransactionsController">
-   <VBox spacing="24.0" styleClass="adm-page, adm-lg">
+   <VBox spacing="24.0" styleClass="adm-page, adm-lg, adm-tx">
       <padding>
          <Insets top="32.0" right="40.0" bottom="32.0" left="40.0" />
       </padding>
 
-      <VBox spacing="5.0">
-         <Label styleClass="adm-page-title" text="Transactions" />
-         <Label styleClass="adm-page-sub" text="A clear record of every completed counter order." />
-      </VBox>
+      <!-- Header: title on the left, Back to Home on the top right -->
+      <HBox alignment="CENTER_LEFT">
+         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <Label styleClass="adm-page-title" text="Transactions" />
+            <Label styleClass="adm-page-sub" text="A clear record of every completed counter order." />
+         </VBox>
+         <Button onAction="#handleBack" styleClass="adm-primary-btn" text="←   Back to Home" />
+      </HBox>
 
       <HBox alignment="BOTTOM_LEFT" spacing="16.0">
          <StackPane HBox.hgrow="ALWAYS" minHeight="52.0" prefHeight="52.0" maxHeight="52.0">
@@ -73,10 +77,6 @@
          <Label styleClass="adm-card-foot" text="All transactions are cash payments. Totals include VAT." />
          <Region HBox.hgrow="ALWAYS" />
          <Label fx:id="todayLabel" styleClass="adm-foot-total" text="" />
-      </HBox>
-
-      <HBox alignment="CENTER_RIGHT">
-         <Button onAction="#handleBack" styleClass="adm-primary-btn" text="←   Back to Home" />
       </HBox>
    </VBox>
 </ScrollPane>

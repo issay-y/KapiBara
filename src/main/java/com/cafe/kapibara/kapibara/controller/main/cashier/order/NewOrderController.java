@@ -20,6 +20,19 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.concurrent.Task;
+import javafx.animation.Animation;
+import javafx.animation.Interpolator;
+import javafx.animation.PauseTransition;
+import javafx.animation.RotateTransition;
+import javafx.scene.Group;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.ArcType;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.StrokeLineCap;
+import javafx.util.Duration;
 
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
@@ -50,6 +63,10 @@ public class NewOrderController implements CashierShell.Aware {
     private String category;
     private String loadError;
 
+    private RotateTransition spin;
+    private long loadStartedAt;
+    private static final long MIN_LOADING_MS = 600;
+
     @FXML
     private void initialize() {
         searchField.textProperty().addListener((obs, old, text) -> renderProducts());
@@ -59,26 +76,106 @@ public class NewOrderController implements CashierShell.Aware {
     public void attach(CashierShell shell) {
         this.shell = shell;
         hideScrollBars();
-        loadMenu();
-        renderChips();
-        renderProducts();
-        renderOrder();
+        loadMenuAsync();
     }
 
-    /** Reads the products from the database every time this page opens. */
-    private void loadMenu() {
-        loadError = null;
-        try {
-            store.refreshMenu();
-        } catch (SQLException e) {
-            loadError = e.getMessage();
+    private void loadMenuAsync() {
+        showLoading();
+        loadStartedAt = System.currentTimeMillis();
+
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                store.refreshMenu();
+                return null;
+            }
+        };
+        task.setOnSucceeded(e -> finishAfterMinimum(null));
+        task.setOnFailed(e -> {
+            Throwable ex = task.getException();
+            finishAfterMinimum(ex == null ? "Unknown error" : ex.getMessage());
+        });
+
+        Thread worker = new Thread(task, "load-menu");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    /** Keeps the spinner on screen long enough to be seen, even if the database answers instantly. */
+    private void finishAfterMinimum(String error) {
+        long elapsed = System.currentTimeMillis() - loadStartedAt;
+        long wait = Math.max(0, MIN_LOADING_MS - elapsed);
+        PauseTransition pause = new PauseTransition(Duration.millis(wait));
+        pause.setOnFinished(e -> finishLoading(error));
+        pause.play();
+    }
+
+    private void showLoading() {
+        payBtn.setDisable(true);
+        chipRow.getChildren().clear();
+        sectionLabel.setText("Loading menu…");
+        countLabel.setText("");
+
+        Label text = ProductCards.label("Loading products…", "csh-loading-text");
+
+        VBox box = new VBox(16, buildSpinner(), text);
+        box.setAlignment(Pos.CENTER);
+        box.setPadding(new javafx.geometry.Insets(80, 0, 80, 0));
+
+        productGrid.getChildren().clear();
+        productGrid.add(box, 0, 0, COLUMNS, 1);
+        GridPane.setHgrow(box, Priority.ALWAYS);
+    }
+
+    /** A ring with an orange arc that rotates forever (does not depend on the JavaFX skin). */
+    private StackPane buildSpinner() {
+        Circle track = new Circle(0, 0, 24);
+        track.setFill(Color.TRANSPARENT);
+        track.setStroke(Color.web("#EBDDCB"));
+        track.setStrokeWidth(5);
+
+        Arc arc = new Arc(0, 0, 24, 24, 90, 110);
+        arc.setType(ArcType.OPEN);
+        arc.setFill(Color.TRANSPARENT);
+        arc.setStroke(Color.web("#FF8732"));
+        arc.setStrokeWidth(5);
+        arc.setStrokeLineCap(StrokeLineCap.ROUND);
+
+        // Both shapes share the same centre, so the group rotates around the ring's middle
+        Group ring = new Group(track, arc);
+
+        if (spin != null) spin.stop();
+        spin = new RotateTransition(Duration.millis(900), ring);
+        spin.setByAngle(360);
+        spin.setInterpolator(Interpolator.LINEAR);
+        spin.setCycleCount(Animation.INDEFINITE);
+        spin.play();
+
+        StackPane holder = new StackPane(ring);
+        holder.setMinSize(64, 64);
+        holder.setPrefSize(64, 64);
+        holder.setMaxSize(64, 64);
+        return holder;
+    }
+
+    private void finishLoading(String error) {
+        if (spin != null) {          // stop the animation so it doesn't keep running in the background
+            spin.stop();
+            spin = null;
         }
+
+        loadError = error;
         ProductCards.clearImageCache();
 
         List<String> categories = store.categories();
         if (category != null && !categories.contains(category)) {
-            category = null;   // the chosen category no longer exists: fall back to "All"
+            category = null;
         }
+
+        payBtn.setDisable(false);
+        renderChips();
+        renderProducts();
+        renderOrder();
     }
 
     /**

@@ -6,7 +6,6 @@ import com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore;
 import com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore.Sale;
 import com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore.SaleLine;
 import com.cafe.kapibara.kapibara.controller.main.cashier.ProductCards;
-import com.cafe.kapibara.kapibara.util.MessageBox;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -96,17 +95,10 @@ public class ReceiptController implements CashierShell.Aware {
         shell.navigate(CashierPage.NEW_ORDER);
     }
 
-    /** Full details in a message box until the transaction history screen exists. */
+    /** Opens the Transactions page, the same as the "Transactions" item in the sidebar. */
     @FXML
     private void handleViewTransaction() {
-        MessageBox.info(summaryLabel, "Transaction " + sale.number(),
-                "Date & time:  " + sale.time().format(STAMP) + "\n"
-                        + "Cashier:  " + sale.cashier() + "\n"
-                        + "Items:  " + sale.items() + "\n"
-                        + (sale.seniorPwd() ? "Discount:  PWD / Senior Citizen 20% (" + money(sale.discount()) + ")\n" : "")
-                        + "Total:  " + money(sale.total()) + "\n"
-                        + "Cash received:  " + money(sale.cashReceived()) + "\n"
-                        + "Change:  " + money(sale.change()));
+        shell.navigate(CashierPage.TRANSACTIONS);
     }
 
     @FXML

@@ -116,9 +116,9 @@
                </VBox>
             </HBox>
             <VBox fx:id="stockRowsBox" spacing="8.0" />
-            <Button onAction="#handleOpenAccounts" maxWidth="Infinity" styleClass="adm-outline-btn" text="👥   Manage team accounts" />
             <Region VBox.vgrow="ALWAYS" />
-            <Label fx:id="teamFooter" styleClass="adm-card-foot" text="5 active accounts • 1 inactive account" />
+            <Label fx:id="teamFooter" styleClass="adm-card-foot" text="See Accounts tab for user management" />
+            <Button onAction="#handleOpenAccounts" maxWidth="Infinity" styleClass="adm-orange-btn" text="👥   Manage team accounts" />
          </VBox>
       </HBox>
    </VBox>

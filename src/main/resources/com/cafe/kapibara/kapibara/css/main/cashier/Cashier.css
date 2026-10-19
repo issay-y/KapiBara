@@ -695,3 +695,10 @@
 .csh-close-btn:hover {
     -fx-underline: true;
 }
+
+/* ---------- Loading spinner ---------- */
+
+.csh-loading-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #8A7A70;
+}

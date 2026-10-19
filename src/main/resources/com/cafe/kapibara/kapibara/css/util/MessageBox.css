@@ -10,9 +10,9 @@
 .msg-card {
     -fx-background-color: #FFFCF8;
     -fx-background-radius: 22;
-    -fx-border-color: #F0E4D6;
+    -fx-border-color: #4E2216;
+    -fx-border-width: 1.5;
     -fx-border-radius: 22;
-    -fx-border-width: 1;
     -fx-padding: 30 32 26 32;
     -fx-effect: dropshadow(gaussian, rgba(78,34,22,0.30), 30, 0.08, 0, 10);
     -fx-font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;

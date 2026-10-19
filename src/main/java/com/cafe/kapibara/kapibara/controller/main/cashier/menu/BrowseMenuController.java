@@ -34,6 +34,8 @@ public class BrowseMenuController implements CashierShell.Aware {
 
     @FXML
     private void initialize() {
+        // The search box and the category chips work together: whatever is typed
+        // stays in the box and filters inside whichever category is selected.
         searchField.textProperty().addListener((obs, old, text) -> render());
     }
 
@@ -53,8 +55,7 @@ public class BrowseMenuController implements CashierShell.Aware {
     private Button chip(String text, String value) {
         boolean active = value == null ? category == null : value.equals(category);
         return ProductCards.chip(text, active, () -> {
-            category = value;
-            searchField.clear();
+            category = value;          // keep the search text; just change the category
             renderChips();
             render();
         });
@@ -65,7 +66,9 @@ public class BrowseMenuController implements CashierShell.Aware {
 
         productGrid.getChildren().clear();
         if (matches.isEmpty()) {
-            productGrid.add(ProductCards.label("No items match your search.", "adm-card-foot"), 0, 0, COLUMNS, 1);
+            String where = category == null ? "" : " in " + category;
+            productGrid.add(ProductCards.label("No items match your search" + where + ".", "adm-card-foot"),
+                    0, 0, COLUMNS, 1);
         }
         int i = 0;
         for (Product p : matches) {

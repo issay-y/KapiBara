@@ -39,7 +39,7 @@
 
          <!-- Main nav -->
          <VBox spacing="6.0">
-            <Button fx:id="navHome" onAction="#handleNav" styleClass="adm-nav, adm-nav-active" text="▦   Dashboard" maxWidth="Infinity" />
+            <Button fx:id="navHome" onAction="#handleNav" styleClass="adm-nav, adm-nav-active" text="▦   Home" maxWidth="Infinity" />
             <Button fx:id="navTransactions" onAction="#handleNav" styleClass="adm-nav" text="🧾   Transactions" maxWidth="Infinity" />
             <Button fx:id="navSales" onAction="#handleNav" styleClass="adm-nav" text="📊   Sales" maxWidth="Infinity" />
             <Button fx:id="navInventory" onAction="#handleNav" styleClass="adm-nav" text="📦   Inventory" maxWidth="Infinity" />
@@ -67,7 +67,6 @@
          <Label fx:id="breadcrumbLabel" styleClass="adm-breadcrumb" text="Caloocan branch / Café administration" />
          <Region HBox.hgrow="ALWAYS" />
          <Label fx:id="dateLabel" styleClass="adm-topbar-date" text="Tue, 06 Oct 2026" />
-         <Label styleClass="adm-bell" text="🔔" />
          <Label fx:id="userLabel" styleClass="adm-topbar-user" text="User  ▾" />
       </HBox>
    </top>

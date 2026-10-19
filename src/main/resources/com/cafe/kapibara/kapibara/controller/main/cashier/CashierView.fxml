@@ -59,7 +59,6 @@
          <Label fx:id="breadcrumbLabel" styleClass="adm-breadcrumb" text="Caloocan branch / Home" />
          <Region HBox.hgrow="ALWAYS" />
          <Label fx:id="dateLabel" styleClass="adm-topbar-date" text="" />
-         <Label styleClass="adm-bell" text="🔔" />
          <Label fx:id="userLabel" styleClass="adm-topbar-user" text="User · Cashier  ▾" />
       </HBox>
    </top>

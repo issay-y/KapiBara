@@ -9,9 +9,9 @@
     -kb-red: #D42A0B;
     -fx-background-color: #FFFCF8;
     -fx-background-radius: 20;
-    -fx-border-color: #E8DACB;
+    -fx-border-color: #4E2216;
     -fx-border-radius: 20;
-    -fx-border-width: 1;
+    -fx-border-width: 1.5;
     -fx-padding: 28 30 26 30;
     -fx-effect: dropshadow(gaussian, rgba(40,15,8,0.35), 28, 0.1, 0, 8);
     -fx-font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;

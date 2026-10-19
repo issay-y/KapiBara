@@ -14,7 +14,7 @@
 
 <!-- resources/com/cafe/kapibara/kapibara/controller/main/admin/inventory/LowStockView.fxml
      Content only: the sidebar and top bar come from AdminView.fxml. -->
-<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="adm-scroll"
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="adm-scroll"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cafe.kapibara.kapibara.controller.main.admin.inventory.LowStockController">
    <VBox spacing="16.0" styleClass="adm-page, adm-lg">
