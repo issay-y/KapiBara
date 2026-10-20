@@ -1,6 +1,5 @@
 package com.cafe.kapibara.kapibara.controller.main.admin.sale;
 
-import com.cafe.kapibara.kapibara.controller.main.admin.AdminPage;
 import com.cafe.kapibara.kapibara.controller.main.admin.AdminShell;
 import com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore;
 import com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore.Sale;
@@ -10,7 +9,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ToggleButton;
@@ -19,10 +17,12 @@ import javafx.scene.layout.VBox;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,50 +30,58 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-/** Sales overview page (KPIs, performance chart, best sellers, hourly + monthly). */
+/** Sales overview page. The period selector (Daily..Yearly) drives every card on the page. */
 public class SaleController implements Initializable, AdminShell.Aware {
 
-    private static final DateTimeFormatter DAY_MONTH = DateTimeFormatter.ofPattern("dd MMM", Locale.ENGLISH);
-    private static final DateTimeFormatter DAY_MONTH_YEAR = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
+    private enum Period { DAILY, WEEKLY, MONTHLY, QUARTERLY, YEARLY }
 
-    @FXML private Button dateRangeBtn;
+    private static final Locale EN = Locale.ENGLISH;
+    private static final DateTimeFormatter DAY_MONTH = DateTimeFormatter.ofPattern("dd MMM", EN);
+    private static final DateTimeFormatter DAY_MONTH_YEAR = DateTimeFormatter.ofPattern("dd MMM yyyy", EN);
+    private static final DateTimeFormatter MONTH_ONLY = DateTimeFormatter.ofPattern("MMM", EN);
+    private static final DateTimeFormatter MONTH_YEAR = DateTimeFormatter.ofPattern("MMMM yyyy", EN);
+    private static final DateTimeFormatter WEEKDAY_DAY = DateTimeFormatter.ofPattern("EEE dd", EN);
+
+    private static final int START_HOUR = 7;
+    private static final int END_HOUR = 18;
+
+    // period selector
+    @FXML private ToggleGroup periodGroup;
+    @FXML private ToggleButton dailyBtn, weeklyBtn, monthlyBtn, quarterlyBtn, yearlyBtn;
+    @FXML private Label rangeLabel;
 
     // KPI cards
-    @FXML private Label todaySalesValue, todaySalesSub;
-    @FXML private Label monthSalesValue, monthSalesSub;
-    @FXML private Label txValue, txSub;
-    @FXML private Label avgValue, avgSub;
-    @FXML private Label topProductValue, topProductSub;
+    @FXML private Label salesLabel, salesValue, salesSub;
+    @FXML private Label prevLabel, prevValue, prevSub;
+    @FXML private Label txLabel, txValue, txSub;
+    @FXML private Label avgLabel, avgValue, avgSub;
+    @FXML private Label topLabel, topProductValue, topProductSub;
 
     // sales performance
     @FXML private Label perfSubtitle, perfScaleLabel;
-    @FXML private ToggleGroup periodGroup;
-    @FXML private ToggleButton dailyBtn, weeklyBtn, monthlyBtn;
     @FXML private BarChart<String, Number> perfChart;
 
     // best sellers
+    @FXML private Label bestSellersTitle;
     @FXML private VBox bestSellersBox;
     @FXML private Label bestSellersFooter;
 
     // bottom charts
+    @FXML private Label hourlyTitle, hourlyNote, hourlyFooter;
     @FXML private BarChart<String, Number> hourlyChart;
-    @FXML private Label hourlyFooter;
-    @FXML private Label monthlyTitle;
-    @FXML private BarChart<String, Number> monthlyChart;
-    @FXML private Label monthlyFooter;
+    @FXML private Label trendTitle, trendNote, trendFooter;
+    @FXML private BarChart<String, Number> trendChart;
 
     private AdminShell shell;
     private final CashierStore store = CashierStore.get();
+    private Period period = Period.DAILY;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // never allow "nothing selected"
         periodGroup.selectedToggleProperty().addListener((obs, old, now) -> {
             if (now == null && old != null) old.setSelected(true);
         });
-
-        LocalDate today = LocalDate.now();
-        dateRangeBtn.setText(today.minusDays(6).format(DAY_MONTH) + " – "
-                + today.format(DAY_MONTH_YEAR) + "     📅");
     }
 
     @Override
@@ -89,94 +97,209 @@ public class SaleController implements Initializable, AdminShell.Aware {
         loadDashboard();
     }
 
+    @FXML
+    private void handlePeriodChange(ActionEvent event) {
+        ToggleButton src = (ToggleButton) event.getSource();
+        src.setSelected(true);
+
+        if (src == dailyBtn) period = Period.DAILY;
+        else if (src == weeklyBtn) period = Period.WEEKLY;
+        else if (src == monthlyBtn) period = Period.MONTHLY;
+        else if (src == quarterlyBtn) period = Period.QUARTERLY;
+        else period = Period.YEARLY;
+
+        loadDashboard();
+    }
+
     // =====================================================================
-    //  DATA PROCESSING
+    //  PERIOD HELPERS
+    // =====================================================================
+
+    /** First day of the current period. */
+    private static LocalDate periodStart(Period p, LocalDate today) {
+        return switch (p) {
+            case DAILY -> today;
+            case WEEKLY -> today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            case MONTHLY -> today.withDayOfMonth(1);
+            case QUARTERLY -> LocalDate.of(today.getYear(), ((today.getMonthValue() - 1) / 3) * 3 + 1, 1);
+            case YEARLY -> LocalDate.of(today.getYear(), 1, 1);
+        };
+    }
+
+    /** First day AFTER the period that begins at start. */
+    private static LocalDate periodEnd(Period p, LocalDate start) {
+        return switch (p) {
+            case DAILY -> start.plusDays(1);
+            case WEEKLY -> start.plusWeeks(1);
+            case MONTHLY -> start.plusMonths(1);
+            case QUARTERLY -> start.plusMonths(3);
+            case YEARLY -> start.plusYears(1);
+        };
+    }
+
+    /** Start of the period n periods before the one beginning at start. */
+    private static LocalDate shiftBack(Period p, LocalDate start, int n) {
+        return switch (p) {
+            case DAILY -> start.minusDays(n);
+            case WEEKLY -> start.minusWeeks(n);
+            case MONTHLY -> start.minusMonths(n);
+            case QUARTERLY -> start.minusMonths(3L * n);
+            case YEARLY -> start.minusYears(n);
+        };
+    }
+
+    private static String periodName(Period p) {
+        return switch (p) {
+            case DAILY -> "Today";
+            case WEEKLY -> "This week";
+            case MONTHLY -> "This month";
+            case QUARTERLY -> "This quarter";
+            case YEARLY -> "This year";
+        };
+    }
+
+    private static String previousName(Period p) {
+        return switch (p) {
+            case DAILY -> "Yesterday";
+            case WEEKLY -> "Last week";
+            case MONTHLY -> "Last month";
+            case QUARTERLY -> "Last quarter";
+            case YEARLY -> "Last year";
+        };
+    }
+
+    private static String rangeText(Period p, LocalDate start) {
+        return switch (p) {
+            case DAILY -> start.format(DAY_MONTH_YEAR);
+            case WEEKLY -> start.format(DAY_MONTH) + " – " + start.plusDays(6).format(DAY_MONTH_YEAR);
+            case MONTHLY -> start.format(MONTH_YEAR);
+            case QUARTERLY -> quarterLabel(start) + " · " + start.format(MONTH_ONLY) + " – "
+                    + start.plusMonths(2).format(MONTH_ONLY) + " " + start.getYear();
+            case YEARLY -> String.valueOf(start.getYear());
+        };
+    }
+
+    private static String quarterLabel(LocalDate d) {
+        return "Q" + ((d.getMonthValue() - 1) / 3 + 1) + " " + d.getYear();
+    }
+
+    private static String hourLabel(int h) {
+        return h < 12 ? h + " AM" : (h == 12 ? "12 PM" : (h - 12) + " PM");
+    }
+
+    private static boolean inRange(Sale s, LocalDate from, LocalDate toExclusive) {
+        LocalDate d = s.time().toLocalDate();
+        return !d.isBefore(from) && d.isBefore(toExclusive);
+    }
+
+    // =====================================================================
+    //  DASHBOARD
     // =====================================================================
 
     private void loadDashboard() {
         LocalDate today = LocalDate.now();
-        List<Sale> allSales = store.sales();
+        LocalDate start = periodStart(period, today);
+        LocalDate end = periodEnd(period, start);
+        LocalDate prevStart = shiftBack(period, start, 1);
 
-        double todaySales = 0;
-        int todayTx = 0;
-        double monthSales = 0;
-        int monthTx = 0;
+        List<Sale> all = store.sales();
+        List<Sale> current = new ArrayList<>();
+        double curTotal = 0;
+        double prevTotal = 0;
+        int prevTx = 0;
 
-        for (Sale sale : allSales) {
-            LocalDate date = sale.time().toLocalDate();
-            double total = sale.total().doubleValue();
-
-            if (date.getYear() == today.getYear() && date.getMonth() == today.getMonth()) {
-                monthSales += total;
-                monthTx++;
-
-                if (date.equals(today)) {
-                    todaySales += total;
-                    todayTx++;
-                }
+        for (Sale s : all) {
+            if (inRange(s, start, end)) {
+                current.add(s);
+                curTotal += s.total().doubleValue();
+            } else if (inRange(s, prevStart, start)) {
+                prevTotal += s.total().doubleValue();
+                prevTx++;
             }
         }
+        int curTx = current.size();
 
-        todaySalesValue.setText(peso(todaySales));
-        todaySalesSub.setText(today.format(DateTimeFormatter.ofPattern("dd MMMM", Locale.ENGLISH))
-                + " · " + todayTx + " transactions");
+        rangeLabel.setText(rangeText(period, start));
 
-        monthSalesValue.setText(peso(monthSales));
-        monthSalesSub.setText(today.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH)
-                + " to date · " + monthTx + " transactions");
+        // KPI 1: sales this period
+        salesLabel.setText(period == Period.DAILY ? "Today's Sales" : periodName(period) + "'s Sales");
+        salesValue.setText(peso(curTotal));
+        salesSub.setText(rangeText(period, start) + " · " + curTx + " transactions");
 
-        txValue.setText(String.valueOf(todayTx));
-        txSub.setText("Today · All complete");
+        // KPI 2: previous period + change
+        prevLabel.setText(previousName(period) + "'s Sales");
+        prevValue.setText(peso(prevTotal));
+        String change;
+        if (prevTotal > 0) {
+            double pct = (curTotal - prevTotal) / prevTotal * 100.0;
+            change = String.format("%s%.1f%% vs now", pct >= 0 ? "▼ " : "▲ ", Math.abs(pct));
+            // pct >= 0 means current is higher than previous, so previous was lower
+            change = String.format("Now is %s%.1f%% %s", "", Math.abs(pct), pct >= 0 ? "higher" : "lower");
+        } else {
+            change = "No sales in that period";
+        }
+        prevSub.setText(prevTx + " transactions · " + change);
 
-        avgValue.setText(todayTx > 0 ? peso(todaySales / todayTx) : "₱0");
-        avgSub.setText("Today's sales ÷ " + todayTx + " orders");
+        // KPI 3 + 4
+        txLabel.setText("Total Transactions");
+        txValue.setText(String.valueOf(curTx));
+        txSub.setText(periodName(period) + " · All complete");
 
-        loadBestSellers();
-        showPeriod(weeklyBtn);
-        loadHourlyChart();
-        loadMonthlyChart();
+        avgLabel.setText("Average Transaction");
+        avgValue.setText(curTx > 0 ? peso(curTotal / curTx) : "₱0");
+        avgSub.setText("Sales ÷ " + curTx + " orders");
+
+        topLabel.setText("Most Sold Product");
+
+        loadBestSellers(current);
+        loadPerformance(current, today, start);
+        loadHourly(current);
+        loadTrend(all, start);
     }
 
-    private void loadBestSellers() {
-        LocalDate today = LocalDate.now();
+    // =====================================================================
+    //  BEST SELLERS
+    // =====================================================================
+
+    private void loadBestSellers(List<Sale> sales) {
         Map<String, ProductStats> statsMap = new HashMap<>();
 
-        for (Sale sale : store.sales()) {
-            if (sale.time().toLocalDate().equals(today)) {
-                for (SaleLine line : sale.lines()) {
-                    statsMap.putIfAbsent(line.name(), new ProductStats(line.name()));
-                    ProductStats stat = statsMap.get(line.name());
-                    stat.sold += line.qty();
-                    stat.revenue += line.amount().doubleValue();
-                }
+        for (Sale sale : sales) {
+            for (SaleLine line : sale.lines()) {
+                ProductStats stat = statsMap.computeIfAbsent(line.name(), ProductStats::new);
+                stat.sold += line.qty();
+                stat.revenue += line.amount().doubleValue();
             }
         }
 
-        List<ProductStats> sortedStats = new ArrayList<>(statsMap.values());
-        sortedStats.sort((a, b) -> Integer.compare(b.sold, a.sold));
+        List<ProductStats> sorted = new ArrayList<>(statsMap.values());
+        sorted.sort((a, b) -> Integer.compare(b.sold, a.sold));
 
+        String when = periodName(period).toLowerCase(EN);
+        bestSellersTitle.setText(period == Period.DAILY ? "Today's best sellers"
+                : "Best sellers · " + periodName(period));
         bestSellersBox.getChildren().clear();
 
-        if (sortedStats.isEmpty()) {
+        if (sorted.isEmpty()) {
             topProductValue.setText("No sales yet");
-            topProductSub.setText("Waiting for first order");
+            topProductSub.setText("Nothing sold " + when);
 
-            Label empty = new Label("No items sold today.");
+            Label empty = new Label("No items sold " + when + ".");
             empty.getStyleClass().add("adm-seller-label");
             bestSellersBox.getChildren().add(empty);
-            bestSellersFooter.setText("0 items sold today");
+            bestSellersFooter.setText("0 items sold " + when);
             return;
         }
 
-        ProductStats top = sortedStats.get(0);
+        ProductStats top = sorted.get(0);
         topProductValue.setText(top.name);
-        topProductSub.setText(top.sold + " sold today · " + peso(top.revenue));
+        topProductSub.setText(top.sold + " sold · " + peso(top.revenue));
 
         int max = top.sold;
-        int displayCount = Math.min(sortedStats.size(), 5);
+        int displayCount = Math.min(sorted.size(), 5);
 
         for (int i = 0; i < displayCount; i++) {
-            ProductStats stat = sortedStats.get(i);
+            ProductStats stat = sorted.get(i);
             Label label = new Label(stat.name + " · " + stat.sold + " sold · " + peso(stat.revenue));
             label.getStyleClass().add("adm-seller-label");
 
@@ -188,147 +311,168 @@ public class SaleController implements Initializable, AdminShell.Aware {
             bestSellersBox.getChildren().add(new VBox(4, label, bar));
         }
 
-        int otherItemsCount = Math.max(0, sortedStats.size() - displayCount);
-        bestSellersFooter.setText(sortedStats.size() + " unique products sold today • Other products: " + otherItemsCount);
+        int others = Math.max(0, sorted.size() - displayCount);
+        bestSellersFooter.setText(sorted.size() + " unique products sold " + when
+                + " • Other products: " + others);
     }
 
     private static class ProductStats {
-        String name;
+        final String name;
         int sold = 0;
         double revenue = 0;
         ProductStats(String name) { this.name = name; }
     }
 
-    private void loadHourlyChart() {
-        LocalDate today = LocalDate.now();
-        int startHour = 7;
-        int endHour = 18;
-        List<String> labels = new ArrayList<>();
-        double[] values = new double[endHour - startHour + 1];
-
-        for (int i = startHour; i <= endHour; i++) {
-            labels.add(i <= 12 ? (i == 12 ? "12 PM" : i + " AM") : (i - 12) + " PM");
-        }
-
-        double sum = 0;
-        for (Sale sale : store.sales()) {
-            if (sale.time().toLocalDate().equals(today)) {
-                int h = sale.time().getHour();
-                if (h >= startHour && h <= endHour) {
-                    values[h - startHour] += sale.total().doubleValue();
-                    sum += sale.total().doubleValue();
-                }
-            }
-        }
-
-        ChartUtil.fillBars(hourlyChart, labels, values, values.length - 1);
-        hourlyFooter.setText("Today so far • " + peso(sum) + " total");
-    }
-
-    private void loadMonthlyChart() {
-        LocalDate today = LocalDate.now();
-        int days = today.getDayOfMonth();
-        List<String> labels = new ArrayList<>();
-        double[] values = new double[days];
-
-        for (int i = 1; i <= days; i++) {
-            labels.add(String.format("%02d", i));
-        }
-
-        double sum = 0;
-        for (Sale s : store.sales()) {
-            LocalDate d = s.time().toLocalDate();
-            if (d.getYear() == today.getYear() && d.getMonth() == today.getMonth()) {
-                int dayIndex = d.getDayOfMonth() - 1;
-                values[dayIndex] += s.total().doubleValue();
-                sum += s.total().doubleValue();
-            }
-        }
-
-        ChartUtil.fillBars(monthlyChart, labels, values, values.length - 1);
-
-        String month = today.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-        monthlyTitle.setText("Monthly • " + month + " to date");
-        monthlyFooter.setText("01–" + String.format("%02d", days) + " " + month + " • " + peso(sum) + " total");
-    }
-
     // =====================================================================
-    //  SALES PERFORMANCE (Daily / Weekly / Monthly)
+    //  SALES PERFORMANCE (breakdown inside the selected period)
     // =====================================================================
 
-    @FXML
-    private void handlePeriodChange(ActionEvent event) {
-        showPeriod((ToggleButton) event.getSource());
-    }
-
-    private void showPeriod(ToggleButton selected) {
-        selected.setSelected(true);
+    private void loadPerformance(List<Sale> sales, LocalDate today, LocalDate start) {
         List<String> labels = new ArrayList<>();
-        double[] values;
-        double sum = 0;
+        int highlight;
+        String note;
 
-        LocalDate today = LocalDate.now();
-        List<Sale> sales = store.sales();
-
-        if (selected == dailyBtn) {
-            int startHour = 7;
-            int endHour = 18;
-            values = new double[endHour - startHour + 1];
-
-            for (int i = startHour; i <= endHour; i++) {
-                labels.add(i <= 12 ? (i == 12 ? "12 PM" : i + " AM") : (i - 12) + " PM");
+        switch (period) {
+            case DAILY -> {
+                for (int h = START_HOUR; h <= END_HOUR; h++) labels.add(hourLabel(h));
+                highlight = Math.max(0, Math.min(END_HOUR - START_HOUR, java.time.LocalTime.now().getHour() - START_HOUR));
+                note = "PHP · Hourly sales for today";
             }
-
-            for (Sale s : sales) {
-                if (s.time().toLocalDate().equals(today)) {
-                    int h = s.time().getHour();
-                    if (h >= startHour && h <= endHour) {
-                        values[h - startHour] += s.total().doubleValue();
-                    }
-                }
+            case WEEKLY -> {
+                for (int i = 0; i < 7; i++) labels.add(start.plusDays(i).format(WEEKDAY_DAY));
+                highlight = today.getDayOfWeek().getValue() - 1;
+                note = "PHP · Daily sales this week";
             }
-            perfScaleLabel.setText("PHP · Hourly sales for today");
-
-        } else if (selected == monthlyBtn) {
-            values = new double[6];
-            for (int i = 5; i >= 0; i--) {
-                labels.add(today.minusMonths(i).format(DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH)));
+            case MONTHLY -> {
+                int days = today.getDayOfMonth();
+                for (int i = 1; i <= days; i++) labels.add(String.format("%02d", i));
+                highlight = days - 1;
+                note = "PHP · Daily sales this month";
             }
-
-            for (Sale s : sales) {
-                LocalDate d = s.time().toLocalDate();
-                long monthsBetween = ChronoUnit.MONTHS.between(d.withDayOfMonth(1), today.withDayOfMonth(1));
-                if (monthsBetween >= 0 && monthsBetween < 6) {
-                    values[5 - (int) monthsBetween] += s.total().doubleValue();
-                }
+            case QUARTERLY -> {
+                for (int i = 0; i < 3; i++) labels.add(start.plusMonths(i).format(MONTH_ONLY));
+                highlight = today.getMonthValue() - start.getMonthValue();
+                note = "PHP · Monthly sales this quarter";
             }
-            perfScaleLabel.setText("PHP · Sales over the last 6 months");
-
-        } else {
-            values = new double[7];
-            for (int i = 6; i >= 0; i--) {
-                labels.add(today.minusDays(i).format(DAY_MONTH));
+            default -> {
+                for (int i = 0; i < 12; i++) labels.add(start.plusMonths(i).format(MONTH_ONLY));
+                highlight = today.getMonthValue() - 1;
+                note = "PHP · Monthly sales this year";
             }
-
-            for (Sale s : sales) {
-                LocalDate d = s.time().toLocalDate();
-                long daysBetween = ChronoUnit.DAYS.between(d, today);
-                if (daysBetween >= 0 && daysBetween < 7) {
-                    values[6 - (int) daysBetween] += s.total().doubleValue();
-                }
-            }
-            perfScaleLabel.setText("PHP · Sales over the last 7 days");
         }
 
+        double[] values = new double[labels.size()];
+        for (Sale s : sales) {
+            int idx = bucketIndex(s.time(), start);
+            if (idx >= 0 && idx < values.length) values[idx] += s.total().doubleValue();
+        }
+
+        double sum = 0;
         for (double v : values) sum += v;
 
-        ChartUtil.fillBars(perfChart, labels, values, values.length - 1);
+        ChartUtil.fillBars(perfChart, labels, values, Math.max(0, Math.min(highlight, values.length - 1)));
+        perfScaleLabel.setText(note);
         perfSubtitle.setText(peso(sum) + " total");
     }
 
-    @FXML
-    private void handleDateRange(ActionEvent event) {
-        // TODO: open a date range picker, then reload the page for that range
+    /** Which bar of the performance chart a sale belongs to (-1 = none). */
+    private int bucketIndex(LocalDateTime t, LocalDate start) {
+        LocalDate d = t.toLocalDate();
+        return switch (period) {
+            case DAILY -> (t.getHour() >= START_HOUR && t.getHour() <= END_HOUR) ? t.getHour() - START_HOUR : -1;
+            case WEEKLY -> (int) ChronoUnit.DAYS.between(start, d);
+            case MONTHLY -> d.getDayOfMonth() - 1;
+            case QUARTERLY -> (int) ChronoUnit.MONTHS.between(start, d.withDayOfMonth(1));
+            case YEARLY -> d.getMonthValue() - 1;
+        };
+    }
+
+    // =====================================================================
+    //  HOURLY CHART (sales by hour of day, summed over the period)
+    // =====================================================================
+
+    private void loadHourly(List<Sale> sales) {
+        List<String> labels = new ArrayList<>();
+        double[] values = new double[END_HOUR - START_HOUR + 1];
+
+        for (int h = START_HOUR; h <= END_HOUR; h++) labels.add(hourLabel(h));
+
+        double sum = 0;
+        int peak = 0;
+        for (Sale s : sales) {
+            int h = s.time().getHour();
+            if (h >= START_HOUR && h <= END_HOUR) {
+                values[h - START_HOUR] += s.total().doubleValue();
+                sum += s.total().doubleValue();
+            }
+        }
+        for (int i = 1; i < values.length; i++) if (values[i] > values[peak]) peak = i;
+
+        hourlyTitle.setText("Hourly sales · " + periodName(period));
+        hourlyNote.setText(period == Period.DAILY ? "PHP · Sales per hour today"
+                : "PHP · Sales per hour of day, all days combined");
+
+        ChartUtil.fillBars(hourlyChart, labels, values, peak);
+        hourlyFooter.setText(sum > 0
+                ? "Peak hour " + hourLabel(START_HOUR + peak) + " • " + peso(sum) + " total"
+                : "No sales in this period");
+    }
+
+    // =====================================================================
+    //  TREND CHART (last N periods, ending with the current one)
+    // =====================================================================
+
+    private void loadTrend(List<Sale> all, LocalDate currentStart) {
+        int n = switch (period) {
+            case DAILY -> 7;
+            case WEEKLY -> 8;
+            case MONTHLY -> 6;
+            case QUARTERLY -> 4;
+            case YEARLY -> 5;
+        };
+
+        LocalDate[] starts = new LocalDate[n];
+        List<String> labels = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            LocalDate ps = shiftBack(period, currentStart, n - 1 - i);
+            starts[i] = ps;
+            labels.add(switch (period) {
+                case DAILY, WEEKLY -> ps.format(DAY_MONTH);
+                case MONTHLY -> ps.format(MONTH_ONLY);
+                case QUARTERLY -> "Q" + ((ps.getMonthValue() - 1) / 3 + 1) + " " + ps.getYear();
+                case YEARLY -> String.valueOf(ps.getYear());
+            });
+        }
+
+        double[] values = new double[n];
+        LocalDate windowEnd = periodEnd(period, currentStart);
+        for (Sale s : all) {
+            if (!inRange(s, starts[0], windowEnd)) continue;
+            LocalDate d = s.time().toLocalDate();
+            for (int i = n - 1; i >= 0; i--) {
+                if (!d.isBefore(starts[i])) {
+                    values[i] += s.total().doubleValue();
+                    break;
+                }
+            }
+        }
+
+        double sum = 0;
+        for (double v : values) sum += v;
+
+        String unit = switch (period) {
+            case DAILY -> "Last 7 days";
+            case WEEKLY -> "Last 8 weeks";
+            case MONTHLY -> "Last 6 months";
+            case QUARTERLY -> "Last 4 quarters";
+            case YEARLY -> "Last 5 years";
+        };
+
+        trendTitle.setText("Trend · " + unit);
+        trendNote.setText("PHP · " + unit + ", current period highlighted");
+
+        ChartUtil.fillBars(trendChart, labels, values, n - 1);
+        trendFooter.setText(unit + " • " + peso(sum) + " total");
     }
 
     private static String peso(double amount) {

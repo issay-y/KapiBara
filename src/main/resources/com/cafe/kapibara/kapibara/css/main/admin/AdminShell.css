@@ -130,17 +130,6 @@
     -fx-text-fill: #2F7D4A;
 }
 
-.adm-date-pill {
-    -fx-background-color: -adm-card;
-    -fx-background-radius: 18;
-    -fx-border-color: -adm-line;
-    -fx-border-radius: 18;
-    -fx-padding: 8 16 8 16;
-    -fx-font-size: 12px;
-    -fx-text-fill: -adm-text;
-    -fx-cursor: hand;
-}
-
 /* ---------- Cards ---------- */
 .adm-card {
     -fx-background-color: -adm-card;
@@ -661,9 +650,9 @@
 
 /* =====================================================================
    Large-screen scale ("adm-lg")
-   Paste at the END of AdminShell.css. Only pages whose root VBox has
-   the "adm-lg" style class are affected, so other admin pages keep
-   their current size. Remove the class from a page to revert it.
+   Only pages whose root VBox has the "adm-lg" style class are affected,
+   so other admin pages keep their current size. Remove the class from a
+   page to revert it.
    ===================================================================== */
 
 /* ---------- Headings ---------- */
@@ -792,9 +781,7 @@
 }
 
 /* =====================================================================
-   Paste at the END of AdminShell.css (after the "adm-lg" block).
-   1) Extra adm-lg sizes needed by the Inventory pages
-   2) Styles for the shared My profile page
+   Extra adm-lg sizes for the Inventory pages + shared My profile page
    ===================================================================== */
 
 /* ---------- Inventory pages (adm-lg) ---------- */
@@ -857,9 +844,6 @@
 .adm-lg .adm-profile-name { -fx-font-size: 32px; }
 
 /* =====================================================================
-   REPLACE the last block you pasted at the end of AdminShell.css with
-   this whole block (the old one lost its comment opener, which breaks
-   the CSS parser).
    Accounts + Inventory: brown card outline, compact fit, combo fix,
    straight table row lines.
    ===================================================================== */
@@ -1044,8 +1028,8 @@
 
 /* =====================================================================
    Sales page (adm-lg + adm-sales)
-   Extra sizes for the pieces adm-lg doesn't cover: date pill, period
-   toggle, chart notes/axes, best sellers, text-style KPI value.
+   Extra sizes for the pieces adm-lg doesn't cover: period toggle,
+   chart notes/axes, best sellers, text-style KPI value.
    ===================================================================== */
 
 /* Cards: slightly tighter than the 28px adm-lg padding so charts keep height */
@@ -1060,14 +1044,6 @@
     -fx-border-radius: 16;
 }
 
-/* Header date pill */
-.adm-sales .adm-date-pill {
-    -fx-padding: 12 22 12 22;
-    -fx-font-size: 15px;
-    -fx-background-radius: 22;
-    -fx-border-radius: 22;
-}
-
 /* KPI: "Most Sold Product" text value */
 .adm-sales .adm-kpi-value-text {
     -fx-font-size: 30px;
@@ -1078,11 +1054,30 @@
 .adm-sales .adm-card-sub   { -fx-font-size: 15px; }
 .adm-sales .adm-chart-note { -fx-font-size: 13px; }
 
-/* Daily / Weekly / Monthly toggle */
+/* Daily / Weekly / Monthly / Quarterly / Yearly toggle
+   Unselected = brown outline. Selected = filled brown. The border keeps
+   the same colour and width in both states, so buttons never shift size. */
 .adm-sales .adm-period-btn {
     -fx-padding: 8 18 8 18;
     -fx-font-size: 14px;
+    -fx-background-insets: 0;
     -fx-background-radius: 10;
+    -fx-border-color: -adm-brown;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.adm-sales .adm-period-btn:hover {
+    -fx-background-color: #F8EFE3;
+}
+
+.adm-sales .adm-period-btn:selected,
+.adm-sales .adm-period-btn:selected:hover {
+    -fx-background-color: -adm-brown;
+    -fx-border-color: -adm-brown;
+    -fx-text-fill: white;
 }
 
 /* Chart axis labels */
