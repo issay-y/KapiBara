@@ -1,5 +1,6 @@
 package com.cafe.kapibara.kapibara.controller.main.cashier;
 
+import com.cafe.kapibara.kapibara.DAO.InventoryDAO;
 import com.cafe.kapibara.kapibara.controller.main.cashier.CashierStore.Product;
 import com.cafe.kapibara.kapibara.util.InventoryImages;
 import javafx.geometry.Insets;
@@ -19,7 +20,6 @@ import javafx.scene.shape.Circle;
 
 import java.io.File;
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -170,10 +170,10 @@ public final class ProductCards {
     }
 
     // ------------------------------------------------------------------
-    // Photo: a circle with a cream ring and soft shadow. Photos saved from the inventory
-    // form are found through InventoryImages (image_path holds only the file name).
-    // The picture is cropped to fill the circle. Items without a photo show the first
-    // letter of their category.
+    // Photo: a circle with a cream ring and soft shadow. Photos live in
+    // htdocs/Kapibara/<Category>/ and are found through InventoryDAO.imageFile
+    // (image_path holds "Category/File.png"). The picture is cropped to fill
+    // the circle. Items without a photo show the first letter of their category.
     // ------------------------------------------------------------------
 
     private static StackPane photo(Product p, double size) {
@@ -236,10 +236,16 @@ public final class ProductCards {
     private static Optional<Image> load(String path) {
         if (path == null || path.isBlank()) return Optional.empty();
         try {
-            // 1. the photo saved by the inventory form
-            Optional<Path> stored = InventoryImages.find(path);
-            if (stored.isPresent()) {
-                return valid(new Image(stored.get().toUri().toString(), 400, 0, true, true));
+            // 1. the photo in htdocs/Kapibara/<Category>/
+            File stored = InventoryDAO.imageFile(path);
+            if (stored != null) {
+                Optional<Image> img = valid(new Image(stored.toURI().toString(), 400, 0, true, true));
+                if (img.isEmpty()) System.err.println("Image could not be decoded: " + stored);
+                return img;
+            }
+            Optional<java.nio.file.Path> userImg = InventoryImages.find(path);
+            if (userImg.isPresent()) {
+                return valid(new Image(userImg.get().toUri().toString(), 400, 0, true, true));
             }
             // 2. a full file path or file: URL
             File file = new File(path);
@@ -254,8 +260,9 @@ public final class ProductCards {
             try (InputStream in = ProductCards.class.getResourceAsStream(resource)) {
                 if (in != null) return valid(new Image(in));
             }
-        } catch (Exception ignored) {
-            // fall through to the letter
+            System.err.println("Image not found: \"" + path + "\" (looked in " + InventoryDAO.imageRoot() + ")");
+        } catch (Exception ex) {
+            System.err.println("Image load failed for \"" + path + "\": " + ex.getMessage());
         }
         return Optional.empty();
     }

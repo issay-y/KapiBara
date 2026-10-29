@@ -59,28 +59,19 @@
                     </columnConstraints>
 
                     <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                        <Label styleClass="adm-form-label" text="Quantity *" />
+                        <Label fx:id="quantityLabel" styleClass="adm-form-label" text="Initial quantity *" />
                         <TextField fx:id="quantityField" styleClass="adm-field" />
                     </VBox>
                     <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                        <Label styleClass="adm-form-label" text="Unit *" />
-                        <ComboBox fx:id="unitCombo" maxWidth="Infinity" promptText="Select unit" styleClass="adm-combo" />
-                    </VBox>
-
-                    <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                        <Label styleClass="adm-form-label" text="Minimum stock *" />
-                        <TextField fx:id="minimumField" styleClass="adm-field" />
-                    </VBox>
-                    <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                         <Label styleClass="adm-form-label" text="Status *" />
                         <TextField fx:id="statusField" styleClass="adm-field, adm-field-readonly" />
                     </VBox>
 
-                    <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                    <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
                         <Label styleClass="adm-form-label" text="Selling price (₱) *" />
                         <TextField fx:id="priceField" promptText="0.00" styleClass="adm-field" />
                     </VBox>
-                    <Label styleClass="adm-form-note" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2"
+                    <Label styleClass="adm-form-note" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1"
                            GridPane.valignment="BOTTOM"
                            text="Shown on the cashier screen. Leave at 0 for items that aren't sold at the counter, like ingredients and supplies." />
                 </GridPane>
@@ -138,17 +129,17 @@
                 <VBox styleClass="adm-card" spacing="20.0" VBox.vgrow="ALWAYS">
                     <Label styleClass="adm-card-title" text="Stock guidance" />
                     <Label styleClass="adm-guide-icon" text="📦" />
-                    <Label styleClass="adm-role-desc" text="Use the same unit for quantity and minimum stock." wrapText="true" />
+                    <Label styleClass="adm-role-desc" text="Low stock is 150 or below. The most you can record for one item is 500." wrapText="true" />
 
                     <HBox alignment="CENTER_LEFT">
                         <Label styleClass="adm-stock-name" text="In stock" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label styleClass="adm-stock-value" text="Above minimum" />
+                        <Label styleClass="adm-stock-value" text="Above 150" />
                     </HBox>
                     <HBox alignment="CENTER_LEFT">
                         <Label styleClass="adm-stock-name" text="Low stock" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label styleClass="adm-stock-value" text="At / below minimum" />
+                        <Label styleClass="adm-stock-value" text="150 or below" />
                     </HBox>
                     <HBox alignment="CENTER_LEFT">
                         <Label styleClass="adm-stock-name" text="Out of stock" />

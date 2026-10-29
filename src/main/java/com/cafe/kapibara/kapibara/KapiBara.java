@@ -16,9 +16,19 @@ public class KapiBara extends Application {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(KapiBara.class.getResource(
                     "/com/cafe/kapibara/kapibara/controller/Id/LoginView.fxml"));
-            Scene scene = new Scene(fxmlLoader.load(), 1200, 700);
+            Scene scene = new Scene(fxmlLoader.load(), 1280, 720);
             stage.setTitle("KapiBara Cafe");
+            try (var iconStream = KapiBara.class.getResourceAsStream(
+                    "/com/cafe/kapibara/kapibara/images/logo.png")) {
+                if (iconStream != null) {
+                    stage.getIcons().add(new javafx.scene.image.Image(iconStream));
+                }
+            } catch (Exception ignored) {
+            }
             stage.setScene(scene);
+            stage.setMinWidth(960);
+            stage.setMinHeight(600);
+            stage.centerOnScreen();
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
@@ -26,6 +36,10 @@ public class KapiBara extends Application {
                     "KapiBara could not load its main window:\n" + e.getMessage());
             javafx.application.Platform.exit();
         }
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 
     private void warmUpDatabase() {

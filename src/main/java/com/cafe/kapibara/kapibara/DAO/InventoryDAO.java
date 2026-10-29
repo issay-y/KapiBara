@@ -4,8 +4,15 @@ import com.cafe.kapibara.kapibara.config.DatabaseConnector;
 import com.cafe.kapibara.kapibara.model.inventory.InventoryCategory;
 import com.cafe.kapibara.kapibara.model.inventory.InventoryForm;
 import com.cafe.kapibara.kapibara.model.inventory.InventoryItem;
+import com.cafe.kapibara.kapibara.model.inventory.InventoryRules;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,24 +22,98 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 
-/**
- * Queries for the inventory pages.
- *
- * Two tables:
- *   inventory_categories (category_id, name)            the list of categories
- *   inventory_items      (..., category_id -> categories) the stock items
- *
- * Both are created automatically. If an older inventory_items table with a text
- * "category" column is found, it is migrated once: every distinct category is copied
- * into inventory_categories, each item gets its category_id, and the old column is dropped.
- * Nothing is seeded from code.
- */
 public class InventoryDAO {
 
     private static volatile boolean ready = false;
+
+    // =====================================================================
+    //  IMAGES (stored in Apache htdocs, one sub-folder per category)
+    // =====================================================================
+
+    /** Change here, or start the app with -Dkapibara.images="D:/somewhere/Kapibara". */
+    private static final String DEFAULT_IMAGE_ROOT = "C:/xampp/htdocs/Kapibara";
+
+    public static Path imageRoot() {
+        return Paths.get(System.getProperty("kapibara.images", DEFAULT_IMAGE_ROOT))
+                .toAbsolutePath().normalize();
+    }
+
+    /** Folder name for a category: the category name with characters Windows forbids removed. */
+    private static String folderName(String category) {
+        String clean = category == null ? "" : category.replaceAll("[\\\\/:*?\"<>|]", "").trim();
+        return clean.isEmpty() ? "Uncategorized" : clean;
+    }
+
+    /**
+     * Resolves a stored image_path ("Coffee/abc.png") to a file on disk.
+     * Old rows that only hold a file name are searched for in every category folder.
+     * Returns null when there is no image or the file can't be found.
+     */
+    public static File imageFile(String imagePath) {
+        if (imagePath == null || imagePath.isBlank()) return null;
+
+        Path root = imageRoot();
+        Path direct = root.resolve(imagePath).normalize();
+        if (direct.startsWith(root) && Files.isRegularFile(direct)) return direct.toFile();
+
+        if (!imagePath.contains("/") && !imagePath.contains("\\")) {
+            try (Stream<Path> dirs = Files.list(root)) {
+                for (Path dir : (Iterable<Path>) dirs.filter(Files::isDirectory)::iterator) {
+                    Path candidate = dir.resolve(imagePath);
+                    if (Files.isRegularFile(candidate)) return candidate.toFile();
+                }
+            } catch (IOException ignored) {
+                // root folder missing: fall through to null
+            }
+        }
+        return null;
+    }
+
+    /** file:/C:/xampp/... string ready for new javafx.scene.image.Image(...). Null when missing. */
+    public static String imageUri(String imagePath) {
+        File f = imageFile(imagePath);
+        return f == null ? null : f.toURI().toString();
+    }
+
+    /**
+     * Copies an uploaded picture into htdocs/Kapibara/<Category>/ under a random name.
+     * @return the value to store in image_path, e.g. "Coffee/3f95...png"
+     */
+    public static String saveImage(File source, String category) throws IOException {
+        String name = source.getName();
+        int dot = name.lastIndexOf('.');
+        String ext = dot >= 0 ? name.substring(dot).toLowerCase(Locale.ROOT) : ".png";
+
+        String folder = folderName(category);
+        Path dir = imageRoot().resolve(folder);
+        Files.createDirectories(dir);
+
+        String fileName = UUID.randomUUID() + ext;
+        Files.copy(source.toPath(), dir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+        return folder + "/" + fileName;
+    }
+
+    /** Deletes the picture file; quietly does nothing if it isn't there. */
+    public static void deleteImage(String imagePath) {
+        File f = imageFile(imagePath);
+        if (f != null) {
+            try {
+                Files.deleteIfExists(f.toPath());
+            } catch (IOException e) {
+                System.err.println("Could not delete image " + f + ": " + e.getMessage());
+            }
+        }
+    }
+
+    // =====================================================================
+    //  SCHEMA SQL
+    // =====================================================================
 
     private static final String CREATE_CATEGORIES =
             "CREATE TABLE IF NOT EXISTS inventory_categories ("
@@ -51,6 +132,7 @@ public class InventoryDAO {
                     + "price DECIMAL(10,2) NOT NULL DEFAULT 0, "
                     + "notes VARCHAR(255) NULL, "
                     + "image_path VARCHAR(255) NULL, "
+                    + "archived BOOLEAN NOT NULL DEFAULT FALSE, "
                     + "updated_by VARCHAR(100) NULL, "
                     + "updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, "
                     + "CONSTRAINT fk_inventory_items_category FOREIGN KEY (category_id) "
@@ -60,26 +142,39 @@ public class InventoryDAO {
     //  READ: ITEMS
     // =====================================================================
 
+    /** Active (not archived) items. */
     public List<InventoryItem> findAll() throws SQLException {
+        return findByArchived(false);
+    }
+
+    /** Archived items only. */
+    public List<InventoryItem> findArchived() throws SQLException {
+        return findByArchived(true);
+    }
+
+    private List<InventoryItem> findByArchived(boolean archived) throws SQLException {
         String sql = "SELECT i.item_id, i.name, c.name AS category, i.quantity, i.unit, i.minimum_stock, i.updated_at "
                 + "FROM inventory_items i JOIN inventory_categories c ON c.category_id = i.category_id "
+                + "WHERE i.archived = ? "
                 + "ORDER BY i.item_id";
 
         List<InventoryItem> items = new ArrayList<>();
         try (Connection conn = DatabaseConnector.getConnection()) {
             ensureSchema(conn);
-            try (PreparedStatement ps = conn.prepareStatement(sql);
-                 ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Timestamp updated = rs.getTimestamp("updated_at");
-                    items.add(new InventoryItem(
-                            rs.getLong("item_id"),
-                            rs.getString("name"),
-                            rs.getString("category"),
-                            rs.getDouble("quantity"),
-                            rs.getString("unit"),
-                            rs.getDouble("minimum_stock"),
-                            updated == null ? LocalDateTime.now() : updated.toLocalDateTime()));
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setBoolean(1, archived);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        Timestamp updated = rs.getTimestamp("updated_at");
+                        items.add(new InventoryItem(
+                                rs.getLong("item_id"),
+                                rs.getString("name"),
+                                rs.getString("category"),
+                                rs.getDouble("quantity"),
+                                rs.getString("unit"),
+                                rs.getDouble("minimum_stock"),
+                                updated == null ? LocalDateTime.now() : updated.toLocalDateTime()));
+                    }
                 }
             }
         }
@@ -114,7 +209,10 @@ public class InventoryDAO {
         }
     }
 
-    /** Case-insensitive. Pass the item's own id as excludeId when editing (0 when adding). */
+    /**
+     * Case-insensitive. Archived items count too, so a name can't be reused while its
+     * item is archived (restore it instead). Pass the item's own id as excludeId when editing (0 when adding).
+     */
     public boolean nameExists(String name, long excludeId) throws SQLException {
         String sql = "SELECT 1 FROM inventory_items WHERE LOWER(name) = LOWER(?) AND item_id <> ? LIMIT 1";
         try (Connection conn = DatabaseConnector.getConnection()) {
@@ -143,13 +241,14 @@ public class InventoryDAO {
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnector.getConnection()) {
             ensureSchema(conn);
+            checkQuantity(form.quantity());
             long categoryId = categoryId(conn, form.category());
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, form.name());
                 ps.setLong(2, categoryId);
                 ps.setDouble(3, form.quantity());
                 ps.setString(4, form.unit());
-                ps.setDouble(5, form.minimum());
+                ps.setDouble(5, InventoryRules.MINIMUM_STOCK);
                 ps.setBigDecimal(6, price == null ? BigDecimal.ZERO : price);
                 ps.setString(7, form.notes());
                 ps.setString(8, form.imagePath());
@@ -171,13 +270,14 @@ public class InventoryDAO {
                 + "WHERE item_id = ?";
         try (Connection conn = DatabaseConnector.getConnection()) {
             ensureSchema(conn);
+            checkQuantity(form.quantity());
             long categoryId = categoryId(conn, form.category());
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, form.name());
                 ps.setLong(2, categoryId);
                 ps.setDouble(3, form.quantity());
                 ps.setString(4, form.unit());
-                ps.setDouble(5, form.minimum());
+                ps.setDouble(5, InventoryRules.MINIMUM_STOCK);
                 ps.setBigDecimal(6, price);
                 ps.setString(7, form.notes());
                 ps.setString(8, form.imagePath());
@@ -188,16 +288,64 @@ public class InventoryDAO {
         }
     }
 
-    /** @return true if a row was deleted */
-    public boolean delete(long id) throws SQLException {
-        String sql = "DELETE FROM inventory_items WHERE item_id = ?";
+    /** Hard-coded limit: one item can't hold more than InventoryRules.MAXIMUM_QUANTITY. */
+    private static void checkQuantity(double quantity) throws SQLException {
+        if (quantity < 0 || quantity > InventoryRules.MAXIMUM_QUANTITY) {
+            throw new SQLException("The quantity must be between 0 and "
+                    + InventoryRules.text(InventoryRules.MAXIMUM_QUANTITY) + ".");
+        }
+    }
+
+    // ---- archive / restore ----------------------------------------------
+
+    /** Hides the item from the inventory list and the cashier. The row and its picture are kept. */
+    public boolean archive(long id, String updatedBy) throws SQLException {
+        return setArchived(id, true, updatedBy);
+    }
+
+    /** Brings an archived item back. */
+    public boolean restore(long id, String updatedBy) throws SQLException {
+        return setArchived(id, false, updatedBy);
+    }
+
+    private boolean setArchived(long id, boolean archived, String updatedBy) throws SQLException {
+        String sql = "UPDATE inventory_items SET archived = ?, updated_by = ?, updated_at = NOW() "
+                + "WHERE item_id = ?";
         try (Connection conn = DatabaseConnector.getConnection()) {
             ensureSchema(conn);
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setLong(1, id);
+                ps.setBoolean(1, archived);
+                ps.setString(2, updatedBy);
+                ps.setLong(3, id);
                 return ps.executeUpdate() > 0;
             }
         }
+    }
+
+    /**
+     * Permanently deletes the row and its picture file.
+     * The screens now use archive() instead; this is kept for cleanup or future use.
+     * @return true if a row was deleted
+     */
+    public boolean delete(long id) throws SQLException {
+        String imagePath = null;
+        boolean deleted;
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            ensureSchema(conn);
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT image_path FROM inventory_items WHERE item_id = ?")) {
+                ps.setLong(1, id);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) imagePath = rs.getString(1);
+                }
+            }
+            try (PreparedStatement ps = conn.prepareStatement("DELETE FROM inventory_items WHERE item_id = ?")) {
+                ps.setLong(1, id);
+                deleted = ps.executeUpdate() > 0;
+            }
+        }
+        if (deleted) deleteImage(imagePath);
+        return deleted;
     }
 
     // =====================================================================
@@ -218,7 +366,10 @@ public class InventoryDAO {
         return categories;
     }
 
-    /** Every category with the number of items using it: used by the Manage categories dialog. */
+    /**
+     * Every category with the number of items using it (archived items included, because they
+     * still block deleting the category): used by the Manage categories dialog.
+     */
     public List<InventoryCategory> findCategoryUsage() throws SQLException {
         String sql = "SELECT c.category_id, c.name, COUNT(i.item_id) AS item_count "
                 + "FROM inventory_categories c LEFT JOIN inventory_items i ON i.category_id = c.category_id "
@@ -262,7 +413,6 @@ public class InventoryDAO {
         }
     }
 
-
     public boolean deleteCategory(long id) throws SQLException {
         String sql = "DELETE FROM inventory_categories WHERE category_id = ?";
         try (Connection conn = DatabaseConnector.getConnection()) {
@@ -304,15 +454,24 @@ public class InventoryDAO {
         }
     }
 
-    /** One sellable item for the cashier screens. */
+    /**
+     * One sellable item for the cashier screens.
+     * imagePath is the stored value ("Coffee/abc.png"); use imageUri() for a loadable URI.
+     */
     public record MenuRow(long id, String name, String category, double quantity,
-                          String unit, double minimum, BigDecimal price, String notes, String imagePath) { }
+                          String unit, double minimum, BigDecimal price, String notes, String imagePath) {
 
-    /** Items that can be sold: only those with a price above 0 appear on the cashier screens. */
+        /** file: URI of the picture in htdocs, or null when there is none. */
+        public String imageUri() {
+            return InventoryDAO.imageUri(imagePath);
+        }
+    }
+
+    /** Items that can be sold: priced above 0 and not archived. */
     public List<MenuRow> findMenuRows() throws SQLException {
         String sql = "SELECT i.item_id, i.name, c.name AS category, i.quantity, i.unit, i.minimum_stock, i.price, i.notes, i.image_path "
                 + "FROM inventory_items i JOIN inventory_categories c ON c.category_id = i.category_id "
-                + "WHERE i.price > 0 ORDER BY c.name, i.name";
+                + "WHERE i.price > 0 AND i.archived = FALSE ORDER BY c.name, i.name";
         List<MenuRow> rows = new ArrayList<>();
         try (Connection conn = DatabaseConnector.getConnection()) {
             ensureSchema(conn);
@@ -383,6 +542,19 @@ public class InventoryDAO {
                     st.executeUpdate("ALTER TABLE inventory_items "
                             + "ADD COLUMN price DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER minimum_stock");
                 }
+            }
+            if (!hasColumn(conn, "inventory_items", "archived")) {
+                try (Statement st = conn.createStatement()) {
+                    st.executeUpdate("ALTER TABLE inventory_items "
+                            + "ADD COLUMN archived BOOLEAN NOT NULL DEFAULT FALSE AFTER image_path");
+                }
+            }
+            // the minimum stock is a fixed rule: bring every row in line with it
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "UPDATE inventory_items SET minimum_stock = ? WHERE minimum_stock <> ?")) {
+                ps.setDouble(1, InventoryRules.MINIMUM_STOCK);
+                ps.setDouble(2, InventoryRules.MINIMUM_STOCK);
+                ps.executeUpdate();
             }
             ready = true;
         }

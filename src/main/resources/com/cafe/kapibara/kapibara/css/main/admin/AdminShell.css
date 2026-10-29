@@ -16,7 +16,6 @@
     -fx-font-size: 13px;
 }
 
-/* ---------- Sidebar ---------- */
 .adm-sidebar {
     -fx-background-color: -adm-brown;
 }
@@ -69,7 +68,6 @@
     -fx-text-fill: #D9C3B2;
 }
 
-/* ---------- Top bar ---------- */
 .adm-topbar {
     -fx-background-color: -adm-card;
     -fx-border-color: transparent transparent -adm-line transparent;
@@ -93,7 +91,6 @@
     -fx-text-fill: -adm-text;
 }
 
-/* ---------- Page container ---------- */
 .adm-content-holder {
     -fx-background-color: -adm-cream;
 }
@@ -130,7 +127,6 @@
     -fx-text-fill: #2F7D4A;
 }
 
-/* ---------- Cards ---------- */
 .adm-card {
     -fx-background-color: -adm-card;
     -fx-background-radius: 14;
@@ -196,7 +192,6 @@
     -fx-text-fill: -adm-text;
 }
 
-/* ---------- Links and buttons ---------- */
 .adm-link {
     -fx-background-color: transparent;
     -fx-padding: 0;
@@ -240,7 +235,6 @@
     -fx-text-fill: white;
 }
 
-/* ---------- Best sellers ---------- */
 .adm-seller-label {
     -fx-font-size: 12px;
     -fx-font-weight: bold;
@@ -268,7 +262,6 @@
     -fx-background-color: -adm-red;
 }
 
-/* ---------- Table (recent transactions) ---------- */
 .adm-table {
     -fx-background-color: -adm-card;
     -fx-border-color: -adm-line;
@@ -301,7 +294,6 @@
     -fx-text-fill: #2F7D4A;
 }
 
-/* ---------- Attention card ---------- */
 .adm-alert {
     -fx-background-color: #FFF0C9;
     -fx-background-radius: 10;
@@ -359,10 +351,6 @@
 .adm-root .default-color0.chart-bar.bar-highlight {
     -fx-bar-fill: -adm-red;
 }
-
-/* =====================================================================
-   Inventory + Low stock pages
-   ===================================================================== */
 
 .adm-primary-btn {
     -fx-background-color: -adm-red;
@@ -521,7 +509,6 @@
     -fx-text-fill: -adm-muted;
 }
 
-/* Accounts page: inactive status pill */
 .adm-pill-tan {
     -fx-background-color: #EBDDCB;
     -fx-background-radius: 10;
@@ -530,10 +517,6 @@
     -fx-font-weight: bold;
     -fx-text-fill: -adm-text;
 }
-
-/* =====================================================================
-   Add / Edit account form
-   ===================================================================== */
 
 .adm-field {
     -fx-background-color: -adm-card;
@@ -595,11 +578,6 @@
     -fx-text-fill: -adm-muted;
 }
 
-/* =====================================================================
-   Message boxes (DialogUtil). Dialogs live outside .adm-root, so no
-   looked-up colours here: plain hex values only.
-   ===================================================================== */
-
 .adm-dialog {
     -fx-background-color: #FFFCF8;
     -fx-font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -648,19 +626,10 @@
     -fx-background-color: #BC2408;
 }
 
-/* =====================================================================
-   Large-screen scale ("adm-lg")
-   Only pages whose root VBox has the "adm-lg" style class are affected,
-   so other admin pages keep their current size. Remove the class from a
-   page to revert it.
-   ===================================================================== */
-
-/* ---------- Headings ---------- */
 .adm-lg .adm-page-title { -fx-font-size: 40px; }
 .adm-lg .adm-page-sub   { -fx-font-size: 16px; }
 .adm-lg .adm-card-title { -fx-font-size: 22px; }
 
-/* ---------- Cards ---------- */
 .adm-lg .adm-card {
     -fx-padding: 28;
     -fx-background-radius: 16;
@@ -676,7 +645,7 @@
 .adm-lg .adm-kpi-value { -fx-font-size: 46px; }
 .adm-lg .adm-kpi-sub   { -fx-font-size: 13px; }
 
-/* ---------- Filters and form controls ---------- */
+
 .adm-lg .adm-search {
     -fx-pref-height: 52px;
     -fx-padding: 0 18 0 52;
@@ -711,7 +680,6 @@
 .adm-lg .adm-role-name { -fx-font-size: 15px; }
 .adm-lg .adm-role-desc { -fx-font-size: 14px; }
 
-/* ---------- Buttons ---------- */
 .adm-lg .adm-primary-btn {
     -fx-padding: 15 30 15 30;
     -fx-font-size: 15px;
@@ -729,7 +697,6 @@
 .adm-lg .adm-page-num-active { -fx-padding: 9 15 9 15; -fx-font-size: 14px; }
 .adm-lg .adm-ellipsis        { -fx-font-size: 14px; }
 
-/* ---------- Table ---------- */
 .adm-lg .adm-table {
     -fx-background-radius: 14;
     -fx-border-radius: 14;
@@ -755,13 +722,7 @@
 
 .adm-lg .adm-link     { -fx-font-size: 14px; }
 .adm-lg .adm-icon-btn { -fx-font-size: 16px; }
-
-/* ---------- Footer text ---------- */
 .adm-lg .adm-card-foot { -fx-font-size: 14px; }
-
-/* =====================================================================
-   Inventory form
-   ===================================================================== */
 
 .adm-field-readonly {
     -fx-background-color: #F6EEE3;
@@ -780,11 +741,6 @@
     -fx-border-radius: 14;
 }
 
-/* =====================================================================
-   Extra adm-lg sizes for the Inventory pages + shared My profile page
-   ===================================================================== */
-
-/* ---------- Inventory pages (adm-lg) ---------- */
 .adm-lg .adm-filter-label { -fx-font-size: 14px; }
 
 .adm-lg .adm-outline-btn {
@@ -805,7 +761,6 @@
 .adm-lg .adm-stock-name,
 .adm-lg .adm-stock-value { -fx-font-size: 14px; }
 
-/* ---------- My profile ---------- */
 .adm-avatar {
     -fx-background-color: #EFE1D0;
     -fx-background-radius: 999;
@@ -843,12 +798,6 @@
 .adm-lg .adm-avatar-text  { -fx-font-size: 40px; }
 .adm-lg .adm-profile-name { -fx-font-size: 32px; }
 
-/* =====================================================================
-   Accounts + Inventory: brown card outline, compact fit, combo fix,
-   straight table row lines.
-   ===================================================================== */
-
-/* ---------- KPI cards: outline same brown as the sidebar ---------- */
 .adm-lg .adm-kpi-card {
     -fx-border-color: -adm-brown;
     -fx-border-width: 1.5;
@@ -856,7 +805,6 @@
     -fx-padding: 18 28 18 28;
 }
 
-/* ---------- Compact sizes so everything fits on screen ---------- */
 .adm-lg .adm-page-title { -fx-font-size: 36px; }
 .adm-lg .adm-kpi-value  { -fx-font-size: 40px; }
 .adm-lg .adm-banner     { -fx-padding: 12 22 12 22; }
@@ -864,7 +812,6 @@
 .adm-lg .adm-th { -fx-padding: 14 24 14 24; }
 .adm-lg .adm-td { -fx-padding: 18 24 18 24; }
 
-/* ---------- Combo boxes (Category / Stock status / Roles) ---------- */
 .adm-lg .adm-combo {
     -fx-min-height: 52px;
     -fx-pref-height: 52px;
@@ -888,9 +835,6 @@
     -fx-text-fill: #4E2216;
 }
 
-/* ---------- Table row lines ----------
-   The per-cell borders are turned off (they were what looked crooked).
-   TableRowUtil.polish(...) draws one straight line per row instead. */
 .adm-lg .adm-td {
     -fx-border-color: transparent;
     -fx-border-width: 0;
@@ -899,10 +843,6 @@
 .adm-row-line {
     -fx-background-color: #F0E4D6;
 }
-
-/* =====================================================================
-   Manage categories dialog + item photo tile
-   ===================================================================== */
 
 .cm-title {
     -fx-font-family: "Lora", "Georgia", serif;
@@ -1026,13 +966,6 @@
     -fx-text-fill: -adm-text;
 }
 
-/* =====================================================================
-   Sales page (adm-lg + adm-sales)
-   Extra sizes for the pieces adm-lg doesn't cover: period toggle,
-   chart notes/axes, best sellers, text-style KPI value.
-   ===================================================================== */
-
-/* Cards: slightly tighter than the 28px adm-lg padding so charts keep height */
 .adm-sales .adm-card {
     -fx-padding: 22;
 }
@@ -1044,19 +977,14 @@
     -fx-border-radius: 16;
 }
 
-/* KPI: "Most Sold Product" text value */
 .adm-sales .adm-kpi-value-text {
     -fx-font-size: 30px;
     -fx-padding: 8 0 8 0;
 }
 
-/* Card subtitles and chart notes */
 .adm-sales .adm-card-sub   { -fx-font-size: 15px; }
 .adm-sales .adm-chart-note { -fx-font-size: 13px; }
 
-/* Daily / Weekly / Monthly / Quarterly / Yearly toggle
-   Unselected = brown outline. Selected = filled brown. The border keeps
-   the same colour and width in both states, so buttons never shift size. */
 .adm-sales .adm-period-btn {
     -fx-padding: 8 18 8 18;
     -fx-font-size: 14px;
@@ -1089,10 +1017,6 @@
     -fx-padding: 6;
 }
 
-/* =====================================================================
-   Account form: red required asterisk + compact roles card
-   ===================================================================== */
-
 .adm-required {
     -fx-font-size: 12px;
     -fx-font-weight: bold;
@@ -1100,7 +1024,6 @@
 }
 .adm-lg .adm-required { -fx-font-size: 14px; }
 
-/* "Fields marked * are required." line (Text nodes use -fx-fill) */
 .adm-note-text {
     -fx-font-size: 11px;
     -fx-fill: -adm-muted;
@@ -1113,17 +1036,12 @@
 .adm-lg .adm-note-text,
 .adm-lg .adm-note-star { -fx-font-size: 13px; }
 
-/* Workspace roles card: brown outline, same as the sidebar */
 .adm-card.adm-roles-card {
     -fx-border-color: -adm-brown;
     -fx-border-width: 1.5;
     -fx-border-radius: 16;
     -fx-background-radius: 16;
 }
-
-/* =====================================================================
-   Settings page
-   ===================================================================== */
 
 .adm-textarea {
     -fx-background-color: -adm-card;
@@ -1166,10 +1084,6 @@
     -fx-border-color: -adm-brown;
     -fx-border-width: 1.5;
 }
-
-/* =====================================================================
-   PIN dialog (VoidGuard)
-   ===================================================================== */
 
 .adm-root.pin-root {
     -fx-background-color: transparent;
@@ -1260,11 +1174,293 @@
     -fx-border-color: -adm-red;
 }
 
-/* Invisible scrollbars on admin pages (scrolling still works) */
 .adm-scroll .scroll-bar:vertical,
 .adm-scroll .scroll-bar:horizontal {
     -fx-opacity: 0;
     -fx-pref-width: 0;
     -fx-pref-height: 0;
     -fx-padding: 0;
+}
+
+.hl-card {
+    -fx-spacing: 14;
+}
+
+.hl-rev-chart {
+    -fx-background-color: transparent;
+}
+.hl-rev-chart .chart-plot-background { -fx-background-color: transparent; }
+.hl-rev-chart .chart-vertical-grid-lines { -fx-stroke: transparent; }
+.hl-rev-chart .chart-horizontal-grid-lines {
+    -fx-stroke: -adm-line;
+    -fx-stroke-dash-array: 4 4;
+}
+.hl-rev-chart .chart-vertical-zero-line,
+.hl-rev-chart .chart-horizontal-zero-line { -fx-stroke: transparent; }
+.hl-rev-chart .axis { -fx-tick-label-fill: -adm-muted; -fx-font-size: 12px; }
+.hl-rev-chart .axis-tick-mark,
+.hl-rev-chart .axis-minor-tick-mark { -fx-stroke: transparent; }
+.hl-rev-chart .axis:left,
+.hl-rev-chart .axis:bottom { -fx-border-color: transparent; }
+
+.hl-rev-chart .default-color0.chart-series-area-line {
+    -fx-stroke: -adm-brown;
+    -fx-stroke-width: 2.5px;
+}
+.hl-rev-chart .default-color0.chart-series-area-fill {
+    -fx-fill: linear-gradient(to bottom, rgba(255,135,50,0.35), rgba(255,135,50,0.02));
+}
+.hl-rev-chart .default-color0.chart-area-symbol {
+    -fx-background-color: -adm-brown, white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 6px;
+    -fx-padding: 4px;
+}
+.hl-rev-chart .default-color0.chart-area-symbol.hl-today-dot {
+    -fx-background-color: -adm-red, white;
+    -fx-padding: 5px;
+}
+
+.hl-donut-hole { -fx-fill: -adm-card; }
+.hl-donut-total {
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+.hl-chip {
+    -fx-background-color: -adm-cream;
+    -fx-background-radius: 10;
+    -fx-border-color: -adm-line;
+    -fx-border-radius: 10;
+    -fx-padding: 4 10 4 10;
+}
+.hl-chip-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: -adm-text;
+}
+
+.hl-bar { -fx-background-radius: 6 6 0 0; }
+.hl-bar-qty {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+.hl-bar-name {
+    -fx-font-size: 13px;
+    -fx-text-fill: -adm-text;
+}
+
+.hl-stock-row {
+    -fx-background-color: -adm-cream;
+    -fx-background-radius: 10;
+    -fx-border-color: -adm-line;
+    -fx-border-radius: 10;
+    -fx-padding: 10 14 10 14;
+}
+.hl-stock-name {
+    -fx-font-size: 14px;
+    -fx-text-fill: -adm-text;
+}
+.hl-stock-value {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-text;
+}
+
+.adm-card.hl-card {
+    -fx-padding: 16 20 16 20;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+}
+
+.hl-card .adm-card-title { -fx-font-size: 20px; }
+.hl-card .adm-card-sub   { -fx-font-size: 12px; }
+
+.hl-card .adm-pill-green,
+.hl-card .adm-pill-gold,
+.hl-card .adm-pill-red {
+    -fx-padding: 4 12 4 12;
+    -fx-font-size: 12px;
+    -fx-background-radius: 12;
+}
+.hl-card .adm-link { -fx-font-size: 13px; }
+
+.hl-rev-chart .axis { -fx-font-size: 12px; }
+
+.hl-donut-total { -fx-font-size: 30px; }
+.hl-chip { -fx-padding: 5 11 5 11; -fx-background-radius: 10; -fx-border-radius: 10; }
+.hl-chip-text { -fx-font-size: 13px; }
+
+.hl-bar-qty  { -fx-font-size: 13px; }
+.hl-bar-name { -fx-font-size: 13px; }
+
+.hl-stock-row   { -fx-padding: 11 16 11 16; -fx-background-radius: 10; -fx-border-radius: 10; }
+.hl-stock-name  { -fx-font-size: 14px; }
+.hl-stock-value { -fx-font-size: 13px; }
+.hl-card .adm-seller-bar > .bar { -fx-padding: 5; }
+
+.adm-card.tx-kpi {
+    -fx-padding: 12 20 12 20;
+    -fx-background-radius: 14;
+    -fx-border-color: -adm-brown;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 14;
+}
+.adm-card.tx-kpi .adm-kpi-label { -fx-font-size: 13px; }
+.adm-card.tx-kpi .adm-kpi-value { -fx-font-size: 30px; }
+.adm-card.tx-kpi .adm-kpi-sub   { -fx-font-size: 12px; }
+
+.tx-row-alt {
+    -fx-background-color: #F7ECDF;
+}
+
+.tx-icon-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10;
+    -fx-border-color: #E3D2BF;
+    -fx-border-radius: 10;
+    -fx-padding: 7 10 7 10;
+    -fx-cursor: hand;
+}
+.tx-icon-btn:hover {
+    -fx-background-color: #FCE1DA;
+    -fx-border-color: -adm-red;
+}
+.tx-icon-btn:pressed {
+    -fx-background-color: #F6CFC5;
+}
+.tx-icon {
+    -fx-fill: -adm-brown;
+}
+.tx-icon-btn:hover .tx-icon {
+    -fx-fill: -adm-red;
+}
+
+/* =====================================================================
+   Sales page: From / To calendar (paste at the END of AdminShell.css)
+   The calendar popup lives outside .adm-root, so plain hex colours only.
+   ===================================================================== */
+
+.sl-date {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #4E2216;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-pref-height: 40px;
+    -fx-font-size: 14px;
+}
+.sl-date:focused {
+    -fx-border-color: #D42A0B;
+}
+.sl-date > .text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: #4E2216;
+    -fx-font-size: 14px;
+    -fx-padding: 0 0 0 12;
+}
+.sl-date > .arrow-button {
+    -fx-background-color: transparent;
+}
+.sl-date > .arrow-button > .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.date-picker-popup {
+    -fx-background-color: #FFFCF8;
+    -fx-border-color: #4E2216;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+.date-picker-popup > .month-year-pane {
+    -fx-background-color: #F3E9DB;
+    -fx-background-radius: 10 10 0 0;
+}
+.date-picker-popup > .month-year-pane .label {
+    -fx-text-fill: #4E2216;
+    -fx-font-family: "Lora", "Georgia", serif;
+    -fx-font-weight: bold;
+}
+.date-picker-popup .day-name-cell,
+.date-picker-popup .week-number-cell {
+    -fx-text-fill: #8A7A70;
+}
+.date-picker-popup .day-cell {
+    -fx-text-fill: #4E2216;
+    -fx-background-radius: 8;
+}
+.date-picker-popup .day-cell:hover {
+    -fx-background-color: #F3E9DB;
+}
+.date-picker-popup .day-cell:selected {
+    -fx-background-color: #4E2216;
+    -fx-text-fill: white;
+}
+.date-picker-popup .today {
+    -fx-border-color: #FF8732;
+    -fx-border-radius: 8;
+}
+.date-picker-popup .day-cell:disabled {
+    -fx-opacity: 0.35;
+}
+
+.inv-grid .adm-td {
+    -fx-padding: 10 24 10 24;
+}
+
+
+.inv-alt {
+    -fx-background-color: #F7ECDF;
+}
+
+.inv-grid .adm-th:hover {
+    -fx-background-color: #E4D2BD;
+}
+
+.tx-icon-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10;
+    -fx-border-color: #E3D2BF;
+    -fx-border-radius: 10;
+    -fx-padding: 7 10 7 10;
+    -fx-cursor: hand;
+}
+.tx-icon-btn:hover {
+    -fx-background-color: #FCE1DA;
+    -fx-border-color: -adm-red;
+}
+.tx-icon-btn:pressed {
+    -fx-background-color: #F6CFC5;
+}
+.tx-icon {
+    -fx-fill: -adm-brown;
+}
+.tx-icon-btn:hover .tx-icon {
+    -fx-fill: -adm-red;
+}
+
+.tx-icon-btn-danger {
+    -fx-border-color: #EDBFB5;
+}
+.tx-icon-btn-danger .tx-icon {
+    -fx-fill: -adm-red;
+}
+.tx-icon-btn-danger:hover {
+    -fx-background-color: #FCE1DA;
+    -fx-border-color: -adm-red;
+}
+
+.adm-td.ls-need {
+    -fx-font-weight: bold;
+    -fx-text-fill: -adm-red;
+}
+.adm-td.ls-ok {
+    -fx-text-fill: -adm-muted;
+}
+
+.inv-grid .adm-seller-bar > .bar {
+    -fx-padding: 4;
 }

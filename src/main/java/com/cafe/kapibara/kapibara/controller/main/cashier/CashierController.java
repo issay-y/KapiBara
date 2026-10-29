@@ -51,16 +51,14 @@ public class CashierController implements Initializable, CashierShell {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        pageByButton.put(navHome, CashierPage.HOME);
         pageByButton.put(navNewOrder, CashierPage.NEW_ORDER);
-        pageByButton.put(navTransactions, CashierPage.TRANSACTIONS);
 
 
         dateLabel.setText(LocalDate.now().format(TOP_DATE));
         loadLogo();
 
         Platform.runLater(() -> {
-            if (currentPage == null) navigate(CashierPage.HOME);
+            if (currentPage == null) navigate(CashierPage.NEW_ORDER);
         });
     }
 
@@ -110,9 +108,6 @@ public class CashierController implements Initializable, CashierShell {
 
             contentHolder.getChildren().setAll(view);
             currentPage = page;
-            breadcrumbLabel.setText(BRANCH + " / " + (page == CashierPage.HOME
-                    ? CashierShell.greeting() + ", " + CashierShell.firstName(userName) + "."
-                    : page.getBreadcrumb()));
             highlightNav();
         } catch (IOException | RuntimeException e) {
             e.printStackTrace();
@@ -163,12 +158,6 @@ public class CashierController implements Initializable, CashierShell {
 
     @FXML
     private void handleNav(ActionEvent event) {
-        CashierPage page = pageByButton.get(event.getSource());
-        if (page != null) navigate(page);
-    }
-
-    @FXML
-    private void handleTransactions(ActionEvent event) {
         CashierPage page = pageByButton.get(event.getSource());
         if (page != null) navigate(page);
     }

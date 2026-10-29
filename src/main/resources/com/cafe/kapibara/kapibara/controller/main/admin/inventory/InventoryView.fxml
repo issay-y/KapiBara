@@ -27,10 +27,10 @@
       <!-- Header -->
       <HBox alignment="CENTER_LEFT">
          <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-            <Label styleClass="adm-page-title" text="Inventory" />
-            <Label styleClass="adm-page-sub" text="Keep the essentials stocked and the counter running smoothly." />
+            <Label fx:id="pageTitle" styleClass="adm-page-title" text="Inventory" />
+            <Label fx:id="pageSub" styleClass="adm-page-sub" text="Keep the essentials stocked and the counter running smoothly." />
          </VBox>
-         <Button onAction="#handleAddItem" styleClass="adm-primary-btn" text="＋   Add item" />
+         <Button fx:id="addItemBtn" onAction="#handleAddItem" styleClass="adm-primary-btn" text="＋   Add item" />
       </HBox>
 
       <!-- KPI row -->
@@ -84,6 +84,7 @@
          </VBox>
          <Button minHeight="52.0" onAction="#handleManageCategories" prefHeight="52.0" styleClass="adm-outline-btn" text="Manage categories" />
          <Button minHeight="52.0" onAction="#handleViewLowStock" prefHeight="52.0" styleClass="adm-outline-btn" text="⚠   View Low Stock" />
+         <Button fx:id="archiveToggleBtn" minHeight="52.0" onAction="#handleToggleArchive" prefHeight="52.0" styleClass="adm-outline-btn" text="🗃   Archived" />
       </HBox>
 
       <!-- Table -->

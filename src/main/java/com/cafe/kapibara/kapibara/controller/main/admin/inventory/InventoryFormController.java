@@ -4,6 +4,7 @@ import com.cafe.kapibara.kapibara.DAO.InventoryDAO;
 import com.cafe.kapibara.kapibara.controller.main.admin.AdminPage;
 import com.cafe.kapibara.kapibara.controller.main.admin.AdminShell;
 import com.cafe.kapibara.kapibara.model.inventory.InventoryForm;
+import com.cafe.kapibara.kapibara.model.inventory.InventoryRules;
 import com.cafe.kapibara.kapibara.model.inventory.StockStatus;
 import com.cafe.kapibara.kapibara.util.AlertsUtil;
 import com.cafe.kapibara.kapibara.util.InventoryImages;
@@ -33,7 +34,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -42,13 +42,13 @@ import java.util.TreeSet;
 
 public class InventoryFormController implements Initializable, AdminShell.Aware {
 
-    private static final List<String> DEFAULT_UNITS =
-            List.of("kg", "g", "liters", "ml", "pcs", "packs", "cans", "boxes", "bottles");
+    /** The form no longer asks for a unit; new items get this one. */
+    private static final String DEFAULT_UNIT = "pcs";
     private static final DateTimeFormatter UPDATED = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
 
-    @FXML private Label titleLabel, subtitleLabel;
-    @FXML private TextField nameField, quantityField, minimumField, priceField, statusField, notesField;
-    @FXML private ComboBox<String> categoryCombo, unitCombo;
+    @FXML private Label titleLabel, subtitleLabel, quantityLabel;
+    @FXML private TextField nameField, quantityField, priceField, statusField, notesField;
+    @FXML private ComboBox<String> categoryCombo;
     @FXML private Label footNoteLabel, errorLabel;
     @FXML private Button cancelBtn, saveBtn;
 
@@ -69,6 +69,10 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
     private boolean loading = true;
     private boolean dirty;
 
+    // Hidden value: not shown on the form, but still sent to the DAO.
+    // (The minimum stock is hard-coded in InventoryRules.)
+    private String storedUnit = DEFAULT_UNIT;
+
     private String currentImage;
     private Path pickedFile;
     private boolean removeImage;
@@ -81,10 +85,8 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         numbersOnly(quantityField);
-        numbersOnly(minimumField);
         numbersOnly(priceField);
         quantityField.setText("0");
-        minimumField.setText("0");
         priceField.setText("0");
         statusField.setEditable(false);
         statusField.setFocusTraversable(false);
@@ -92,13 +94,10 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         nameField.textProperty().addListener(markDirty);
         notesField.textProperty().addListener(markDirty);
         quantityField.textProperty().addListener(markDirty);
-        minimumField.textProperty().addListener(markDirty);
         priceField.textProperty().addListener(markDirty);
         categoryCombo.valueProperty().addListener(markDirty);
-        unitCombo.valueProperty().addListener(markDirty);
 
         quantityField.textProperty().addListener((obs, old, now) -> updateStatusPreview());
-        minimumField.textProperty().addListener((obs, old, now) -> updateStatusPreview());
         updateStatusPreview();
 
         photoBox.setClip(new Circle(PHOTO_SIZE / 2, PHOTO_SIZE / 2, PHOTO_SIZE / 2));
@@ -133,11 +132,13 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
             titleLabel.setText("Edit inventory item");
             subtitleLabel.setText("Update stock details for this item.");
             footNoteLabel.setText("");
+            quantityLabel.setText("Quantity *");
             saveText = "✓   Save changes";
         } else {
             titleLabel.setText("Add inventory item");
             subtitleLabel.setText("Add an ingredient or supply to your café's inventory.");
             footNoteLabel.setText("Inventory details can be edited later.");
+            quantityLabel.setText("Initial quantity *");
             saveText = "✓   Save item";
         }
         saveBtn.setText(saveText);
@@ -197,16 +198,13 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         if (form != null) categories.add(form.category());
         categoryCombo.getItems().setAll(categories);
 
-        LinkedHashSet<String> units = new LinkedHashSet<>(DEFAULT_UNITS);
-        if (form != null) units.add(form.unit());
-        unitCombo.getItems().setAll(units);
-
         if (form != null) {
+            // keep the values the form no longer shows, so editing doesn't wipe them
+            storedUnit = form.unit() == null || form.unit().isBlank() ? DEFAULT_UNIT : form.unit();
+
             nameField.setText(form.name());
             categoryCombo.setValue(form.category());
             quantityField.setText(numberText(form.quantity()));
-            unitCombo.setValue(form.unit());
-            minimumField.setText(numberText(form.minimum()));
             priceField.setText(numberText(price == null ? 0 : price.doubleValue()));
             notesField.setText(form.notes() == null ? "" : form.notes());
             subtitleLabel.setText("Update stock details for " + form.name() + ".");
@@ -236,10 +234,9 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
 
     private void updateStatusPreview() {
         Double quantity = parse(quantityField.getText());
-        Double minimum = parse(minimumField.getText());
-        statusField.setText(quantity == null || minimum == null
+        statusField.setText(quantity == null
                 ? "—"
-                : StockStatus.of(quantity, minimum).getDisplayName());
+                : StockStatus.of(quantity, InventoryRules.MINIMUM_STOCK).getDisplayName());
     }
 
     private static Double parse(String text) {
@@ -431,7 +428,7 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
                     duplicate = "An item with this name already exists.";
                 } else {
                     if (picked != null) {
-                        stored = InventoryImages.save(picked);
+                        stored = InventoryImages.save(picked, form.category());
                         replaced = true;
                     } else if (remove) {
                         stored = null;
@@ -500,9 +497,11 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
                     ? "There are no categories yet. Use \"Manage categories\" to add one."
                     : "Please choose a category.";
         }
-        if (parse(quantityField.getText()) == null) return "Please enter the quantity (0 or more).";
-        if (unitCombo.getValue() == null) return "Please choose a unit.";
-        if (parse(minimumField.getText()) == null) return "Please enter the minimum stock (0 or more).";
+        Double quantity = parse(quantityField.getText());
+        if (quantity == null) return "Please enter the initial quantity (0 or more).";
+        if (quantity > InventoryRules.MAXIMUM_QUANTITY) {
+            return "The quantity can be at most " + InventoryRules.text(InventoryRules.MAXIMUM_QUANTITY) + ".";
+        }
         if (parse(priceField.getText()) == null) return "Please enter the selling price (0 or more).";
         if (notesField.getText().trim().length() > 255) return "Notes can be at most 255 characters.";
         return null;
@@ -524,8 +523,8 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
                 nameField.getText().trim(),
                 categoryCombo.getValue(),
                 parse(quantityField.getText()),
-                unitCombo.getValue(),
-                parse(minimumField.getText()),
+                storedUnit,
+                InventoryRules.MINIMUM_STOCK,
                 notes.isEmpty() ? null : notes,
                 null,
                 null,
@@ -537,10 +536,10 @@ public class InventoryFormController implements Initializable, AdminShell.Aware 
         nameField.clear();
         notesField.clear();
         quantityField.setText("0");
-        minimumField.setText("0");
         priceField.setText("0");
         categoryCombo.setValue(null);
-        unitCombo.setValue(null);
+
+        storedUnit = DEFAULT_UNIT;
 
         pickedFile = null;
         removeImage = false;

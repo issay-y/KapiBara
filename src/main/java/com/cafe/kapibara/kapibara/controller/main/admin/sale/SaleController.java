@@ -8,21 +8,26 @@ import com.cafe.kapibara.kapibara.util.ChartUtil;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
+import javafx.scene.control.DateCell;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 
 import java.net.URL;
 import java.sql.SQLException;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,22 +35,26 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-/** Sales overview page. The period selector (Daily..Yearly) drives every card on the page. */
+/**
+ * Sales overview page. A From / To calendar (default: 1st of this month to today)
+ * drives every card, chart and list on the page. The old Daily..Yearly buttons are hidden.
+ */
 public class SaleController implements Initializable, AdminShell.Aware {
 
-    private enum Period { DAILY, WEEKLY, MONTHLY, QUARTERLY, YEARLY }
+    private enum Grain { HOURLY, DAILY, WEEKLY, MONTHLY }
 
     private static final Locale EN = Locale.ENGLISH;
+    private static final DateTimeFormatter MD = DateTimeFormatter.ofPattern("MMM d", EN);
+    private static final DateTimeFormatter MDY = DateTimeFormatter.ofPattern("MMM d, yyyy", EN);
     private static final DateTimeFormatter DAY_MONTH = DateTimeFormatter.ofPattern("dd MMM", EN);
-    private static final DateTimeFormatter DAY_MONTH_YEAR = DateTimeFormatter.ofPattern("dd MMM yyyy", EN);
     private static final DateTimeFormatter MONTH_ONLY = DateTimeFormatter.ofPattern("MMM", EN);
-    private static final DateTimeFormatter MONTH_YEAR = DateTimeFormatter.ofPattern("MMMM yyyy", EN);
+    private static final DateTimeFormatter MONTH_YEAR_SHORT = DateTimeFormatter.ofPattern("MMM yy", EN);
     private static final DateTimeFormatter WEEKDAY_DAY = DateTimeFormatter.ofPattern("EEE dd", EN);
 
-    private static final int START_HOUR = 7;
+    private static final int START_HOUR = 7;   // default hour window; widens if sales fall outside it
     private static final int END_HOUR = 18;
 
-    // period selector
+    // old period selector (kept so the FXML still loads; the buttons are hidden)
     @FXML private ToggleGroup periodGroup;
     @FXML private ToggleButton dailyBtn, weeklyBtn, monthlyBtn, quarterlyBtn, yearlyBtn;
     @FXML private Label rangeLabel;
@@ -74,14 +83,26 @@ public class SaleController implements Initializable, AdminShell.Aware {
 
     private AdminShell shell;
     private final CashierStore store = CashierStore.get();
-    private Period period = Period.DAILY;
+
+    // calendar controls (built in code)
+    private final DatePicker fromPicker = new DatePicker();
+    private final DatePicker toPicker = new DatePicker();
+    private boolean controlsMounted = false;
+    private boolean adjusting = false;
+
+    private LocalDate from;
+    private LocalDate to;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // never allow "nothing selected"
+        // never allow "nothing selected" on the (hidden) old toggle group
         periodGroup.selectedToggleProperty().addListener((obs, old, now) -> {
             if (now == null && old != null) old.setSelected(true);
         });
+
+        LocalDate today = LocalDate.now();
+        from = today.withDayOfMonth(1);
+        to = today;
     }
 
     @Override
@@ -94,102 +115,120 @@ public class SaleController implements Initializable, AdminShell.Aware {
             System.err.println("Could not load sales history: " + e.getMessage());
         }
 
+        mountDateControls();
         loadDashboard();
     }
 
+    /** Kept because the FXML references it; the buttons are hidden so it is never triggered. */
     @FXML
-    private void handlePeriodChange(ActionEvent event) {
-        ToggleButton src = (ToggleButton) event.getSource();
-        src.setSelected(true);
+    private void handlePeriodChange(ActionEvent event) { }
 
-        if (src == dailyBtn) period = Period.DAILY;
-        else if (src == weeklyBtn) period = Period.WEEKLY;
-        else if (src == monthlyBtn) period = Period.MONTHLY;
-        else if (src == quarterlyBtn) period = Period.QUARTERLY;
-        else period = Period.YEARLY;
+    // =====================================================================
+    //  CALENDAR CONTROLS
+    // =====================================================================
 
-        loadDashboard();
+    private void mountDateControls() {
+        if (controlsMounted) return;
+        controlsMounted = true;
+
+        // hide the old Daily..Yearly buttons
+        for (ToggleButton b : new ToggleButton[]{dailyBtn, weeklyBtn, monthlyBtn, quarterlyBtn, yearlyBtn}) {
+            b.setVisible(false);
+            b.setManaged(false);
+        }
+
+        setUpPicker(fromPicker, from);
+        setUpPicker(toPicker, to);
+
+        fromPicker.valueProperty().addListener((o, a, b) -> {
+            if (adjusting || b == null) return;
+            from = b;
+            if (to.isBefore(from)) { adjusting = true; to = from; toPicker.setValue(to); adjusting = false; }
+            loadDashboard();
+        });
+        toPicker.valueProperty().addListener((o, a, b) -> {
+            if (adjusting || b == null) return;
+            to = b;
+            if (to.isBefore(from)) { adjusting = true; from = to; fromPicker.setValue(from); adjusting = false; }
+            loadDashboard();
+        });
+
+        HBox controls = new HBox(8, small("From"), fromPicker, small("To"), toPicker);
+        controls.setAlignment(Pos.CENTER_RIGHT);
+
+        Node host = dailyBtn.getParent();
+        if (host instanceof Pane pane) {
+            pane.getChildren().add(controls);
+        } else {
+            System.err.println("SaleController: could not find where to put the calendar controls.");
+        }
+    }
+
+    private static Label small(String text) {
+        Label l = new Label(text);
+        l.getStyleClass().add("adm-filter-label");
+        return l;
+    }
+
+    private static void setUpPicker(DatePicker picker, LocalDate value) {
+        picker.setValue(value);
+        picker.setPrefWidth(160);
+        picker.getStyleClass().add("sl-date");
+        picker.setConverter(new StringConverter<>() {
+            @Override public String toString(LocalDate d) { return d == null ? "" : d.format(MDY); }
+            @Override public LocalDate fromString(String s) {
+                try { return (s == null || s.isBlank()) ? null : LocalDate.parse(s.trim(), MDY); }
+                catch (DateTimeParseException e) { return null; }
+            }
+        });
+        // no future dates
+        picker.setDayCellFactory(p -> new DateCell() {
+            @Override public void updateItem(LocalDate item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item != null && item.isAfter(LocalDate.now())) setDisable(true);
+            }
+        });
     }
 
     // =====================================================================
-    //  PERIOD HELPERS
+    //  HELPERS
     // =====================================================================
 
-    /** First day of the current period. */
-    private static LocalDate periodStart(Period p, LocalDate today) {
-        return switch (p) {
-            case DAILY -> today;
-            case WEEKLY -> today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-            case MONTHLY -> today.withDayOfMonth(1);
-            case QUARTERLY -> LocalDate.of(today.getYear(), ((today.getMonthValue() - 1) / 3) * 3 + 1, 1);
-            case YEARLY -> LocalDate.of(today.getYear(), 1, 1);
-        };
+    private static boolean between(Sale s, LocalDate a, LocalDate b) {
+        LocalDate d = s.time().toLocalDate();
+        return !d.isBefore(a) && !d.isAfter(b);
     }
 
-    /** First day AFTER the period that begins at start. */
-    private static LocalDate periodEnd(Period p, LocalDate start) {
-        return switch (p) {
-            case DAILY -> start.plusDays(1);
-            case WEEKLY -> start.plusWeeks(1);
-            case MONTHLY -> start.plusMonths(1);
-            case QUARTERLY -> start.plusMonths(3);
-            case YEARLY -> start.plusYears(1);
-        };
-    }
-
-    /** Start of the period n periods before the one beginning at start. */
-    private static LocalDate shiftBack(Period p, LocalDate start, int n) {
-        return switch (p) {
-            case DAILY -> start.minusDays(n);
-            case WEEKLY -> start.minusWeeks(n);
-            case MONTHLY -> start.minusMonths(n);
-            case QUARTERLY -> start.minusMonths(3L * n);
-            case YEARLY -> start.minusYears(n);
-        };
-    }
-
-    private static String periodName(Period p) {
-        return switch (p) {
-            case DAILY -> "Today";
-            case WEEKLY -> "This week";
-            case MONTHLY -> "This month";
-            case QUARTERLY -> "This quarter";
-            case YEARLY -> "This year";
-        };
-    }
-
-    private static String previousName(Period p) {
-        return switch (p) {
-            case DAILY -> "Yesterday";
-            case WEEKLY -> "Last week";
-            case MONTHLY -> "Last month";
-            case QUARTERLY -> "Last quarter";
-            case YEARLY -> "Last year";
-        };
-    }
-
-    private static String rangeText(Period p, LocalDate start) {
-        return switch (p) {
-            case DAILY -> start.format(DAY_MONTH_YEAR);
-            case WEEKLY -> start.format(DAY_MONTH) + " – " + start.plusDays(6).format(DAY_MONTH_YEAR);
-            case MONTHLY -> start.format(MONTH_YEAR);
-            case QUARTERLY -> quarterLabel(start) + " · " + start.format(MONTH_ONLY) + " – "
-                    + start.plusMonths(2).format(MONTH_ONLY) + " " + start.getYear();
-            case YEARLY -> String.valueOf(start.getYear());
-        };
-    }
-
-    private static String quarterLabel(LocalDate d) {
-        return "Q" + ((d.getMonthValue() - 1) / 3 + 1) + " " + d.getYear();
+    private static String rangeText(LocalDate a, LocalDate b) {
+        if (a.equals(b)) return a.format(MDY);
+        if (a.getYear() == b.getYear()) return a.format(MD) + " – " + b.format(MDY);
+        return a.format(MDY) + " – " + b.format(MDY);
     }
 
     private static String hourLabel(int h) {
         return h < 12 ? h + " AM" : (h == 12 ? "12 PM" : (h - 12) + " PM");
     }
 
-    private static boolean inRange(Sale s, LocalDate from, LocalDate toExclusive) {
-        LocalDate d = s.time().toLocalDate();
-        return !d.isBefore(from) && d.isBefore(toExclusive);
+    private static Grain grainFor(long days) {
+        if (days <= 1) return Grain.HOURLY;
+        if (days <= 31) return Grain.DAILY;
+        if (days <= 186) return Grain.WEEKLY;
+        return Grain.MONTHLY;
+    }
+
+    /** Hour window: 7 AM - 6 PM by default, widened when sales happen outside it. */
+    private static int[] hourBounds(List<Sale> sales) {
+        int lo = START_HOUR, hi = END_HOUR;
+        for (Sale s : sales) {
+            int h = s.time().getHour();
+            if (h < lo) lo = h;
+            if (h > hi) hi = h;
+        }
+        return new int[]{lo, hi};
+    }
+
+    private static String signedPct(double pct) {
+        return String.format(EN, "%s%.1f%%", pct >= 0 ? "+" : "−", Math.abs(pct));
     }
 
     // =====================================================================
@@ -198,70 +237,62 @@ public class SaleController implements Initializable, AdminShell.Aware {
 
     private void loadDashboard() {
         LocalDate today = LocalDate.now();
-        LocalDate start = periodStart(period, today);
-        LocalDate end = periodEnd(period, start);
-        LocalDate prevStart = shiftBack(period, start, 1);
+        long days = ChronoUnit.DAYS.between(from, to) + 1;
+        LocalDate prevFrom = from.minusDays(days);
+        LocalDate prevTo = from.minusDays(1);
 
         List<Sale> all = store.sales();
         List<Sale> current = new ArrayList<>();
-        double curTotal = 0;
-        double prevTotal = 0;
+        double curTotal = 0, prevTotal = 0;
         int prevTx = 0;
 
         for (Sale s : all) {
-            if (inRange(s, start, end)) {
+            if (between(s, from, to)) {
                 current.add(s);
                 curTotal += s.total().doubleValue();
-            } else if (inRange(s, prevStart, start)) {
+            } else if (between(s, prevFrom, prevTo)) {
                 prevTotal += s.total().doubleValue();
                 prevTx++;
             }
         }
         int curTx = current.size();
+        String range = rangeText(from, to);
 
-        rangeLabel.setText(rangeText(period, start));
+        rangeLabel.setText(range + " · " + days + (days == 1 ? " day" : " days"));
 
-        // KPI 1: sales this period
-        salesLabel.setText(period == Period.DAILY ? "Today's Sales" : periodName(period) + "'s Sales");
+        // KPI 1: total for the range, with change vs the previous equal-length range
+        salesLabel.setText("Total Sales");
         salesValue.setText(peso(curTotal));
-        salesSub.setText(rangeText(period, start) + " · " + curTx + " transactions");
+        String vs = prevTotal > 0 ? " · " + signedPct((curTotal - prevTotal) / prevTotal * 100.0) + " vs previous" : "";
+        salesSub.setText(curTx + (curTx == 1 ? " transaction" : " transactions") + vs);
 
-        // KPI 2: previous period + change
-        prevLabel.setText(previousName(period) + "'s Sales");
+        // KPI 2: previous period
+        prevLabel.setText("Previous Period");
         prevValue.setText(peso(prevTotal));
-        String change;
-        if (prevTotal > 0) {
-            double pct = (curTotal - prevTotal) / prevTotal * 100.0;
-            change = String.format("%s%.1f%% vs now", pct >= 0 ? "▼ " : "▲ ", Math.abs(pct));
-            // pct >= 0 means current is higher than previous, so previous was lower
-            change = String.format("Now is %s%.1f%% %s", "", Math.abs(pct), pct >= 0 ? "higher" : "lower");
-        } else {
-            change = "No sales in that period";
-        }
-        prevSub.setText(prevTx + " transactions · " + change);
+        prevSub.setText(rangeText(prevFrom, prevTo) + " · " + prevTx + (prevTx == 1 ? " tx" : " tx"));
 
         // KPI 3 + 4
         txLabel.setText("Total Transactions");
         txValue.setText(String.valueOf(curTx));
-        txSub.setText(periodName(period) + " · All complete");
+        txSub.setText("Selected range · All complete");
 
         avgLabel.setText("Average Transaction");
         avgValue.setText(curTx > 0 ? peso(curTotal / curTx) : "₱0");
-        avgSub.setText("Sales ÷ " + curTx + " orders");
+        avgSub.setText(curTx > 0 ? "Sales ÷ " + curTx + " orders" : "No orders in this range");
 
         topLabel.setText("Most Sold Product");
 
-        loadBestSellers(current);
-        loadPerformance(current, today, start);
-        loadHourly(current);
-        loadTrend(all, start);
+        loadBestSellers(current, range);
+        loadPerformance(current, today, days);
+        loadHourly(current, days);
+        loadTrend(all);
     }
 
     // =====================================================================
     //  BEST SELLERS
     // =====================================================================
 
-    private void loadBestSellers(List<Sale> sales) {
+    private void loadBestSellers(List<Sale> sales, String range) {
         Map<String, ProductStats> statsMap = new HashMap<>();
 
         for (Sale sale : sales) {
@@ -275,19 +306,17 @@ public class SaleController implements Initializable, AdminShell.Aware {
         List<ProductStats> sorted = new ArrayList<>(statsMap.values());
         sorted.sort((a, b) -> Integer.compare(b.sold, a.sold));
 
-        String when = periodName(period).toLowerCase(EN);
-        bestSellersTitle.setText(period == Period.DAILY ? "Today's best sellers"
-                : "Best sellers · " + periodName(period));
+        bestSellersTitle.setText("Best sellers");
         bestSellersBox.getChildren().clear();
 
         if (sorted.isEmpty()) {
             topProductValue.setText("No sales yet");
-            topProductSub.setText("Nothing sold " + when);
+            topProductSub.setText("Nothing sold in this range");
 
-            Label empty = new Label("No items sold " + when + ".");
+            Label empty = new Label("No items sold in this range.");
             empty.getStyleClass().add("adm-seller-label");
             bestSellersBox.getChildren().add(empty);
-            bestSellersFooter.setText("0 items sold " + when);
+            bestSellersFooter.setText("0 items sold · " + range);
             return;
         }
 
@@ -312,8 +341,7 @@ public class SaleController implements Initializable, AdminShell.Aware {
         }
 
         int others = Math.max(0, sorted.size() - displayCount);
-        bestSellersFooter.setText(sorted.size() + " unique products sold " + when
-                + " • Other products: " + others);
+        bestSellersFooter.setText(sorted.size() + " unique products sold • Other products: " + others);
     }
 
     private static class ProductStats {
@@ -324,155 +352,128 @@ public class SaleController implements Initializable, AdminShell.Aware {
     }
 
     // =====================================================================
-    //  SALES PERFORMANCE (breakdown inside the selected period)
+    //  SALES PERFORMANCE (breakdown across the selected range)
     // =====================================================================
 
-    private void loadPerformance(List<Sale> sales, LocalDate today, LocalDate start) {
+    private void loadPerformance(List<Sale> sales, LocalDate today, long days) {
+        Grain grain = grainFor(days);
+        int[] hb = hourBounds(sales);
         List<String> labels = new ArrayList<>();
-        int highlight;
         String note;
 
-        switch (period) {
+        switch (grain) {
+            case HOURLY -> {
+                for (int h = hb[0]; h <= hb[1]; h++) labels.add(hourLabel(h));
+                note = "PHP · Hourly sales";
+            }
             case DAILY -> {
-                for (int h = START_HOUR; h <= END_HOUR; h++) labels.add(hourLabel(h));
-                highlight = Math.max(0, Math.min(END_HOUR - START_HOUR, java.time.LocalTime.now().getHour() - START_HOUR));
-                note = "PHP · Hourly sales for today";
+                boolean sameMonth = from.getMonth() == to.getMonth() && from.getYear() == to.getYear();
+                for (int i = 0; i < days; i++) {
+                    LocalDate d = from.plusDays(i);
+                    labels.add(days <= 7 ? d.format(WEEKDAY_DAY) : (sameMonth ? String.format("%02d", d.getDayOfMonth()) : d.format(MD)));
+                }
+                note = "PHP · Daily sales";
             }
             case WEEKLY -> {
-                for (int i = 0; i < 7; i++) labels.add(start.plusDays(i).format(WEEKDAY_DAY));
-                highlight = today.getDayOfWeek().getValue() - 1;
-                note = "PHP · Daily sales this week";
-            }
-            case MONTHLY -> {
-                int days = today.getDayOfMonth();
-                for (int i = 1; i <= days; i++) labels.add(String.format("%02d", i));
-                highlight = days - 1;
-                note = "PHP · Daily sales this month";
-            }
-            case QUARTERLY -> {
-                for (int i = 0; i < 3; i++) labels.add(start.plusMonths(i).format(MONTH_ONLY));
-                highlight = today.getMonthValue() - start.getMonthValue();
-                note = "PHP · Monthly sales this quarter";
+                int weeks = (int) Math.ceil(days / 7.0);
+                for (int i = 0; i < weeks; i++) labels.add(from.plusWeeks(i).format(DAY_MONTH));
+                note = "PHP · Weekly sales (weeks start " + from.format(MD) + ")";
             }
             default -> {
-                for (int i = 0; i < 12; i++) labels.add(start.plusMonths(i).format(MONTH_ONLY));
-                highlight = today.getMonthValue() - 1;
-                note = "PHP · Monthly sales this year";
+                int months = (int) ChronoUnit.MONTHS.between(from.withDayOfMonth(1), to.withDayOfMonth(1)) + 1;
+                boolean multiYear = from.getYear() != to.getYear();
+                for (int i = 0; i < months; i++) {
+                    LocalDate m = from.withDayOfMonth(1).plusMonths(i);
+                    labels.add(m.format(multiYear ? MONTH_YEAR_SHORT : MONTH_ONLY));
+                }
+                note = "PHP · Monthly sales";
             }
         }
 
         double[] values = new double[labels.size()];
+        double sum = 0;
         for (Sale s : sales) {
-            int idx = bucketIndex(s.time(), start);
+            int idx = bucketIndex(s, grain, hb[0]);
             if (idx >= 0 && idx < values.length) values[idx] += s.total().doubleValue();
+            sum += s.total().doubleValue();
         }
 
-        double sum = 0;
-        for (double v : values) sum += v;
+        // highlight the bucket that contains today, otherwise the last bar
+        int highlight = values.length - 1;
+        if (!today.isBefore(from) && !today.isAfter(to)) {
+            Sale probe = null;
+            int idx = switch (grain) {
+                case HOURLY -> java.time.LocalTime.now().getHour() - hb[0];
+                case DAILY -> (int) ChronoUnit.DAYS.between(from, today);
+                case WEEKLY -> (int) (ChronoUnit.DAYS.between(from, today) / 7);
+                case MONTHLY -> (int) ChronoUnit.MONTHS.between(from.withDayOfMonth(1), today.withDayOfMonth(1));
+            };
+            if (idx >= 0 && idx < values.length) highlight = idx;
+        }
 
-        ChartUtil.fillBars(perfChart, labels, values, Math.max(0, Math.min(highlight, values.length - 1)));
+        ChartUtil.fillBars(perfChart, labels, values, Math.max(0, highlight));
         perfScaleLabel.setText(note);
-        perfSubtitle.setText(peso(sum) + " total");
+        perfSubtitle.setText(peso(sum) + " total · " + rangeText(from, to));
     }
 
     /** Which bar of the performance chart a sale belongs to (-1 = none). */
-    private int bucketIndex(LocalDateTime t, LocalDate start) {
-        LocalDate d = t.toLocalDate();
-        return switch (period) {
-            case DAILY -> (t.getHour() >= START_HOUR && t.getHour() <= END_HOUR) ? t.getHour() - START_HOUR : -1;
-            case WEEKLY -> (int) ChronoUnit.DAYS.between(start, d);
-            case MONTHLY -> d.getDayOfMonth() - 1;
-            case QUARTERLY -> (int) ChronoUnit.MONTHS.between(start, d.withDayOfMonth(1));
-            case YEARLY -> d.getMonthValue() - 1;
+    private int bucketIndex(Sale s, Grain grain, int firstHour) {
+        LocalDate d = s.time().toLocalDate();
+        return switch (grain) {
+            case HOURLY -> s.time().getHour() - firstHour;
+            case DAILY -> (int) ChronoUnit.DAYS.between(from, d);
+            case WEEKLY -> (int) (ChronoUnit.DAYS.between(from, d) / 7);
+            case MONTHLY -> (int) ChronoUnit.MONTHS.between(from.withDayOfMonth(1), d.withDayOfMonth(1));
         };
     }
 
-    // =====================================================================
-    //  HOURLY CHART (sales by hour of day, summed over the period)
-    // =====================================================================
 
-    private void loadHourly(List<Sale> sales) {
+    private void loadHourly(List<Sale> sales, long days) {
+        int[] hb = hourBounds(sales);
         List<String> labels = new ArrayList<>();
-        double[] values = new double[END_HOUR - START_HOUR + 1];
+        double[] values = new double[hb[1] - hb[0] + 1];
 
-        for (int h = START_HOUR; h <= END_HOUR; h++) labels.add(hourLabel(h));
+        for (int h = hb[0]; h <= hb[1]; h++) labels.add(hourLabel(h));
 
         double sum = 0;
         int peak = 0;
         for (Sale s : sales) {
-            int h = s.time().getHour();
-            if (h >= START_HOUR && h <= END_HOUR) {
-                values[h - START_HOUR] += s.total().doubleValue();
-                sum += s.total().doubleValue();
-            }
+            values[s.time().getHour() - hb[0]] += s.total().doubleValue();
+            sum += s.total().doubleValue();
         }
         for (int i = 1; i < values.length; i++) if (values[i] > values[peak]) peak = i;
 
-        hourlyTitle.setText("Hourly sales · " + periodName(period));
-        hourlyNote.setText(period == Period.DAILY ? "PHP · Sales per hour today"
-                : "PHP · Sales per hour of day, all days combined");
+        hourlyTitle.setText("Hourly sales");
+        hourlyNote.setText(days <= 1 ? "PHP · Sales per hour" : "PHP · Sales per hour of day, all days combined");
 
         ChartUtil.fillBars(hourlyChart, labels, values, peak);
         hourlyFooter.setText(sum > 0
-                ? "Peak hour " + hourLabel(START_HOUR + peak) + " • " + peso(sum) + " total"
-                : "No sales in this period");
+                ? "Peak hour " + hourLabel(hb[0] + peak) + " • " + peso(sum) + " total"
+                : "No sales in this range");
     }
 
-    // =====================================================================
-    //  TREND CHART (last N periods, ending with the current one)
-    // =====================================================================
 
-    private void loadTrend(List<Sale> all, LocalDate currentStart) {
-        int n = switch (period) {
-            case DAILY -> 7;
-            case WEEKLY -> 8;
-            case MONTHLY -> 6;
-            case QUARTERLY -> 4;
-            case YEARLY -> 5;
-        };
-
-        LocalDate[] starts = new LocalDate[n];
+    private void loadTrend(List<Sale> all) {
+        int n = 7;
+        LocalDate first = to.minusDays(n - 1);
         List<String> labels = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            LocalDate ps = shiftBack(period, currentStart, n - 1 - i);
-            starts[i] = ps;
-            labels.add(switch (period) {
-                case DAILY, WEEKLY -> ps.format(DAY_MONTH);
-                case MONTHLY -> ps.format(MONTH_ONLY);
-                case QUARTERLY -> "Q" + ((ps.getMonthValue() - 1) / 3 + 1) + " " + ps.getYear();
-                case YEARLY -> String.valueOf(ps.getYear());
-            });
-        }
-
         double[] values = new double[n];
-        LocalDate windowEnd = periodEnd(period, currentStart);
-        for (Sale s : all) {
-            if (!inRange(s, starts[0], windowEnd)) continue;
-            LocalDate d = s.time().toLocalDate();
-            for (int i = n - 1; i >= 0; i--) {
-                if (!d.isBefore(starts[i])) {
-                    values[i] += s.total().doubleValue();
-                    break;
-                }
-            }
-        }
+
+        for (int i = 0; i < n; i++) labels.add(first.plusDays(i).format(DAY_MONTH));
 
         double sum = 0;
-        for (double v : values) sum += v;
+        for (Sale s : all) {
+            if (!between(s, first, to)) continue;
+            int idx = (int) ChronoUnit.DAYS.between(first, s.time().toLocalDate());
+            values[idx] += s.total().doubleValue();
+            sum += s.total().doubleValue();
+        }
 
-        String unit = switch (period) {
-            case DAILY -> "Last 7 days";
-            case WEEKLY -> "Last 8 weeks";
-            case MONTHLY -> "Last 6 months";
-            case QUARTERLY -> "Last 4 quarters";
-            case YEARLY -> "Last 5 years";
-        };
-
-        trendTitle.setText("Trend · " + unit);
-        trendNote.setText("PHP · " + unit + ", current period highlighted");
+        trendTitle.setText("Trend · 7 days to " + to.format(MD));
+        trendNote.setText("PHP · " + rangeText(first, to) + ", last day highlighted");
 
         ChartUtil.fillBars(trendChart, labels, values, n - 1);
-        trendFooter.setText(unit + " • " + peso(sum) + " total");
+        trendFooter.setText("Last 7 days • " + peso(sum) + " total");
     }
 
     private static String peso(double amount) {

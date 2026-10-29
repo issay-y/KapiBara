@@ -4,6 +4,7 @@ import com.cafe.kapibara.kapibara.DAO.AccountDAO;
 import com.cafe.kapibara.kapibara.controller.main.admin.AdminPage;
 import com.cafe.kapibara.kapibara.controller.main.admin.AdminShell;
 import com.cafe.kapibara.kapibara.model.account.AccountForm;
+import com.cafe.kapibara.kapibara.model.account.AccountRow;
 import com.cafe.kapibara.kapibara.model.account.AccountRole;
 import com.cafe.kapibara.kapibara.model.account.AccountStatus;
 import com.cafe.kapibara.kapibara.util.AlertsUtil;
@@ -12,13 +13,22 @@ import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -26,11 +36,16 @@ import java.util.ResourceBundle;
 public class AccountFormController implements Initializable, AdminShell.Aware {
 
     private static final String USERNAME_PATTERN = "[A-Za-z0-9._-]{3,30}";
+
+    // ---- password rules (hard-coded) -------------------------------------
     private static final int MIN_PASSWORD_LENGTH = 8;
+    private static final int MAX_PASSWORD_LENGTH = 10;
+    private static final String ALLOWED_SYMBOLS = ".,_-";
 
     @FXML private Label titleLabel, subtitleLabel;
     @FXML private TextField fullNameField, usernameField;
-    @FXML private ComboBox<String> roleCombo, statusCombo;
+    @FXML private ComboBox<String> roleCombo;
+    @FXML private ComboBox<String> statusCombo;   // no longer used; hidden if the FXML still has it
     @FXML private Label lockNoteLabel;
 
     @FXML private Label passwordSectionLabel, passwordLabel, confirmLabel, hintLabel, errorLabel;
@@ -47,6 +62,15 @@ public class AccountFormController implements Initializable, AdminShell.Aware {
     private long editingId;
     private String saveText = "✓   Save account";
 
+    // The status is no longer on the form: new accounts are Active, edited accounts keep theirs.
+    private AccountStatus storedStatus = AccountStatus.ACTIVE;
+
+    // Who is using the form, and (when editing) the role the account had when it was opened.
+    // Admin: can add Cashier/Manager and change roles (never the admin account's).
+    // Manager: can only add Cashier accounts and can't change any role.
+    private AccountRole viewerRole;   // null until looked up; treated like a manager until then
+    private AccountRole storedRole;
+
     private boolean loading = true;   // true while fields are being filled in code
     private boolean dirty;            // true once the person has changed something
 
@@ -56,14 +80,14 @@ public class AccountFormController implements Initializable, AdminShell.Aware {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // The Admin role can't be picked: the admin account is permanent.
         for (AccountRole role : AccountRole.values()) {
-            roleCombo.getItems().add(role.getDisplayName());
-        }
-        for (AccountStatus status : AccountStatus.values()) {
-            statusCombo.getItems().add(status.getDisplayName());
+            if (role != AccountRole.ADMIN) roleCombo.getItems().add(role.getDisplayName());
         }
         roleCombo.setValue(AccountRole.CASHIER.getDisplayName());
-        statusCombo.setValue(AccountStatus.ACTIVE.getDisplayName());
+
+        hideStatus();
+        mountPasswordRules();
 
         setupPasswordToggle(passwordField, passwordVisibleField, togglePasswordBtn);
         setupPasswordToggle(confirmField, confirmVisibleField, toggleConfirmBtn);
@@ -73,7 +97,6 @@ public class AccountFormController implements Initializable, AdminShell.Aware {
         passwordField.textProperty().addListener(markDirty);
         confirmField.textProperty().addListener(markDirty);
         roleCombo.valueProperty().addListener(markDirty);
-        statusCombo.valueProperty().addListener(markDirty);
 
         clearError();
         setVisibleAndManaged(lockNoteLabel, false);
@@ -82,6 +105,7 @@ public class AccountFormController implements Initializable, AdminShell.Aware {
     @Override
     public void attach(AdminShell shell) {
         this.shell = shell;
+        loadViewerRole();
 
         Object payload = shell.getPagePayload();
         if (payload instanceof Long id) {
@@ -101,6 +125,7 @@ public class AccountFormController implements Initializable, AdminShell.Aware {
     // =====================================================================
 
     private void configureTexts() {
+        // No " *" in the labels: the form already draws its own red star next to them.
         if (editMode) {
             titleLabel.setText("Edit account");
             subtitleLabel.setText("Update this account's details and workspace role.");
@@ -114,19 +139,84 @@ public class AccountFormController implements Initializable, AdminShell.Aware {
             titleLabel.setText("Add team account");
             subtitleLabel.setText("Set up a clear identity and role for your team member.");
             passwordSectionLabel.setText("Account password");
-            passwordLabel.setText("Password *");
-            confirmLabel.setText("Confirm password *");
+            passwordLabel.setText("Password");
+            confirmLabel.setText("Confirm password");
             setPrompt(passwordField, passwordVisibleField, "Enter a password");
             setPrompt(confirmField, confirmVisibleField, "Re-enter password");
             saveText = "✓   Save account";
         }
         saveBtn.setText(saveText);
-        hintLabel.setText("Use at least " + MIN_PASSWORD_LENGTH + " characters. Confirm the details with your team member.");
     }
 
     private static void setPrompt(PasswordField hidden, TextField visible, String text) {
         hidden.setPromptText(text);
         visible.setPromptText(text);
+    }
+
+    /** Removes the "Account status" field from the screen (its label goes with it). */
+    private void hideStatus() {
+        if (statusCombo == null) return;   // already removed from the FXML
+        Node holder = statusCombo.getParent() instanceof VBox ? statusCombo.getParent() : statusCombo;
+        holder.setVisible(false);
+        holder.setManaged(false);
+    }
+
+    /** Replaces the old one-line hint with the "Password Requirements & Security Rules" box. */
+    private void mountPasswordRules() {
+        VBox card = buildRulesCard();
+
+        Node parent = hintLabel.getParent();
+        if (parent instanceof Pane box && !(parent instanceof GridPane)) {
+            int index = box.getChildren().indexOf(hintLabel);
+            if (index >= 0) {
+                box.getChildren().set(index, card);
+                return;
+            }
+        }
+        // fallback if the layout is unusual: show the rules as plain text
+        hintLabel.setWrapText(true);
+        hintLabel.setText("Password rules: 8 to 10 characters; at least 1 uppercase letter, 1 digit and 1 symbol "
+                + "(. , _ -); can't match the username; no repeating or sequential patterns (123, aaa).");
+    }
+
+    private static VBox buildRulesCard() {
+        Label shield = new Label("🛡");
+        shield.setStyle("-fx-font-size: 16px; -fx-text-fill: #4E2216;");
+        Label title = new Label("Password Requirements & Security Rules");
+        title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #4E2216;");
+        HBox header = new HBox(10, shield, title);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        VBox left = ruleColumn(
+                "Length: strictly " + MIN_PASSWORD_LENGTH + " to " + MAX_PASSWORD_LENGTH + " characters",
+                "At least 1 uppercase (A–Z)",
+                "At least 1 numeric digit (0–9)");
+        VBox right = ruleColumn(
+                "At least 1 allowed symbol: . , _ or -",
+                "Cannot match the username",
+                "No repeating or sequential patterns (123, aaa)");
+
+        HBox columns = new HBox(48, left, right);
+        HBox.setHgrow(left, Priority.ALWAYS);
+        HBox.setHgrow(right, Priority.ALWAYS);
+
+        VBox card = new VBox(12, header, columns);
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.setStyle("-fx-background-color: #F6EEE3; -fx-background-radius: 12; "
+                + "-fx-border-color: #E3D2BF; -fx-border-radius: 12; -fx-padding: 16 20 16 20;");
+        return card;
+    }
+
+    private static VBox ruleColumn(String... rules) {
+        VBox column = new VBox(8);
+        column.setMaxWidth(Double.MAX_VALUE);
+        for (String rule : rules) {
+            Label line = new Label("•   " + rule);
+            line.setWrapText(true);
+            line.setStyle("-fx-font-size: 13px; -fx-text-fill: #8A7A70;");
+            column.getChildren().add(line);
+        }
+        return column;
     }
 
     /** Eye button: shows or hides the password. Both fields always hold the same text. */
@@ -181,23 +271,101 @@ public class AccountFormController implements Initializable, AdminShell.Aware {
     private void populate(AccountForm form) {
         loading = true;
 
+        storedStatus = form.status();   // keep the account's current status untouched
+        storedRole = form.role();       // remembered so a locked role can't be changed
+
         fullNameField.setText(form.fullName());
         usernameField.setText(form.username());
         roleCombo.setValue(form.role().getDisplayName());
-        statusCombo.setValue(form.status().getDisplayName());
         subtitleLabel.setText("Update " + form.fullName() + "'s account details and workspace role.");
 
-        // The admin account is permanent: its role and status can't be changed.
-        if (form.role() == AccountRole.ADMIN) {
-            roleCombo.setDisable(true);
-            statusCombo.setDisable(true);
-            lockNoteLabel.setText("This is the admin account. Its role and status are permanent.");
-            setVisibleAndManaged(lockNoteLabel, true);
-        }
+        applyRoleRules();
 
         saveBtn.setDisable(false);
         loading = false;
         dirty = false;
+    }
+
+    // =====================================================================
+    //  ROLE RULES
+    // =====================================================================
+
+    /** Finds the signed-in person's role (matched by username or full name, like the Accounts page does). */
+    private void loadViewerRole() {
+        final String current = shell.getCurrentUserName() == null ? "" : shell.getCurrentUserName().trim();
+
+        Thread worker = new Thread(() -> {
+            AccountRole found = null;
+            try {
+                for (AccountRow row : accountDAO.findAll()) {
+                    boolean mine = !current.isEmpty()
+                            && (current.equalsIgnoreCase(row.username() == null ? "" : row.username())
+                            || current.equalsIgnoreCase(row.fullName() == null ? "" : row.fullName()));
+                    if (mine) {
+                        found = row.role();
+                        break;
+                    }
+                }
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+
+            final AccountRole finalFound = found;
+            Platform.runLater(() -> {
+                viewerRole = finalFound;
+                applyRoleRules();
+            });
+        }, "load-viewer-role");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    /** True when the Role dropdown must not be changed by the person using the form. */
+    private boolean isRoleLocked() {
+        boolean viewerIsAdmin = viewerRole == AccountRole.ADMIN;
+        boolean editingAdmin = editMode && storedRole == AccountRole.ADMIN;
+        return editingAdmin || !viewerIsAdmin;
+    }
+
+    /** The role that is saved: the dropdown's choice, or the fixed one when the dropdown is locked. */
+    private AccountRole finalRole() {
+        if (!isRoleLocked()) return roleByName(roleCombo.getValue());
+        return editMode && storedRole != null ? storedRole : AccountRole.CASHIER;
+    }
+
+    private void applyRoleRules() {
+        boolean viewerIsAdmin = viewerRole == AccountRole.ADMIN;
+        boolean editingAdmin = editMode && storedRole == AccountRole.ADMIN;
+        boolean locked = isRoleLocked();
+
+        boolean wasLoading = loading;
+        loading = true;   // these are not changes made by the person
+        try {
+            if (!editMode) {
+                String cashier = AccountRole.CASHIER.getDisplayName();
+                List<String> options = new ArrayList<>();
+                for (AccountRole role : AccountRole.values()) {
+                    if (role == AccountRole.ADMIN) continue;
+                    if (!viewerIsAdmin && role != AccountRole.CASHIER) continue;   // managers: cashier only
+                    options.add(role.getDisplayName());
+                }
+                String current = roleCombo.getValue();
+                roleCombo.getItems().setAll(options);
+                roleCombo.setValue(current != null && options.contains(current) ? current : cashier);
+            }
+            roleCombo.setDisable(locked);
+        } finally {
+            loading = wasLoading;
+        }
+
+        if (editingAdmin) {
+            lockNoteLabel.setText("This is the admin account. Its role is permanent.");
+        } else if (locked) {
+            lockNoteLabel.setText(editMode
+                    ? "Only an admin can change roles."
+                    : "Managers can only add cashier accounts.");
+        }
+        setVisibleAndManaged(lockNoteLabel, locked);
     }
 
     // =====================================================================
@@ -301,16 +469,59 @@ public class AccountFormController implements Initializable, AdminShell.Aware {
             return "Username must be 3–30 characters: letters, numbers, dots, dashes or underscores.";
         }
         if (roleCombo.getValue() == null) return "Please choose a role.";
-        if (statusCombo.getValue() == null) return "Please choose an account status.";
 
         boolean passwordRequired = !editMode || !password.isEmpty() || !confirm.isEmpty();
         if (passwordRequired) {
-            if (password.length() < MIN_PASSWORD_LENGTH) {
-                return "Password must be at least " + MIN_PASSWORD_LENGTH + " characters.";
-            }
+            String problem = passwordProblem(password, username);
+            if (problem != null) return problem;
             if (!password.equals(confirm)) return "The passwords don't match.";
         }
         return null;
+    }
+
+    /** Checks the hard-coded password rules. @return the first broken rule, or null if the password is fine */
+    private static String passwordProblem(String password, String username) {
+        if (password.length() < MIN_PASSWORD_LENGTH || password.length() > MAX_PASSWORD_LENGTH) {
+            return "Password must be " + MIN_PASSWORD_LENGTH + " to " + MAX_PASSWORD_LENGTH + " characters long.";
+        }
+        for (char c : password.toCharArray()) {
+            boolean ok = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')
+                    || ALLOWED_SYMBOLS.indexOf(c) >= 0;
+            if (!ok) return "Password can only use letters, numbers and these symbols: . , _ -";
+        }
+        if (!password.matches(".*[A-Z].*")) return "Password needs at least 1 uppercase letter (A–Z).";
+        if (!password.matches(".*[0-9].*")) return "Password needs at least 1 number (0–9).";
+        if (!containsAny(password, ALLOWED_SYMBOLS)) {
+            return "Password needs at least 1 symbol: . , _ or -";
+        }
+        if (password.equalsIgnoreCase(username)) return "Password can't be the same as the username.";
+        if (hasRepeatOrSequence(password)) {
+            return "Password can't have repeating or sequential patterns (like 123 or aaa).";
+        }
+        return null;
+    }
+
+    private static boolean containsAny(String text, String chars) {
+        for (char c : chars.toCharArray()) {
+            if (text.indexOf(c) >= 0) return true;
+        }
+        return false;
+    }
+
+    /** True for 3 of the same character in a row (aaa) or 3 letters/digits in a row up or down (abc, 123, 321). */
+    private static boolean hasRepeatOrSequence(String password) {
+        String p = password.toLowerCase();
+        for (int i = 0; i + 2 < p.length(); i++) {
+            char a = p.charAt(i), b = p.charAt(i + 1), c = p.charAt(i + 2);
+            if (a == b && b == c) return true;
+            if (!Character.isLetterOrDigit(a) || !Character.isLetterOrDigit(b) || !Character.isLetterOrDigit(c)) {
+                continue;
+            }
+            boolean up = b - a == 1 && c - b == 1;
+            boolean down = a - b == 1 && b - c == 1;
+            if (up || down) return true;
+        }
+        return false;
     }
 
     private AccountForm collectForm() {
@@ -318,8 +529,8 @@ public class AccountFormController implements Initializable, AdminShell.Aware {
                 editMode ? editingId : 0,
                 fullNameField.getText().trim(),
                 usernameField.getText().trim(),
-                roleByName(roleCombo.getValue()),
-                statusByName(statusCombo.getValue()));
+                finalRole(),
+                storedStatus);
     }
 
     private static AccountRole roleByName(String displayName) {
@@ -327,13 +538,6 @@ public class AccountFormController implements Initializable, AdminShell.Aware {
             if (role.getDisplayName().equals(displayName)) return role;
         }
         return AccountRole.CASHIER;
-    }
-
-    private static AccountStatus statusByName(String displayName) {
-        for (AccountStatus status : AccountStatus.values()) {
-            if (status.getDisplayName().equals(displayName)) return status;
-        }
-        return AccountStatus.ACTIVE;
     }
 
     private void showError(String message) {

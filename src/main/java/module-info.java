@@ -41,12 +41,10 @@ module com.cafe.kapibara.kapibara {
 
     //
     exports com.cafe.kapibara.kapibara.controller.main.cashier;
-    opens com.cafe.kapibara.kapibara.controller.main.cashier.home to javafx.fxml;
     opens com.cafe.kapibara.kapibara.controller.main.cashier.menu to javafx.fxml;
     opens com.cafe.kapibara.kapibara.controller.main.cashier.order to javafx.fxml;
     opens com.cafe.kapibara.kapibara.controller.main.cashier.receipt to javafx.fxml;
     opens com.cafe.kapibara.kapibara.controller.main.cashier.checkout to javafx.fxml;
-    opens com.cafe.kapibara.kapibara.controller.main.cashier.transactions to javafx.fxml;
 
 
     opens com.cafe.kapibara.kapibara.css.id;
@@ -59,4 +57,5 @@ module com.cafe.kapibara.kapibara {
     opens com.cafe.kapibara.kapibara.util to javafx.fxml;
     exports com.cafe.kapibara.kapibara.controller.main.admin.settings;
     opens com.cafe.kapibara.kapibara.controller.main.admin.settings to javafx.fxml;
+    opens com.cafe.kapibara.kapibara.model.inventory to javafx.fxml;
 }

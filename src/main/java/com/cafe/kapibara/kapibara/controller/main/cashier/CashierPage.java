@@ -2,8 +2,6 @@ package com.cafe.kapibara.kapibara.controller.main.cashier;
 
 public enum CashierPage {
 
-    HOME("Home",
-            "/com/cafe/kapibara/kapibara/controller/main/cashier/home/CashierHomeView.fxml"),
     NEW_ORDER("New order",
             "/com/cafe/kapibara/kapibara/controller/main/cashier/order/NewOrderView.fxml"),
     BROWSE_MENU("Browse the menu",
@@ -15,12 +13,7 @@ public enum CashierPage {
     RECEIPT("Payment complete",
             "/com/cafe/kapibara/kapibara/controller/main/cashier/receipt/ReceiptView.fxml",
             NEW_ORDER),
-    TRANSACTIONS("Transactions",
-            "/com/cafe/kapibara/kapibara/controller/main/cashier/transactions/TransactionsView.fxml"),
-    TRANSACTION_DETAIL("Transaction details",
-            "/com/cafe/kapibara/kapibara/controller/main/cashier/transactions/TransactionDetailView.fxml",
-            TRANSACTIONS),
-        PROFILE("Profile",
+    PROFILE("Profile",
             "/com/cafe/kapibara/kapibara/controller/main/profile/ProfileView.fxml");
 
     private final String breadcrumb;

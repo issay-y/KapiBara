@@ -43,7 +43,7 @@ public class ReceiptController implements CashierShell.Aware {
         Optional<Sale> last = CashierStore.get().lastSale();
         if (last.isEmpty()) {
             // Opened without a finished sale: nothing to show.
-            Platform.runLater(() -> shell.navigate(CashierPage.HOME));
+            Platform.runLater(() -> shell.navigate(CashierPage.NEW_ORDER));
             return;
         }
         sale = last.get();
@@ -96,13 +96,9 @@ public class ReceiptController implements CashierShell.Aware {
     }
 
     /** Opens the Transactions page, the same as the "Transactions" item in the sidebar. */
-    @FXML
-    private void handleViewTransaction() {
-        shell.navigate(CashierPage.TRANSACTIONS);
-    }
 
     @FXML
     private void handleClose() {
-        shell.navigate(CashierPage.HOME);
+        shell.navigate(CashierPage.NEW_ORDER);
     }
 }

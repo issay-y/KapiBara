@@ -7,6 +7,7 @@ import com.cafe.kapibara.kapibara.model.account.AccountRole;
 import com.cafe.kapibara.kapibara.model.account.AccountRow;
 import com.cafe.kapibara.kapibara.model.account.AccountStatus;
 import com.cafe.kapibara.kapibara.util.AlertsUtil;
+import com.cafe.kapibara.kapibara.util.TableRowUtil;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,8 +18,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.shape.FillRule;
+import javafx.scene.shape.SVGPath;
 
 import java.net.URL;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -208,32 +212,38 @@ public class AccountController implements Initializable, AdminShell.Aware {
                     : "Showing " + (from + 1) + "–" + to + " of " + filtered.size() + " accounts");
         }
 
+        TableRowUtil.polish(accountsGrid, headers.length);   // stretch cells + straight row lines (same as Inventory)
         buildPagination();
     }
 
     private void addRow(int row, AccountRow account) {
-        accountsGrid.add(cell(safe(account.fullName())), 0, row);
-        accountsGrid.add(cell(safe(account.username())), 1, row);
-        accountsGrid.add(cell(account.role().getDisplayName()), 2, row);
+        boolean alt = row % 2 == 0;   // every other row gets a slightly darker tint
+
+        accountsGrid.add(tint(cell(safe(account.fullName())), alt), 0, row);
+        accountsGrid.add(tint(cell(safe(account.username())), alt), 1, row);
+        accountsGrid.add(tint(cell(account.role().getDisplayName()), alt), 2, row);
 
         Label pill = new Label(account.status().getDisplayName());
         pill.getStyleClass().add(account.status() == AccountStatus.ACTIVE ? "adm-pill-green" : "adm-pill-tan");
-        accountsGrid.add(wrap(pill), 3, row);
+        accountsGrid.add(tint(wrap(pill), alt), 3, row);
 
-        accountsGrid.add(cell(lastActivityText(account.lastLogin())), 4, row);
+        accountsGrid.add(tint(cell(lastActivityText(account.lastLogin())), alt), 4, row);
 
-        Button edit = new Button("Edit");
-        edit.getStyleClass().add("adm-link");
+        Button edit = iconButton(pencilIcon(), "Edit account", false);
         edit.setOnAction(e -> handleEdit(account));
 
-        Button delete = new Button("Delete");
-        delete.getStyleClass().add("adm-link");
+        Button delete = iconButton(trashIcon(), "Delete account", true);
         delete.setOnAction(e -> handleDelete(account));
 
-        HBox actions = new HBox(16, edit, delete);
+        HBox actions = new HBox(8, edit, delete);
         actions.setAlignment(Pos.CENTER_LEFT);
         actions.getStyleClass().add("adm-td");
-        accountsGrid.add(actions, 5, row);
+        accountsGrid.add(tint(actions, alt), 5, row);
+    }
+
+    private static <T extends Node> T tint(T node, boolean alt) {
+        if (alt) node.getStyleClass().add("inv-alt");   // same tint class the Inventory table uses
+        return node;
     }
 
     private static Label cell(String text) {
@@ -248,6 +258,33 @@ public class AccountController implements Initializable, AdminShell.Aware {
         box.setAlignment(Pos.CENTER_LEFT);
         box.getStyleClass().add("adm-td");
         return box;
+    }
+
+    // ---- icons (same vector shapes and styles as the Inventory table) ----
+
+    private static Button iconButton(SVGPath icon, String tooltip, boolean danger) {
+        Button b = new Button();
+        b.setGraphic(icon);
+        b.getStyleClass().add("tx-icon-btn");
+        if (danger) b.getStyleClass().add("tx-icon-btn-danger");
+        b.setTooltip(new Tooltip(tooltip));
+        return b;
+    }
+
+    private static SVGPath pencilIcon() {
+        SVGPath p = new SVGPath();
+        p.setContent("M0 12 L0.6 8.6 L8.6 0.6 C9.1 0.1 9.9 0.1 10.4 0.6 L11.4 1.6 C11.9 2.1 11.9 2.9 11.4 3.4 "
+                + "L3.4 11.4 Z");
+        p.getStyleClass().add("tx-icon");
+        return p;
+    }
+
+    private static SVGPath trashIcon() {
+        SVGPath p = new SVGPath();
+        p.setContent("M1 2.5 H11 V3.8 H1 Z M4 0.5 H8 V2.5 H4 Z M2 4.5 H10 L9.3 12 H2.7 Z");
+        p.setFillRule(FillRule.NON_ZERO);
+        p.getStyleClass().add("tx-icon");
+        return p;
     }
 
     private static String lastActivityText(LocalDateTime lastLogin) {

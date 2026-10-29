@@ -37,9 +37,7 @@
             <Label styleClass="adm-badge, csh-badge" text="Cashier workspace" />
          </HBox>
 
-         <Button fx:id="navHome" maxWidth="Infinity" onAction="#handleNav" styleClass="adm-nav" text="▦   Home" />
          <Button fx:id="navNewOrder" maxWidth="Infinity" onAction="#handleNav" styleClass="adm-nav" text="☕   New Order" />
-         <Button fx:id="navTransactions" maxWidth="Infinity" onAction="#handleTransactions" styleClass="adm-nav" text="▤   Transactions" />
 
          <Region VBox.vgrow="ALWAYS" />
 
